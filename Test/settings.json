@@ -1,0 +1,12 @@
+{
+    "population" : {
+        "size" : "int"
+    },
+    "map" : {
+        "density" : "float"
+    },
+    "disease" : {
+        "name" : "string",
+        "mutation_chance" : "float"
+    }
+}
