@@ -1,4 +1,3 @@
-from msilib.schema import Class
 import threading
 import logger 
 import random
@@ -29,8 +28,6 @@ NEED TO ADD GETTERS AND SETTERS
 # Constants 
 DEBUG = False
 
-T_TIME = 1 # in hours 
-T_RADIUS = 2 # radius 
 WIDTH = 5
 HEIGHT = 5
 
@@ -38,37 +35,194 @@ MAX_MOVE_AMOUNT = 2
 MOVE_PROB = 0.5
 
 P = 1 # probablity ????
-DT = 0.1 # disease transmission
-INFECTION_TOTAL_TIME = 3 # day
 
 NUMB_PEOPLE = 20
 NUMB_STARTING_INFECTED = 1
 
 
 # Transform the main def into a class 
+"""
+simulation runs maps which contain population
+"""
 class Simulation:
     def __init__(self) -> None:
-        self.disease = create_disease()
-        self.population = create_population()
-        self.day = 0
+        self.__disease = createDisease()
+        self.__map = createMap()
+        self.__dayCounter = 0
+    
+
+    def setDayCounter(self):
+        self.__dayCounter += 1
+
+
+    def day(self):
+        """
+        need to choose the order of the day 
+        """
+        self.setDayCounter()
+        self.movement()
+
+        s_group = self.tempoaryGroup(0, 'S')
+        i_group = self.tempoaryGroup(0 ,'I') 
+
+        for i_person in i_group:
+            i_person.setItime()
+
+        for s_person in s_group:
+            for i_person in i_group:
+                if self.checkInsideRadius(i_person.getPos()[0], i_person.getPos()[1], s_person.getPos()[0], s_person.getPos()[1]):
+                    s_person.setRtime()
+                    if s_person.getRtime() >= self.__disease.getTransmissionTime() and random.random() < P * self.__disease.getDiseaseTransmission():
+                        s_person.setStatus('I')
+            
+        for i_person in i_group:
+            if i_person.getItime() > self.__disease.getInfectedTime():
+                i_person.setStatus('R')
+        
+        self.movement()
+
+
+    def checkInsideRadius(self, x, y, c_x, c_y) -> bool:  
+        if ((x - c_x) * (x - c_x) + (y - c_y) * (y - c_y) <= self.__disease.getTransmissionRadius() * self.__disease.getTransmissionRadius()):
+            return True 
+
+
+    def movement(self):
+        """
+        x change:
+            Random number between 0 and MAX_MOV_AMMOUNT,
+            Then check poitive and negative direction if one is outbound pick the other one if both in bounds
+            then random pick between them. (checked with the change added to the current value)
+        y change: 
+            Random number between 0 and MAX_MOV_AMMOUNT - pos(x change)
+            Then check poitive and negative direction if one is outbound pick the other one if both in bounds
+            then random pick between them.  (checked with the change added to the current value)
+        Add those values to the current values 
+        """
+        notR_group = self.tempoaryGroup(1 ,'R')
+        if random.random() < MOVE_PROB:
+            for person in notR_group:
+                # x direction 
+                x_amount = random.randint(1, MAX_MOVE_AMOUNT)
+                self.checkMovement(0, self.__map.getWidth(), x_amount, person)
+                # y direction  
+                self.checkMovement(1, self.__map.getHeight(), random.randint(1, MAX_MOVE_AMOUNT) - x_amount, person)
+
+
+    def checkMovement(self, direction, limit, moveAmount, person):
+        if person.getPos()[direction] + moveAmount < limit:
+            person.setPos(direction, moveAmount)
+        elif person.getPos()[direction] - moveAmount > 0:
+            person.setPos(direction, -moveAmount)
+
+
+    def tempoaryGroup(self, type: int, st : str):
+        if type == 0:
+            return [person for person in self.__map.getPopulation() if person.getStatus() == st]
+        return [person for person in self.__map.getPopulation() if person.getStatus() != st]
+
+
+    def countStatistics(self):
+        s,i,r = 0,0,0
+        for person in self.__map.getPopulation():
+            if person.getStatus() == 'S':
+                s +=1
+            elif person.getStatus() == 'I':
+                i +=1
+            elif person.getStatus() == 'R':
+                r +=1
+        print('s - ', end="")
+        print(s)
+        print('i - ', end="")
+        print(i)
+        print('r - ', end="")
+        print(r)
+
+
+class Map:
+    def __init__(self, width, height, population) -> None:
+        self.__width = width
+        self.__height = height
+        self.__population = population
+    
+
+    def getWidth(self) -> int:
+        return self.__width
+    
+
+    def getHeight(self) -> int:
+        return self.__height
+
+    
+    def getPopulation(self):
+        return self.__population
 
 
 class Disease:
     def __init__(self, tT, dT, tR, iT) -> None:
-        self.transmissionTime = None
-        self.diseaseTransmission = None
-        self.transmissionRadius = None
-        self.infectedTime = None
+        self.__transmissionTime = tT
+        self.__diseaseTransmission = dT
+        self.__transmissionRadius = tR
+        self.__infectedTime = iT
+
+    
+    def getTransmissionTime(self):
+        return self.__transmissionTime
+    
+
+    def getDiseaseTransmission(self):
+        return self.__diseaseTransmission
+    
+
+    def getTransmissionRadius(self):
+        return self.__transmissionRadius
+
+
+    def getInfectedTime(self):
+        return self.__infectedTime
 
 
 class Person:
     def __init__(self, iD: int,  s = 'S') -> None:
         self.iD = iD
-        self.status = s
+        self.__status = s
         self.eRData = '' # either dead or immune 
-        self.rTime = 0
-        self.iTime = 0
-        self.pos = [random.randrange(WIDTH+1),random.randrange(HEIGHT+1)]
+        self.__rTime = 0
+        self.__iTime = 0
+        self.__pos = [random.randrange(WIDTH+1),random.randrange(HEIGHT+1)]
+
+
+    def getPos(self):
+        return self.__pos
+
+
+    def getStatus(self):
+        return self.__status
+
+
+    def getItime(self):
+        return self.__iTime
+
+
+    def getRtime(self):
+        return self.__rTime
+
+
+    # check if this is good programming should i have called getPos or since its in the player should i just directly access it 
+    def setPos(self, direction, moveAmount):
+        self.__pos[direction] += moveAmount
+
+
+    def setStatus(self, st: str):
+        self.__status = st
+
+
+    def setItime(self, mod=0):
+        self.__iTime += 1+mod
+
+    
+    def setRtime(self, mod=0):
+        self.__rTime += 1+mod
 
 
     def display_stats(self):
@@ -83,7 +237,11 @@ class Person:
         ''')
 
 
-def create_population() -> list:
+def createMap():
+    return Map(WIDTH, HEIGHT, createPopulation())
+
+
+def createPopulation() -> list:
     population = []
     a = 0 
     for i in range(NUMB_PEOPLE):
@@ -95,150 +253,18 @@ def create_population() -> list:
     return population
 
 
-def create_disease() -> Class:
+def createDisease():
     return Disease(1,0.1,2,3)
 
 
-def main_loop(population, day):
-    """
-    Move 
-    Run checks
-    At the end plus one to infection time and check if no longer infected. 
-    """
-    day +=1
-    movement(population)
-
-    s_group = create_group(0, 'S', population)
-    i_group = create_group(0 ,'I', population) 
-
-    for i_person in i_group:
-        i_person.iTime += 1
-
-    for s_person in s_group:
-        for i_person in i_group:
-            if check_inside_radius(i_person.pos[0], i_person.pos[1], s_person.pos[0], s_person.pos[1]):
-                debugging(0, [i_person, s_person]) 
-                s_person.rTime += 1
-                if s_person.rTime >= T_TIME and random.random() < P * DT:
-                    s_person.status = 'I'
-        
-    for i_person in i_group:
-        if i_person.iTime > INFECTION_TOTAL_TIME:
-            i_person.status = 'R'
-    
-    population = movement(population)
-
-    return day 
-
-
-def movement(population):
-    # random chance to move, random amount they can move 
-    notR_group = create_group(1 ,'R', population)
-    """
-    x change:
-        Random number between 0 and MAX_MOV_AMMOUNT,
-        Then check poitive and negative direction if one is outbound pick the other one if both in bounds
-        then random pick between them. (checked with the change added to the current value)
-    y change: 
-        Random number between 0 and MAX_MOV_AMMOUNT - pos(x change)
-        Then check poitive and negative direction if one is outbound pick the other one if both in bounds
-        then random pick between them.  (checked with the change added to the current value)
-    Add those values to the current values 
-    """
-    if random.random() < MOVE_PROB:
-        for person in notR_group:
-            # x direction 
-            x,y = debugging(1, [0, person])
-            x_amount = random.randint(1, MAX_MOVE_AMOUNT)
-            check_movement(0, WIDTH, x_amount, person)
-            # y direction  
-            check_movement(1, HEIGHT, random.randint(1, MAX_MOVE_AMOUNT) - x_amount, person)
-            debugging(1, [1, person, x, y])
-
-
-def check_movement(type, direction, amount, person):
-    if person.pos[type] + amount < direction:
-        person.pos[type] += amount
-    elif person.pos[type] - amount > 0:
-        person.pos[type] -= amount
-
-
-def create_group(type , st : str, population) -> list:
-    if type == 0:
-        return [person for person in population if person.status == st]
-    else:
-        return [person for person in population if person.status != st]
-
-
-def check_inside_radius(x,y,c_x,c_y):  
-    if ((x - c_x) * (x - c_x) + (y - c_y) * (y - c_y) <= T_RADIUS * T_RADIUS):
-        return True 
-
-
-def count_stats(population) -> list[str]:
-    s,i,r = 0,0,0
-    for person in population:
-        if person.status == 'S':
-            s +=1
-        elif person.status == 'I':
-            i +=1
-        elif person.status == 'R':
-            r +=1
-    return s,i,r
-
-
-def debugging(tag, args : list):
-    # if not DEBUG:
-    #     return 
-    if tag == 0:
-        print(f'''
-            Radius - {T_RADIUS}
-            Infected - {args[0].iD}
-            Susceptible - {args[1].iD}
-            ''')
-    elif tag == 1:
-        if args[0] == 0:
-            return args[1].pos[0], args[1].pos[1]
-        else: 
-            print(f'''
-            original pos - {args[2], args[3]}
-            new pos - {args[1].pos[0], args[1].pos[1]}
-            ''')
-    elif tag == 3:
-        for p in args[0]:
-            print(p.display_stats())
-    elif tag == 4:
-        s,i,r = count_stats(args[0])
-        print(f'''
-        Susceptible - {s}
-        Infected - {i}
-        Removed - {r}
-        ''')
-        
-
 log = logger.DiscontinousLog()
-a = True 
-day = 0
 log.log('program start')
 if __name__ == "__main__":
-    population = create_population()
-    log.log('population created')
-    while a == True:
-        print(f'width : {WIDTH}, height : {HEIGHT}')
-        #debugging(3, [population])
-        
-        day = main_loop(population, day)
-        debugging(4, [population])
-       
-        b = input('>')
-        if b == 'd':
-            a = False
-        print('-----------')
-        #debugging(3, [population])
-
+    running = True 
+    sim = Simulation()
+    while running:
+        sim.day()
+        sim.countStatistics()
+        input('> ')
 
 log.localDump('TASDAWD2')
-
-
-
-
