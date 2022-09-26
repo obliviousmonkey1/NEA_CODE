@@ -1,6 +1,8 @@
 import sys
 sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools')
+sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
 
+import dbHandler as dbH
 import logger  
 import threading
 import random
@@ -48,9 +50,9 @@ NUMB_STARTING_INFECTED = 1
 simulation runs maps which contain population
 """
 class Simulation:
-    def __init__(self) -> None:
+    def __init__(self, map) -> None:
         self.__disease = createDisease()
-        self.__map = createMap()
+        self.__map = Map(map)
         self.__dayCounter = 0
     
 
@@ -83,6 +85,7 @@ class Simulation:
                 i_person.setStatus('R')
         
         self.movement()
+        self.updateDB()
 
 
     def checkInsideRadius(self, x, y, c_x, c_y) -> bool:  
@@ -122,7 +125,13 @@ class Simulation:
     def tempoaryGroup(self, type: int, st : str):
         if type == 0:
             return [person for person in self.__map.getPopulation() if person.getStatus() == st]
-        return [person for person in self.__map.getPopulation() if person.getStatus() != st]
+        elif type == 1:
+            return [person for person in self.__map.getPopulation() if person.getStatus() != st]
+
+
+    def updateDB(self):
+        for person in self.__map.getPopulation():
+            pass
 
 
     def countStatistics(self):
@@ -143,10 +152,10 @@ class Simulation:
 
 
 class Map:
-    def __init__(self, width, height, population) -> None:
-        self.__width = width
-        self.__height = height
-        self.__population = population
+    def __init__(self, map) -> None:
+        self.__width = map[2]
+        self.__height = map[3]
+        self.__population = self.populatePopulationFromDataBase(map[0])
     
 
     def getWidth(self) -> int:
@@ -159,6 +168,11 @@ class Map:
     
     def getPopulation(self):
         return self.__population
+
+
+    def populatePopulationFromDataBase(self, mapID):
+        dbpopulation = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db').getPopulation(mapID)
+        return [Person(person[0], person[3], self.__width, self.__height) for person in dbpopulation]
 
 
 class Disease:
@@ -186,13 +200,13 @@ class Disease:
 
 
 class Person:
-    def __init__(self, iD: int,  s = 'S') -> None:
-        self.iD = iD
-        self.__status = s
+    def __init__(self, id: int, status, width, height) -> None:
+        self.iD = id
+        self.__status = status
         self.eRData = '' # either dead or immune 
         self.__rTime = 0
         self.__iTime = 0
-        self.__pos = [random.randrange(WIDTH+1),random.randrange(HEIGHT+1)]
+        self.__pos = [random.randrange(width),random.randrange(height)]
 
 
     def getPos(self):
@@ -240,10 +254,6 @@ class Person:
         ''')
 
 
-def createMap():
-    return Map(WIDTH, HEIGHT, createPopulation())
-
-
 def createPopulation() -> list:
     population = []
     a = 0 
@@ -259,15 +269,15 @@ def createPopulation() -> list:
 def createDisease():
     return Disease(1,0.1,2,3)
 
+# # get rid of the while loop and the sim being called
+# if __name__ == "__main__":
+#     log = logger.DiscontinousLog()
+#     log.log('program start')
+#     running = True 
+#     sim = Simulation()
+#     while running:
+#         sim.day()
+#         sim.countStatistics()
+#         input('> ')
 
-log = logger.DiscontinousLog()
-log.log('program start')
-if __name__ == "__main__":
-    running = True 
-    sim = Simulation()
-    while running:
-        sim.day()
-        sim.countStatistics()
-        input('> ')
-
-log.localDump('TASDAWD2')
+# log.localDump('TASDAWD2')

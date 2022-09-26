@@ -9,6 +9,14 @@ class DBManager:
     def __init__(self, dbPath='') -> None:
         self.conn = sqlite3.connect(dbPath)
     
+    def getPopulation(self, mapID):
+        c = self.conn.cursor()
+        c.execute(f'''
+        SELECT *
+        FROM Person, Map, Population
+        WHERE Map.ID = {mapID} and Map.populationID = Population.id and Person.populationID = Population.id 
+        ''')
+        return c.fetchall()   
         
     def createPopulationDB(self):
         cTable = '''

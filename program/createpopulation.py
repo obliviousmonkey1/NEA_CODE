@@ -1,8 +1,11 @@
 import sys
+
+from program.SIR_MODEL import WIDTH
 sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
 
 import sqlite3
 import names
+import random
 
 import dbMaker
 
@@ -39,6 +42,13 @@ class person:
 # dbMaker.createMap([1,'city1',5,5,1],[1,1])
 # dbMaker.createPerson([1,'Tom','Elliott','S',1])
 
+WIDTH = 5
+HEIGHT = 5
+
+WIDTH2 = 10
+HEIGHT2 = 10
+
+
 conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
 c = conn.cursor()
 
@@ -54,8 +64,8 @@ insert = '''
 INSERT INTO Map VALUES
 (?,?,?,?,?)
 '''
-c.execute(insert, (1, 'City1', 5, 5,1))
-c.execute(insert, (2, 'City2', 4, 4,2))
+c.execute(insert, (1, 'City1', WIDTH, HEIGHT,1))
+c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2,2))
 
 
 insert = '''
@@ -68,17 +78,17 @@ a = 0
 id = 1
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, ((id),'Alice','A','I',1))
+        c.execute(insert, ((id),'Alice','A','I',0,0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
 
         a+=1
     else:
-        c.execute(insert, ((id),'Alice','A','R',1))
+        c.execute(insert, ((id),'Alice','A','R',0,0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
     id +=1
 
 a = 0 
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'Bob','E','I',2))
+        c.execute(insert, (id,'Bob','E','I',0,0,random.randrange(WIDTH2),random.randrange(HEIGHT2),2))
 
         a+=1
     else:

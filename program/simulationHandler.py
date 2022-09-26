@@ -1,5 +1,6 @@
-import SIR_MODEL as sim
+import SIR_MODEL as model
 import sqlite3
+import threading
 
 """
 SIR_MODEL which runs all the maps simulations these are threaded and controlled in this file so that all of the maps are kept in sync 
@@ -18,6 +19,7 @@ class Main():
     def __init__(self) -> None:
         self.maps = self.getMaps()
 
+    # call/use the dbHandler
     def getMaps(self):
         conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
         c = conn.cursor()   
@@ -28,35 +30,25 @@ class Main():
         return c.fetchall()
 
 
-conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
-c = conn.cursor()
+    def sim(self,map):
+        sim = model.Simulation(map)
+        sim.countStatistics()
+        
 
-getPeople = '''
-SELECT *
-FROM Person, Map, Population
-WHERE Population.mapID = Map.id and Person.populationID = Population.id
-'''
+    def run(self):
+        running = True 
+        while running:
+            self.threads = []
+            for map in self.maps:
+                x = threading.Thread(target=self.sim, args=(map,))
+                self.threads.append(x)
+                x.start()
+            for index, thread in enumerate(self.threads):
+                thread.join()
+        
+            # do stuff like update graph idk some other stuff
+            input('> ')
 
-getPeople = '''
-SELECT *
-FROM Person, Map, Population
-WHERE Map.ID = Map.populationID = Population.id and Person.populationID = Map.populationID and Person.populationID = 1
-'''
-for i in range(2):
-    c.execute(f'''
-    SELECT *
-    FROM Person, Map, Population
-    WHERE Map.ID = {i+1} and Map.populationID = Population.id and Person.populationID = Population.id 
-    ''')
-    people = c.fetchall()
-    print(people)
 
 a = Main()
-print(a.maps)
-
-# a = []
-# for person in people:
-#     a.append(sim.Person(person[0], person[3]))
-
-# for i in a:
-#     print(i.getStatus)
+print(a.run())
