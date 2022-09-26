@@ -41,30 +41,19 @@ MOVE_PROB = 0.5
 
 P = 1 # probablity ????
 
-NUMB_PEOPLE = 20
-NUMB_STARTING_INFECTED = 1
 
-
-# Transform the main def into a class 
-"""
-simulation runs maps which contain population
-"""
 class Simulation:
     def __init__(self, map) -> None:
         self.__disease = createDisease()
         self.__map = Map(map)
-        self.__dayCounter = 0
-    
-
-    def setDayCounter(self):
-        self.__dayCounter += 1
+        self.__dbQueryHandler = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
 
 
     def day(self):
         """
         need to choose the order of the day 
         """
-        self.setDayCounter()
+        self.__map.getDay()
         self.movement()
 
         s_group = self.tempoaryGroup(0, 'S')
@@ -131,7 +120,12 @@ class Simulation:
 
     def updateDB(self):
         for person in self.__map.getPopulation():
-            pass
+            self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
+            self.__dbQueryHandler.updatePersonRtime(person.getID(), person.getRtime())
+            self.__dbQueryHandler.updatePersonItime(person.getID(), person.getItime())
+            self.__dbQueryHandler.updatePersonXPos(person.getID(), person.getPos()[0])
+            self.__dbQueryHandler.updatePersonYPos(person.getID(), person.getPos()[1])
+        self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
 
 
     def countStatistics(self):
@@ -153,10 +147,16 @@ class Simulation:
 
 class Map:
     def __init__(self, map) -> None:
+        self.__id = map[0]
         self.__width = map[2]
         self.__height = map[3]
+        self.__day = map[4]
         self.__population = self.populatePopulationFromDataBase(map[0])
     
+
+    def getID(self) -> int:
+        return self.__id
+
 
     def getWidth(self) -> int:
         return self.__width
@@ -165,14 +165,23 @@ class Map:
     def getHeight(self) -> int:
         return self.__height
 
+
+    def getDay(self) -> int:
+        return self.__day
+
     
     def getPopulation(self):
         return self.__population
 
 
+    def updateDay(self):
+        self.__day += 1
+
+
     def populatePopulationFromDataBase(self, mapID):
         dbpopulation = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db').getPopulation(mapID)
-        return [Person(person[0], person[3], self.__width, self.__height) for person in dbpopulation]
+        dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db').close()
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5]) for person in dbpopulation]
 
 
 class Disease:
@@ -200,30 +209,33 @@ class Disease:
 
 
 class Person:
-    def __init__(self, id: int, status, width, height) -> None:
-        self.iD = id
+    def __init__(self, id: int, status: str, rTime: int, iTime: int, posX: int, posY: int) -> None:
+        self.__iD = id
         self.__status = status
-        self.eRData = '' # either dead or immune 
-        self.__rTime = 0
-        self.__iTime = 0
-        self.__pos = [random.randrange(width),random.randrange(height)]
+        self.__rTime = rTime
+        self.__iTime = iTime
+        self.__pos = [posX, posY]
 
 
-    def getPos(self):
-        return self.__pos
+    def getID(self) -> int:
+        return self.__iD 
 
 
     def getStatus(self):
         return self.__status
 
 
+    def getRtime(self):
+        return self.__rTime
+
+
     def getItime(self):
         return self.__iTime
 
 
-    def getRtime(self):
-        return self.__rTime
-
+    def getPos(self) -> list[int]:
+        return self.__pos
+    
 
     # check if this is good programming should i have called getPos or since its in the player should i just directly access it 
     def setPos(self, direction, moveAmount):
@@ -254,30 +266,5 @@ class Person:
         ''')
 
 
-def createPopulation() -> list:
-    population = []
-    a = 0 
-    for i in range(NUMB_PEOPLE):
-        if a < NUMB_STARTING_INFECTED:
-            population.append(Person(i+1, s='I'))
-            a+=1
-        else:
-            population.append(Person(i+1))
-    return population
-
-
 def createDisease():
     return Disease(1,0.1,2,3)
-
-# # get rid of the while loop and the sim being called
-# if __name__ == "__main__":
-#     log = logger.DiscontinousLog()
-#     log.log('program start')
-#     running = True 
-#     sim = Simulation()
-#     while running:
-#         sim.day()
-#         sim.countStatistics()
-#         input('> ')
-
-# log.localDump('TASDAWD2')

@@ -9,103 +9,116 @@ class DBManager:
     def __init__(self, dbPath='') -> None:
         self.conn = sqlite3.connect(dbPath)
     
+
+    # Population and people 
     def getPopulation(self, mapID):
-        c = self.conn.cursor()
-        c.execute(f'''
+        gPopulation = '''
         SELECT *
         FROM Person, Map, Population
-        WHERE Map.ID = {mapID} and Map.populationID = Population.id and Person.populationID = Population.id 
-        ''')
-        return c.fetchall()   
-        
-    def createPopulationDB(self):
-        cTable = '''
-        CREATE TABLE IF NOT EXISTS Person(
-            ISBN  INTEGER,
-            title    TEXT,
-            author  TEXT,
-            year    TEXT,
-            PRIMARY KEY(ISBN)
-        );
-        '''    
-        c = self.conn.cursor()
-        c.execute(cTable)
-        self.conn.commit()
-    
-    
-    def aBook(self, isbn:int,title:str,author:str,year:str) -> bool:
-        iBook = '''
-        INSERT INTO Book VALUES
-        (?,?,?,?)
+        WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
         '''
         c = self.conn.cursor()
-        try:
-            c.execute(iBook, (isbn,title,author,year))
-            self.conn.commit()
-        except sqlite3.IntegrityError as sqIE:
-            print(sqIE)
-            return False
-        return True 
-
-
-    def sBooks(self):
-        sBooks = '''
-            SELECT *
-            FROM Book
-            '''
-        c = self.conn.cursor()
+        c.execute(gPopulation, (mapID,))
+        return c.fetchall()   
     
-        c.execute(sBooks)
-        book = c.fetchall()
-        return True, book
 
-
-    def sBook(self ,isbn:int) -> bool:
-        sBook = '''
-            SELECT *
-            FROM Book
-            WHERE ? = Book.ISBN
-            '''
+    def updatePersonStatus(self, id: int, status: str) -> None:
+        uPersonStatus = '''
+        UPDATE Person
+        SET status = ? 
+        WHERE id = ?
+        '''
         c = self.conn.cursor()
-    
-        c.execute(sBook,(isbn,))
-        book = c.fetchone()
-
-        if book == None:
-            return False, book
-        return True, book
-
-
-    # Need to refactor this code 
-    def uBook(self, isbn:int, type:int, change:str) -> bool:
-        t = self.types[type-1]
-        uBook = '''
-        UPDATE Book 
-        SET {0} = '{1}'
-        WHERE Book.ISBN = {2};
-        '''.format(t,change,isbn)
-        c = self.conn.cursor()
-        c.execute(uBook)
+        c.execute(uPersonStatus, (status, id))
         self.conn.commit()
 
-        # add error shit
 
-        return True 
-
-
-    def dBook(self, type:int, change:str):
-        t = self.types[type-1]
-        if t == 'ISBN':
-            change = int(change)
-        dBook = '''
-        DELETE FROM Book
-        WHERE {0} = '{1}'
-        '''.format(t,change)  
+    def updatePersonRtime(self, id: int, rTime: int) -> None:
+        uPersonRtime = '''
+        UPDATE Person
+        SET rTime = ? 
+        WHERE id = ?
+        '''
         c = self.conn.cursor()
-        c.execute(dBook)
+        c.execute(uPersonRtime, (rTime, id))
         self.conn.commit()
 
-        return True 
+    
+    def updatePersonItime(self, id: int, iTime: int) -> None:
+        uPersonItime = '''
+        UPDATE Person
+        SET iTime = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonItime, (iTime, id))
+        self.conn.commit()
+
+
+    def updatePersonXPos(self, id: int, pos: int) -> None:
+        uPersonXPos = '''
+        UPDATE Person
+        SET xPos = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonXPos, (pos, id))
+        self.conn.commit()
+
+
+    def updatePersonYPos(self, id: int, pos: int) -> None:
+        uPersonYPos = '''
+        UPDATE Person
+        SET yPos = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonYPos, (pos, id))
+        self.conn.commit()
+
+
+    # Map
+    def getMaps(self):
+        gMaps = '''
+        SELECT *
+        FROM Map
+        '''
+        c = self.conn.cursor()
+        c.execute(gMaps)
+        return c.fetchall()
+    
+
+    def getMapWidth(self, id: int) -> int:
+        gMapWidth = '''
+        SELECT width
+        FROM Map
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapWidth, (id,))
+        return c.fetchone()       
+
+
+    def getMapHeight(self, id: int) -> int:
+        gMapHeight = '''
+        SELECT height
+        FROM Map
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapHeight, (id,))
+        return c.fetchone()    
+
+
+    def updateMapDay(self, id: int, day: int) -> None:
+        uMapDay = '''
+        UPDATE Map
+        SET day = ?
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uMapDay, (day, id))
+        self.conn.commit()
 
 
     def close(self):

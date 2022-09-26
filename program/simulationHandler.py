@@ -1,6 +1,15 @@
+from cmd import IDENTCHARS
+import sys
+sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools')
+sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
+
+import dbHandler as dbH
+import logger 
+
 import SIR_MODEL as model
 import sqlite3
 import threading
+import random
 
 """
 SIR_MODEL which runs all the maps simulations these are threaded and controlled in this file so that all of the maps are kept in sync 
@@ -13,25 +22,50 @@ so get the pop from the pop id in the map
 get the people from checking if their pop id is equal to that one 
 
 thread the maps 0
+
+load program, allow for editing of settings
+then we load the dbMaker
+then we load the createPopulation and createMap
+then we run the main simulationHandler
 """
+PEOPLE_NUMBER = 40
+MAP_NUMBER = 2
 
 class Main():
     def __init__(self) -> None:
-        self.maps = self.getMaps()
-
-    # call/use the dbHandler
-    def getMaps(self):
-        conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
-        c = conn.cursor()   
-        c.execute('''
-        SELECT *
-        FROM Map
-        ''')
-        return c.fetchall()
+        self.__dbQueryHandler = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
+        self.maps = self.populateMapsFromDatabase()
+        self.run()
 
 
-    def sim(self,map):
+    def populateMapsFromDatabase(self):
+       return self.__dbQueryHandler.getMaps()
+
+
+    # Debugging (prevent having to delete the db over and over again)
+    # really bad should just delete old population.db and then run dbMaker and createPop
+    def resetPopulationTables(self): 
+        for id in range(1, PEOPLE_NUMBER):
+            if id == 1 or id == 21:
+                self.__dbQueryHandler.updatePersonStatus(id, 'I')
+            else:
+                self.__dbQueryHandler.updatePersonStatus(id, 'S')
+            self.__dbQueryHandler.updatePersonRtime(id, 0)
+            self.__dbQueryHandler.updatePersonItime(id, 0)
+            if id < 20:
+                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(1))[0]))
+                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapHeight(1))[0]))
+            else:
+                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
+                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
+        for id in range(MAP_NUMBER):
+            self.__dbQueryHandler.updateMapDay(id, 0)
+
+
+    def sim(self, map, threadID):
         sim = model.Simulation(map)
+        sim.day()
+        print(f'Thread {threadID}')
         sim.countStatistics()
         
 
@@ -39,16 +73,18 @@ class Main():
         running = True 
         while running:
             self.threads = []
-            for map in self.maps:
-                x = threading.Thread(target=self.sim, args=(map,))
+            for index, map in enumerate(self.maps):
+                x = threading.Thread(target=self.sim, args=(map,index))
                 self.threads.append(x)
                 x.start()
             for index, thread in enumerate(self.threads):
                 thread.join()
         
             # do stuff like update graph idk some other stuff
-            input('> ')
+            a = input('> ')
+            if a == '1':
+                self.resetPopulationTables()
+                
 
-
-a = Main()
-print(a.run())
+if __name__ == "__main__":
+    Main()
