@@ -1,9 +1,9 @@
 {
     "population" : {
-        "size" : "int"
+        "dbREF" : "str"
     },
     "map" : {
-        "density" : "float"
+        "dbREF" : "str"
     },
     "disease" : {
         "name" : "string",

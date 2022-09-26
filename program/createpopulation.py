@@ -1,5 +1,10 @@
+import sys
+sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
+
 import sqlite3
 import names
+
+import dbMaker
 
 """
 map gets generated first
@@ -30,3 +35,55 @@ class db:
 
 class person:
     pass
+
+# dbMaker.createMap([1,'city1',5,5,1],[1,1])
+# dbMaker.createPerson([1,'Tom','Elliott','S',1])
+
+conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
+c = conn.cursor()
+
+insert = '''
+INSERT INTO Population VALUES
+(?)
+'''
+c.execute(insert, (1,))
+c.execute(insert, (2,))
+
+
+insert = '''
+INSERT INTO Map VALUES
+(?,?,?,?,?)
+'''
+c.execute(insert, (1, 'City1', 5, 5,1))
+c.execute(insert, (2, 'City2', 4, 4,2))
+
+
+insert = '''
+INSERT INTO Person VALUES
+(?,?,?,?,?)
+'''
+NUMB_PEOPLE = 20
+NUMB_STARTING_INFECTED = 1
+a = 0 
+id = 1
+for i in range(NUMB_PEOPLE):
+    if a < NUMB_STARTING_INFECTED:
+        c.execute(insert, ((id),'Alice','A','I',1))
+
+        a+=1
+    else:
+        c.execute(insert, ((id),'Alice','A','R',1))
+    id +=1
+
+a = 0 
+for i in range(NUMB_PEOPLE):
+    if a < NUMB_STARTING_INFECTED:
+        c.execute(insert, (id,'Bob','E','I',2))
+
+        a+=1
+    else:
+        c.execute(insert, (id,'Bob','E','R',2))
+    id +=1
+
+conn.commit()
+c.close()

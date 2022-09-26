@@ -1,5 +1,8 @@
+import sys
+sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools')
+
+import logger  
 import threading
-import logger 
 import random
 from itertools import count 
 import pandas as pd
