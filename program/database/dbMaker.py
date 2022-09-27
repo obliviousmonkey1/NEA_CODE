@@ -1,5 +1,7 @@
 import sqlite3
 
+FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+
 """
 person and pop have one to many
 pop to map has one to one
@@ -40,7 +42,7 @@ CREATE TABLE IF NOT EXISTS Map(
 );
 '''
   
-conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
+conn = sqlite3.connect(FILE_PATH)
 c = conn.cursor()
 c.execute(createPersonTable)
 c.execute(createPopulationTable)

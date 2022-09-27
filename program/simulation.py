@@ -1,6 +1,9 @@
+FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
+
 import sys
-sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools')
-sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
+sys.path.append(FILE_PATH_LOG)
+sys.path.append(FILE_PATH_DB)
 
 import dbHandler as dbH
 import logger  
@@ -43,7 +46,7 @@ class Simulation:
     def __init__(self, map) -> None:
         self.__disease = createDisease()
         self.__map = Map(map)
-        self.__dbQueryHandler = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
+        self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
 
 
     def day(self):
@@ -177,8 +180,8 @@ class Map:
 
 
     def populatePopulationFromDataBase(self, mapID):
-        dbpopulation = dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db').getPopulation(mapID)
-        dbH.DBManager('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db').close()
+        dbpopulation = dbH.DBManager(FILE_PATH_DB).getPopulation(mapID)
+        dbH.DBManager(FILE_PATH_DB).close()
         return [Person(person[0], person[1], person[2], person[3], person[4], person[5]) for person in dbpopulation]
 
 

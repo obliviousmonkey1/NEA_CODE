@@ -1,12 +1,15 @@
+FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+
 import sys
 
-sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
+sys.path.append(FILE_PATH)
 
 import sqlite3
 import names
 import random
 
 import dbMaker
+
 
 """
 map gets generated first
@@ -48,7 +51,7 @@ WIDTH2 = 10
 HEIGHT2 = 10
 
 
-conn = sqlite3.connect('/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db')
+conn = sqlite3.connect(FILE_PATH)
 c = conn.cursor()
 
 insert = '''
