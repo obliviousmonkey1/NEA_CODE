@@ -1,5 +1,5 @@
-FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
-
+FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
 import sys
 
 sys.path.append(FILE_PATH)
@@ -51,7 +51,7 @@ WIDTH2 = 10
 HEIGHT2 = 10
 
 
-conn = sqlite3.connect(FILE_PATH)
+conn = sqlite3.connect(FILE_PATH_DB)
 c = conn.cursor()
 
 insert = '''
@@ -66,8 +66,8 @@ insert = '''
 INSERT INTO Map VALUES
 (?,?,?,?,?,?)
 '''
-c.execute(insert, (1, 'City1', WIDTH, HEIGHT, 0, 1))
-c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 0, 2))
+c.execute(insert, (1, 'City1', WIDTH, HEIGHT, 1, 1))
+c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 1, 2))
 
 
 insert = '''
@@ -80,21 +80,21 @@ a = 0
 id = 1
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0,0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
+        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
 
         a+=1
     else:
-        c.execute(insert, (id,'S',0,0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
+        c.execute(insert, (id,'S',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),1))
     id +=1
 
 a = 0 
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0,0,random.randrange(WIDTH2),random.randrange(HEIGHT2),2))
+        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),2))
 
         a+=1
     else:
-        c.execute(insert, (id,'S',0,0,random.randrange(WIDTH2),random.randrange(HEIGHT2),2))
+        c.execute(insert, (id,'S',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),2))
     id +=1
 
 conn.commit()

@@ -12,8 +12,8 @@ createPersonTable = '''
 CREATE TABLE IF NOT EXISTS Person(
     id          INTEGER,
     status      TEXT,
-    rTime       INTEGER,
-    iTime       INTEGER,
+    rTime       FLOAT,
+    iTime       FLOAT,
     xPos        INTEGER,
     yPos        INTEGER,
     populationID    INTEGER,    
@@ -41,6 +41,16 @@ CREATE TABLE IF NOT EXISTS Map(
     PRIMARY KEY(id)
 );
 '''
+
+# mapRelationship or mapConnections
+createMapRelationshipsTable = ''''''
+
+createTemporaryPopulationTable = ''''''
+
+createTemporaryPersonTable = ''''''
+
+# contain routines that people have one routine shared between many people 
+createWeeklyRoutinesTable = ''''''
   
 conn = sqlite3.connect(FILE_PATH)
 c = conn.cursor()

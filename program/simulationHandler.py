@@ -1,9 +1,10 @@
 FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DBH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
 FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
 
 import sys
 sys.path.append(FILE_PATH_LOG)
-sys.path.append(FILE_PATH_DB)
+sys.path.append(FILE_PATH_DBH)
 
 import dbHandler as dbH
 import logger 
@@ -52,8 +53,8 @@ class Main():
                 self.__dbQueryHandler.updatePersonStatus(id, 'I')
             else:
                 self.__dbQueryHandler.updatePersonStatus(id, 'S')
-            self.__dbQueryHandler.updatePersonRtime(id, 0)
-            self.__dbQueryHandler.updatePersonItime(id, 0)
+            self.__dbQueryHandler.updatePersonRtime(id, 0.0)
+            self.__dbQueryHandler.updatePersonItime(id, 0.0)
             if id < 20:
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(1))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapHeight(1))[0]))
@@ -61,7 +62,7 @@ class Main():
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
         for id in range(1, (MAP_NUMBER+1)):
-            self.__dbQueryHandler.updateMapDay(id, 0)
+            self.__dbQueryHandler.updateMapDay(id, 1)
 
 
     def sim(self, map, threadID):

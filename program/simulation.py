@@ -1,9 +1,10 @@
+FILE_PATH_DBH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
 FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
 FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
 
 import sys
 sys.path.append(FILE_PATH_LOG)
-sys.path.append(FILE_PATH_DB)
+sys.path.append(FILE_PATH_DBH)
 
 import dbHandler as dbH
 import logger  
@@ -42,39 +43,46 @@ MOVE_PROB = 0.5
 P = 1 # probablity ????
 
 
+# run on a 24 hour basis 
 class Simulation:
     def __init__(self, map) -> None:
         self.__disease = createDisease()
         self.__map = Map(map)
         self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
+        self.__hour = 0
 
 
+    # need to brake up day into sub functions 
     def day(self):
         """
         need to choose the order of the day 
+        need to update to run on an hour basis so need to change the infection checking stuff and setting of Itime()
         """
-        self.__map.updateDay()
-        print(self.__map.getDay())
-        self.movement()
+        while self.__hour < 24:
+            print(self.__hour)
+            susceptibleGroup = self.tempoaryGroup(0, 'S')
+            infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
-        s_group = self.tempoaryGroup(0, 'S')
-        i_group = self.tempoaryGroup(0 ,'I') 
+            # check if infection time is over, if it is not then update infection time 
+            for infectedPerson in infecetdGroup:
+                if infectedPerson.getItime() >= self.__disease.getInfectedTime():
+                    infectedPerson.setStatus('R')
+                else:
+                    infectedPerson.setItime()
 
-        for i_person in i_group:
-            i_person.setItime()
+            self.movement()
 
-        for s_person in s_group:
-            for i_person in i_group:
-                if self.checkInsideRadius(i_person.getPos()[0], i_person.getPos()[1], s_person.getPos()[0], s_person.getPos()[1]):
-                    s_person.setRtime()
-                    if s_person.getRtime() >= self.__disease.getTransmissionTime() and random.random() < P * self.__disease.getDiseaseTransmission():
-                        s_person.setStatus('I')
+            for susceptiblePerson in susceptibleGroup:
+                for infectedPerson in infecetdGroup:
+                    if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1]):
+                        susceptiblePerson.setRtime()
+                        if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime() and random.random() < P * self.__disease.getDiseaseTransmission():
+                            susceptiblePerson.setStatus('I')
             
-        for i_person in i_group:
-            if i_person.getItime() > self.__disease.getInfectedTime():
-                i_person.setStatus('R')
-        
-        self.movement()
+            self.__hour +=1
+
+        # update infection time 
+        self.__map.updateDay()
         self.updateDB()
 
 
@@ -186,9 +194,9 @@ class Map:
 
 
 class Disease:
-    def __init__(self, tT, dT, tR, iT) -> None:
+    def __init__(self, tT: float, dT, tR, iT: float) -> None:
         self.__transmissionTime = tT
-        self.__diseaseTransmission = dT
+        self.__diseaseTransmission = dT  
         self.__transmissionRadius = tR
         self.__infectedTime = iT
 
@@ -210,7 +218,7 @@ class Disease:
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: int, iTime: int, posX: int, posY: int) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
@@ -222,15 +230,15 @@ class Person:
         return self.__iD 
 
 
-    def getStatus(self):
+    def getStatus(self) -> str:
         return self.__status
 
 
-    def getRtime(self):
+    def getRtime(self) -> float:
         return self.__rTime
 
 
-    def getItime(self):
+    def getItime(self) -> float:
         return self.__iTime
 
 
@@ -238,21 +246,20 @@ class Person:
         return self.__pos
     
 
-    # check if this is good programming should i have called getPos or since its in the player should i just directly access it 
-    def setPos(self, direction, moveAmount):
+    def setPos(self, direction, moveAmount) -> None:
         self.__pos[direction] += moveAmount
 
 
-    def setStatus(self, st: str):
+    def setStatus(self, st: str) -> None:
         self.__status = st
 
 
-    def setItime(self, mod=0):
-        self.__iTime += 1+mod
+    def setItime(self, val: float = 1.0) -> None:
+        self.__iTime += val/24.0
 
     
-    def setRtime(self, mod=0):
-        self.__rTime += 1+mod
+    def setRtime(self, val: float = 1.0) -> None:
+        self.__rTime += val/24.0
 
 
     def display_stats(self):
@@ -268,4 +275,5 @@ class Person:
 
 
 def createDisease():
-    return Disease(1,0.1,2,3)
+    return Disease(2.0, 0.1, 2, 3.0)
+
