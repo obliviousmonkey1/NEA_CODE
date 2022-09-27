@@ -1,4 +1,3 @@
-from cmd import IDENTCHARS
 import sys
 sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools')
 sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
@@ -6,7 +5,7 @@ sys.path.append('/Users/parzavel/Documents/NEA/NEA_CODE/program/database')
 import dbHandler as dbH
 import logger 
 
-import SIR_MODEL as model
+import simulation as model
 import sqlite3
 import threading
 import random
@@ -45,7 +44,7 @@ class Main():
     # Debugging (prevent having to delete the db over and over again)
     # really bad should just delete old population.db and then run dbMaker and createPop
     def resetPopulationTables(self): 
-        for id in range(1, PEOPLE_NUMBER):
+        for id in range(1, (PEOPLE_NUMBER+1)):
             if id == 1 or id == 21:
                 self.__dbQueryHandler.updatePersonStatus(id, 'I')
             else:
@@ -58,7 +57,7 @@ class Main():
             else:
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
-        for id in range(MAP_NUMBER):
+        for id in range(1, (MAP_NUMBER+1)):
             self.__dbQueryHandler.updateMapDay(id, 0)
 
 

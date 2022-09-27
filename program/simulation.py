@@ -33,9 +33,6 @@ NEED TO ADD GETTERS AND SETTERS
 # Constants 
 DEBUG = False
 
-WIDTH = 5
-HEIGHT = 5
-
 MAX_MOVE_AMOUNT = 2
 MOVE_PROB = 0.5
 
@@ -53,7 +50,8 @@ class Simulation:
         """
         need to choose the order of the day 
         """
-        self.__map.getDay()
+        self.__map.updateDay()
+        print(self.__map.getDay())
         self.movement()
 
         s_group = self.tempoaryGroup(0, 'S')
