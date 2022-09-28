@@ -66,8 +66,8 @@ insert = '''
 INSERT INTO Map VALUES
 (?,?,?,?,?,?)
 '''
-c.execute(insert, (1, 'City1', WIDTH, HEIGHT, 1, 1))
-c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 1, 2))
+c.execute(insert, (1, 'City1', WIDTH, HEIGHT, 0, 1))
+c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 0, 2))
 
 
 insert = '''

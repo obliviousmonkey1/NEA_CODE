@@ -37,7 +37,7 @@ MAP_NUMBER = 2
 class Main():
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
-        self.maps = self.populateMapsFromDatabase()
+        self.__maps = self.populateMapsFromDatabase()
         self.run()
 
 
@@ -62,7 +62,7 @@ class Main():
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
         for id in range(1, (MAP_NUMBER+1)):
-            self.__dbQueryHandler.updateMapDay(id, 1)
+            self.__dbQueryHandler.updateMapDay(id, 0)
 
 
     def sim(self, map, threadID):
@@ -76,7 +76,7 @@ class Main():
         running = True 
         while running:
             self.threads = []
-            for index, map in enumerate(self.maps):
+            for index, map in enumerate(self.__maps):
                 x = threading.Thread(target=self.sim, args=(map,index))
                 self.threads.append(x)
                 x.start()
@@ -87,6 +87,7 @@ class Main():
             a = input('> ')
             if a == '1':
                 self.resetPopulationTables()
+            self.__maps = self.populateMapsFromDatabase()
                 
 
 if __name__ == "__main__":

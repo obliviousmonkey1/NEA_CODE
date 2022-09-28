@@ -59,7 +59,7 @@ class Simulation:
         need to update to run on an hour basis so need to change the infection checking stuff and setting of Itime()
         """
         while self.__hour < 24:
-            print(self.__hour, threadID)
+            #print(self.__hour, threadID)
             susceptibleGroup = self.tempoaryGroup(0, 'S')
             infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
