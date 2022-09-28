@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Map(
 
 createDiseaseTable = '''
 CREATE TABLE IF NOT EXISTS Disease(
-    id          INTEGER,
+    id          STRING,
     name        TEXT,
     transmissionTime    FLOAT,
     contagion           FLOAT,

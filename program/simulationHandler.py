@@ -51,7 +51,7 @@ class Main():
         for id in range(1, (PEOPLE_NUMBER+1)):
             if id == 1 or id == 21:
                 self.__dbQueryHandler.updatePersonStatus(id, 'I')
-                self.__dbQueryHandler.updateDiseaseID(id, 1)
+                self.__dbQueryHandler.updateDiseaseID(id, '1')
             else:
                 self.__dbQueryHandler.updatePersonStatus(id, 'S')
                 self.__dbQueryHandler.updateDiseaseID(id, None)

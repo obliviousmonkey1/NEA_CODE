@@ -39,6 +39,7 @@ DEBUG = False
 
 MAX_MOVE_AMOUNT = 2
 MOVE_PROB = 0.5
+MUTATION_CHANCE = 0.3
 
 P = 1 # probablity ????
 
@@ -81,7 +82,10 @@ class Simulation:
                     if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
                         susceptiblePerson.setRtime()
                         if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
-                            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+                            if random.random() < MUTATION_CHANCE:
+                                susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+                            else:
+                                susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
                             susceptiblePerson.setStatus('I')
             
             self.__hour +=1
@@ -132,6 +136,22 @@ class Simulation:
             return [person for person in self.__map.getPopulation() if person.getStatus() != st]
 
 
+    def diseaseMutation(self, infectedID, susceptibleID, diseaseID):
+        '''
+        when a person first catches a disease chance for a mutaion to happen 
+        disease id is going to be made up off day + infected id + susceptibleID + map name + og disease id
+        name is going to be the disease name
+        '''
+        ndID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{str(diseaseID)}'
+        print(ndID)
+        self.__dbQueryHandler.createDisease(
+            ndID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
+            self.__disease.getContagion(diseaseID), self.__disease.getTransmissionRadius(diseaseID),
+            self.__disease.getInfectedTime(diseaseID)
+        )
+        return ndID
+
+
     def updateDB(self):
         for person in self.__map.getPopulation():
             self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
@@ -165,11 +185,16 @@ class Simulation:
 class Map:
     def __init__(self, map) -> None:
         self.__id = map[0]
+        self.__name = map[1]
         self.__width = map[2]
         self.__height = map[3]
         self.__day = map[4]
         self.__population = self.populatePopulationFromDataBase(map[0])
     
+
+    def getName(self) -> str:
+        return self.__name
+
 
     def getID(self) -> int:
         return self.__id
@@ -205,26 +230,30 @@ class Map:
 class Disease:
     def __init__(self, dbQuery) -> None:
         self.__dbQueryHandler = dbQuery
+    
+
+    def getName(self, id: str) -> str:
+        return self.__dbQueryHandler.getDiseaseName(id)[0]
 
     
-    def getTransmissionTime(self, id: int) -> float:
+    def getTransmissionTime(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseaseTransmissionTime(id)[0]
     
 
-    def getContagion(self, id: int) -> float:
+    def getContagion(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseaseContagion(id)[0]
     
 
-    def getTransmissionRadius(self, id: int) -> int:
+    def getTransmissionRadius(self, id: str) -> int:
         return self.__dbQueryHandler.getDiseaseTransmissionRadius(id)[0]
       
 
-    def getInfectedTime(self, id: int) -> float:
+    def getInfectedTime(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int, diseaseID: int) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int, diseaseID: str) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
@@ -253,7 +282,7 @@ class Person:
         return self.__pos
     
 
-    def getDiseaseId(self) -> int:
+    def getDiseaseId(self) -> str:
         return self.__diseaseID
 
 

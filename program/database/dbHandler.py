@@ -144,7 +144,28 @@ class DBManager:
 
 
     # Disease
-    def getDiseaseTransmissionTime(self, id: int) -> float:
+    def createDisease(self, id: str, name: str, transmissionTime: float, contagion: float, transmissionRadius: int, infectedTime: float) -> None:
+        insert = '''
+        INSERT INTO Disease VALUES
+        (?,?,?,?,?,?)
+        '''
+        c = self.conn.cursor()
+        c.execute(insert, (id, name, transmissionTime, contagion, transmissionRadius, infectedTime))
+        self.conn.commit()
+
+
+    def getDiseaseName(self, id: str) -> str:
+        gDiseaseName = '''
+        SELECT name
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseName, (id,))
+        return c.fetchone()    
+
+
+    def getDiseaseTransmissionTime(self, id: str) -> float:
         gDiseaseTransmissionTime = '''
         SELECT transmissionTime
         FROM Disease
@@ -155,7 +176,7 @@ class DBManager:
         return c.fetchone()    
 
 
-    def getDiseaseContagion(self, id: int) -> float:
+    def getDiseaseContagion(self, id: str) -> float:
         gDiseaseContagion = '''
         SELECT contagion
         FROM Disease
@@ -166,7 +187,7 @@ class DBManager:
         return c.fetchone()    
 
 
-    def getDiseaseTransmissionRadius(self, id: int) -> int:
+    def getDiseaseTransmissionRadius(self, id: str) -> int:
         gDiseaseTransmissionRadius = '''
         SELECT transmissionRadius
         FROM Disease
@@ -177,7 +198,7 @@ class DBManager:
         return c.fetchone()    
 
 
-    def getDiseaseInfectedTime(self, id: int) -> float:
+    def getDiseaseInfectedTime(self, id: str) -> float:
         gInfectedTime = '''
         SELECT infectedTime
         FROM Disease

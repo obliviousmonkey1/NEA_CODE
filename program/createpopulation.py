@@ -59,7 +59,7 @@ insert = '''
 INSERT INTO Disease VALUES
 (?,?,?,?,?,?)
 '''
-c.execute(insert, (1,'Disease1', 2.0, 0.1, 2, 3.0))
+c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0))
 
 
 insert = '''
@@ -88,7 +88,7 @@ a = 0
 id = 1
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),1,1))
+        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),'1',1))
         a+=1
     else:
         c.execute(insert, (id,'S',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),None,1))
@@ -97,7 +97,7 @@ for i in range(NUMB_PEOPLE):
 a = 0 
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),1,2))
+        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',2))
 
         a+=1
     else:
