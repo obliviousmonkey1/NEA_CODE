@@ -77,6 +77,17 @@ class DBManager:
         self.conn.commit()
 
 
+    def updateDiseaseID(self, id: int, diseaseID: int) -> None:
+        uPersonDiseaseID = '''
+        UPDATE Person
+        SET diseaseID = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonDiseaseID, (diseaseID, id))
+        self.conn.commit()
+
+
     # Map
     def getMaps(self):
         gMaps = '''
@@ -130,6 +141,51 @@ class DBManager:
         c = self.conn.cursor()
         c.execute(uMapDay, (day, id))
         self.conn.commit()
+
+
+    # Disease
+    def getDiseaseTransmissionTime(self, id: int) -> float:
+        gDiseaseTransmissionTime = '''
+        SELECT transmissionTime
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseTransmissionTime, (id,))
+        return c.fetchone()    
+
+
+    def getDiseaseContagion(self, id: int) -> float:
+        gDiseaseContagion = '''
+        SELECT contagion
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseContagion, (id,))
+        return c.fetchone()    
+
+
+    def getDiseaseTransmissionRadius(self, id: int) -> int:
+        gDiseaseTransmissionRadius = '''
+        SELECT transmissionRadius
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseTransmissionRadius, (id,))
+        return c.fetchone()    
+
+
+    def getDiseaseInfectedTime(self, id: int) -> float:
+        gInfectedTime = '''
+        SELECT infectedTime
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gInfectedTime, (id,))
+        return c.fetchone()    
 
 
     def close(self):

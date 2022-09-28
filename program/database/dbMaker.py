@@ -16,8 +16,10 @@ CREATE TABLE IF NOT EXISTS Person(
     iTime       FLOAT,
     xPos        INTEGER,
     yPos        INTEGER,
+    diseaseID       INTEGER,
     populationID    INTEGER,    
     FOREIGN KEY(populationID) REFERENCES Population(id),
+    FOREIGN KEY(diseaseID) REFERENCES Disease(id),
     PRIMARY KEY(id)
 );
 '''
@@ -42,6 +44,18 @@ CREATE TABLE IF NOT EXISTS Map(
 );
 '''
 
+createDiseaseTable = '''
+CREATE TABLE IF NOT EXISTS Disease(
+    id          INTEGER,
+    name        TEXT,
+    transmissionTime    FLOAT,
+    contagion           FLOAT,
+    transmissionRadius  INTEGER,
+    infectedTime        FLOAT,
+    PRIMARY KEY(id)
+);
+'''
+
 # mapRelationship or mapConnections
 createMapRelationshipsTable = ''''''
 
@@ -57,6 +71,7 @@ c = conn.cursor()
 c.execute(createPersonTable)
 c.execute(createPopulationTable)
 c.execute(createMapTable)
+c.execute(createDiseaseTable)
 c.close()
 
 

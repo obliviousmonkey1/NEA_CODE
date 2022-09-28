@@ -46,9 +46,9 @@ P = 1 # probablity ????
 # run on a 24 hour basis 
 class Simulation:
     def __init__(self, map) -> None:
-        self.__disease = createDisease()
-        self.__map = Map(map)
         self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
+        self.__disease = Disease(self.__dbQueryHandler)
+        self.__map = Map(map)
         self.__hour = 0
 
 
@@ -65,8 +65,9 @@ class Simulation:
 
             # check if infection time is over, if it is not then update infection time 
             for infectedPerson in infecetdGroup:
-                if infectedPerson.getItime() >= self.__disease.getInfectedTime():
+                if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
                     infectedPerson.setStatus('R')
+                    infectedPerson.setDiseaseID(None)
                 else:
                     infectedPerson.setItime()
 
@@ -74,10 +75,11 @@ class Simulation:
 
             for susceptiblePerson in susceptibleGroup:
                 for infectedPerson in infecetdGroup:
-                    if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1]):
+                    if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
                         susceptiblePerson.setRtime()
-                        if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime() and random.random() < P * self.__disease.getDiseaseTransmission():
+                        if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
                             susceptiblePerson.setStatus('I')
+                            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId)
             
             self.__hour +=1
 
@@ -86,8 +88,8 @@ class Simulation:
         self.updateDB()
 
 
-    def checkInsideRadius(self, x, y, c_x, c_y) -> bool:  
-        if ((x - c_x) * (x - c_x) + (y - c_y) * (y - c_y) <= self.__disease.getTransmissionRadius() * self.__disease.getTransmissionRadius()):
+    def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  
+        if ((x - c_x) * (x - c_x) + (y - c_y) * (y - c_y) <= self.__disease.getTransmissionRadius(diseaseID) * self.__disease.getTransmissionRadius(diseaseID)):
             return True 
 
 
@@ -134,6 +136,7 @@ class Simulation:
             self.__dbQueryHandler.updatePersonItime(person.getID(), person.getItime())
             self.__dbQueryHandler.updatePersonXPos(person.getID(), person.getPos()[0])
             self.__dbQueryHandler.updatePersonYPos(person.getID(), person.getPos()[1])
+            self.__dbQueryHandler.updateDiseaseID(person.getID(), person.getDiseaseId())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()
@@ -192,40 +195,39 @@ class Map:
     def populatePopulationFromDataBase(self, mapID):
         dbpopulation = dbH.DBManager(FILE_PATH_DB).getPopulation(mapID)
         dbH.DBManager(FILE_PATH_DB).close()
-        return [Person(person[0], person[1], person[2], person[3], person[4], person[5]) for person in dbpopulation]
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6]) for person in dbpopulation]
 
 
+# doesn't store anything only has getters and setters for the database so multiple disease can be around 
 class Disease:
-    def __init__(self, tT: float, dT, tR, iT: float) -> None:
-        self.__transmissionTime = tT
-        self.__diseaseTransmission = dT  
-        self.__transmissionRadius = tR
-        self.__infectedTime = iT
+    def __init__(self, dbQuery) -> None:
+        self.__dbQueryHandler = dbQuery
 
     
-    def getTransmissionTime(self):
-        return self.__transmissionTime
+    def getTransmissionTime(self, id: int):
+        return self.__dbQueryHandler.getDiseaseTransmissionTime(id)[0]
     
 
-    def getDiseaseTransmission(self):
-        return self.__diseaseTransmission
+    def getContagion(self, id: int):
+        return self.__dbQueryHandler.getDiseaseContagion(id)[0]
     
 
-    def getTransmissionRadius(self):
-        return self.__transmissionRadius
+    def getTransmissionRadius(self, id: int):
+        return (self.__dbQueryHandler.getDiseaseTransmissionRadius(id))[0]
+      
 
-
-    def getInfectedTime(self):
-        return self.__infectedTime
+    def getInfectedTime(self, id: int):
+        return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int, diseaseID: int) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
         self.__iTime = iTime
         self.__pos = [posX, posY]
+        self.__diseaseID = diseaseID
 
 
     def getID(self) -> int:
@@ -248,6 +250,10 @@ class Person:
         return self.__pos
     
 
+    def getDiseaseId(self) -> int:
+        return self.__diseaseID
+
+
     def setPos(self, direction, moveAmount) -> None:
         self.__pos[direction] += moveAmount
 
@@ -264,6 +270,10 @@ class Person:
         self.__rTime += val/24.0
 
 
+    def setDiseaseID(self, diseaseID: int)-> None:
+        self.__diseaseID = diseaseID
+
+
     def display_stats(self):
         print(f''' 
         ID : {self.iD}
@@ -274,8 +284,3 @@ class Person:
             - iTime : {self.iTime}
             - pos : {self.pos}
         ''')
-
-
-def createDisease():
-    return Disease(2.0, 0.1, 2, 3.0)
-
