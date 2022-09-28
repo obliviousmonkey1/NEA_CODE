@@ -53,13 +53,13 @@ class Simulation:
 
 
     # need to brake up day into sub functions 
-    def day(self):
+    def day(self, threadID):
         """
         need to choose the order of the day 
         need to update to run on an hour basis so need to change the infection checking stuff and setting of Itime()
         """
         while self.__hour < 24:
-            print(self.__hour)
+            print(self.__hour, threadID)
             susceptibleGroup = self.tempoaryGroup(0, 'S')
             infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
@@ -81,7 +81,7 @@ class Simulation:
             
             self.__hour +=1
 
-        # update infection time 
+        # update day and update database with new values 
         self.__map.updateDay()
         self.updateDB()
 
@@ -135,6 +135,8 @@ class Simulation:
             self.__dbQueryHandler.updatePersonXPos(person.getID(), person.getPos()[0])
             self.__dbQueryHandler.updatePersonYPos(person.getID(), person.getPos()[1])
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
+        print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
+        self.__dbQueryHandler.close()
 
 
     def countStatistics(self):

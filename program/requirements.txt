@@ -1,0 +1,8 @@
+import sqlite3
+import names
+import random
+import threading
+from itertools import count 
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation

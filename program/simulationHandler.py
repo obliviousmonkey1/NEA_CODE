@@ -67,7 +67,7 @@ class Main():
 
     def sim(self, map, threadID):
         sim = model.Simulation(map)
-        sim.day()
+        sim.day(threadID)
         print(f'Thread {threadID}')
         sim.countStatistics()
         

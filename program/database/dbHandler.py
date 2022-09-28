@@ -33,7 +33,7 @@ class DBManager:
         self.conn.commit()
 
 
-    def updatePersonRtime(self, id: int, rTime: int) -> None:
+    def updatePersonRtime(self, id: int, rTime: float) -> None:
         uPersonRtime = '''
         UPDATE Person
         SET rTime = ? 
@@ -44,7 +44,7 @@ class DBManager:
         self.conn.commit()
 
     
-    def updatePersonItime(self, id: int, iTime: int) -> None:
+    def updatePersonItime(self, id: int, iTime: float) -> None:
         uPersonItime = '''
         UPDATE Person
         SET iTime = ? 
@@ -108,7 +108,18 @@ class DBManager:
         c = self.conn.cursor()
         c.execute(gMapHeight, (id,))
         return c.fetchone()    
+    
 
+    def getMapDay(self, id: int) -> int:
+        gMapDay = '''
+        SELECT day 
+        FROM Map
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapDay, (id,))
+        return c.fetchone()
+        
 
     def updateMapDay(self, id: int, day: int) -> None:
         uMapDay = '''
