@@ -60,16 +60,19 @@ class Simulation:
         """
         while self.__hour < 24:
             #print(self.__hour, threadID)
-            susceptibleGroup = self.tempoaryGroup(0, 'S')
             infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
             # check if infection time is over, if it is not then update infection time 
-            for infectedPerson in infecetdGroup:
-                if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
-                    infectedPerson.setStatus('R')
-                    infectedPerson.setDiseaseID(None)
-                else:
-                    infectedPerson.setItime()
+            if infecetdGroup != None:
+                for infectedPerson in infecetdGroup:
+                    if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
+                        infectedPerson.setDiseaseID(None)
+                        infectedPerson.setStatus('R')
+                    else:
+                        infectedPerson.setItime()
+
+            susceptibleGroup = self.tempoaryGroup(0, 'S')
+            infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
             self.movement()
 
@@ -78,8 +81,8 @@ class Simulation:
                     if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
                         susceptiblePerson.setRtime()
                         if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
+                            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
                             susceptiblePerson.setStatus('I')
-                            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId)
             
             self.__hour +=1
 
@@ -204,19 +207,19 @@ class Disease:
         self.__dbQueryHandler = dbQuery
 
     
-    def getTransmissionTime(self, id: int):
+    def getTransmissionTime(self, id: int) -> float:
         return self.__dbQueryHandler.getDiseaseTransmissionTime(id)[0]
     
 
-    def getContagion(self, id: int):
+    def getContagion(self, id: int) -> float:
         return self.__dbQueryHandler.getDiseaseContagion(id)[0]
     
 
-    def getTransmissionRadius(self, id: int):
-        return (self.__dbQueryHandler.getDiseaseTransmissionRadius(id))[0]
+    def getTransmissionRadius(self, id: int) -> int:
+        return self.__dbQueryHandler.getDiseaseTransmissionRadius(id)[0]
       
 
-    def getInfectedTime(self, id: int):
+    def getInfectedTime(self, id: int) -> float:
         return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
 
 

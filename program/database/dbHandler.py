@@ -185,7 +185,7 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gInfectedTime, (id,))
-        return c.fetchone()    
+        return c.fetchone()
 
 
     def close(self):
