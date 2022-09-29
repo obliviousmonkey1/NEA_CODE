@@ -14,6 +14,8 @@ from itertools import count
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import timeit
+
 
 '''
 very naive model
@@ -39,60 +41,65 @@ DEBUG = False
 
 MAX_MOVE_AMOUNT = 2
 MOVE_PROB = 0.5
-MUTATION_CHANCE = 0.3
+MUTATION_CHANCE = 0.01
 
 P = 1 # probablity ????
 
 
-# run on a 24 hour basis 
 class Simulation:
     def __init__(self, map) -> None:
         self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
         self.__disease = Disease(self.__dbQueryHandler)
         self.__map = Map(map)
+        self.__logger = logger.DiscontinousLog()
         self.__hour = 0
 
 
     # need to brake up day into sub functions 
+    # need to use continous log
     def day(self, threadID):
-        """
-        need to choose the order of the day 
-        need to update to run on an hour basis so need to change the infection checking stuff and setting of Itime()
-        """
-        while self.__hour < 24:
-            #print(self.__hour, threadID)
-            infecetdGroup = self.tempoaryGroup(0 ,'I') 
+        self.startTime = timeit.default_timer()
+        self.__logger.log('day function', f'startTime: {self.startTime}, day: {self.__map.getDay()}')
 
-            # check if infection time is over, if it is not then update infection time 
-            if infecetdGroup != None:
-                for infectedPerson in infecetdGroup:
-                    if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
-                        infectedPerson.setDiseaseID(None)
-                        infectedPerson.setStatus('R')
-                    else:
-                        infectedPerson.setItime()
+        if self.tempoaryGroup(0 ,'I'):
+            while self.__hour < 24:
+                self.__logger.log('day function whileloop', f'hour: {self.__hour}')
+                infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
-            susceptibleGroup = self.tempoaryGroup(0, 'S')
-            infecetdGroup = self.tempoaryGroup(0 ,'I') 
-
-            self.movement()
-
-            for susceptiblePerson in susceptibleGroup:
-                for infectedPerson in infecetdGroup:
-                    if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
-                        susceptiblePerson.setRtime()
-                        if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
-                            if random.random() < MUTATION_CHANCE:
-                                susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+                # check if infection time is over, if it is not then update infection time 
+                if infecetdGroup != None:
+                    for infectedPerson in infecetdGroup:
+                        if infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
+                            if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
+                                infectedPerson.setDiseaseID(None)
+                                infectedPerson.setStatus('R')
                             else:
-                                susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
-                            susceptiblePerson.setStatus('I')
-            
-            self.__hour +=1
+                                infectedPerson.setItime()
+                        else:
+                            infectedPerson.setIBtime()
 
-        # update day and update database with new values 
+                susceptibleGroup = self.tempoaryGroup(0, 'S')
+                infecetdGroup = self.tempoaryGroup(0 ,'I') 
+
+                self.movement()
+
+                for susceptiblePerson in susceptibleGroup:
+                    for infectedPerson in infecetdGroup:
+                        if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
+                            susceptiblePerson.setRtime()
+                            if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
+                                if random.random() < MUTATION_CHANCE:
+                                    susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+                                else:
+                                    susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+                                susceptiblePerson.setIBtime(0.0)
+                                susceptiblePerson.setStatus('I')
+                
+                self.__hour +=1
+
+        self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
         self.__map.updateDay()
-        self.updateDB()
+        self.updateDB(threadID)
 
 
     def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  
@@ -142,17 +149,16 @@ class Simulation:
         disease id is going to be made up off day + infected id + susceptibleID + map name + og disease id
         name is going to be the disease name
         '''
-        ndID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{str(diseaseID)}'
-        print(ndID)
+        newDiseaseID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{str(diseaseID)}'
         self.__dbQueryHandler.createDisease(
-            ndID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
+            newDiseaseID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
             self.__disease.getContagion(diseaseID), self.__disease.getTransmissionRadius(diseaseID),
-            self.__disease.getInfectedTime(diseaseID)
+            self.__disease.getInfectedTime(diseaseID), self.__disease.getIncubationTime(diseaseID)
         )
-        return ndID
+        return newDiseaseID
 
 
-    def updateDB(self):
+    def updateDB(self, threadID):
         for person in self.__map.getPopulation():
             self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
             self.__dbQueryHandler.updatePersonRtime(person.getID(), person.getRtime())
@@ -160,9 +166,14 @@ class Simulation:
             self.__dbQueryHandler.updatePersonXPos(person.getID(), person.getPos()[0])
             self.__dbQueryHandler.updatePersonYPos(person.getID(), person.getPos()[1])
             self.__dbQueryHandler.updateDiseaseID(person.getID(), person.getDiseaseId())
+            self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()
+
+        self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
+        self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
+        self.__logger.localDump(f'{threadID}')
 
 
     def countStatistics(self):
@@ -223,7 +234,7 @@ class Map:
     def populatePopulationFromDataBase(self, mapID):
         dbpopulation = dbH.DBManager(FILE_PATH_DB).getPopulation(mapID)
         dbH.DBManager(FILE_PATH_DB).close()
-        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6]) for person in dbpopulation]
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7]) for person in dbpopulation]
 
 
 # doesn't store anything only has getters and setters for the database so multiple disease can be around 
@@ -250,14 +261,19 @@ class Disease:
 
     def getInfectedTime(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
+    
+
+    def getIncubationTime(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseIncubationTime(id)[0]
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, posX: int, posY: int, diseaseID: str) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, posX: int, posY: int, diseaseID: str) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
         self.__iTime = iTime
+        self.__ibTime = ibTime
         self.__pos = [posX, posY]
         self.__diseaseID = diseaseID
 
@@ -278,16 +294,16 @@ class Person:
         return self.__iTime
 
 
+    def getIBtime(self) -> float:
+        return self.__ibTime
+
+
     def getPos(self) -> list[int]:
         return self.__pos
     
 
     def getDiseaseId(self) -> str:
         return self.__diseaseID
-
-
-    def setPos(self, direction, moveAmount) -> None:
-        self.__pos[direction] += moveAmount
 
 
     def setStatus(self, st: str) -> None:
@@ -302,17 +318,28 @@ class Person:
         self.__rTime += val/24.0
 
 
+    def setIBtime(self, val: float = 1.0) -> None:
+        if self.__status == 'S':
+            self.__ibTime = val
+        else:
+            self.__ibTime += val/24.0
+
+
+    def setPos(self, direction, moveAmount) -> None:
+        self.__pos[direction] += moveAmount
+
+
     def setDiseaseID(self, diseaseID: int)-> None:
         self.__diseaseID = diseaseID
 
 
     def display_stats(self):
         print(f''' 
-        ID : {self.iD}
+        ID : {self.__iD}
         Data :
-            - status : {self.status}
-            - eRData : {self.eRData}
-            - rTime : {self.rTime}
-            - iTime : {self.iTime}
-            - pos : {self.pos}
+            - status : {self.__status}
+            - rTime : {self.__rTime}
+            - iTime : {self.__iTime}
+            - ibTime : {self.__ibTime}
+            - pos : {self.__pos}
         ''')

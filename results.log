@@ -1,0 +1,128 @@
+Efficiency test using threading 1 (28/09/22):
+    200 people split over 4 maps day 1 data:
+
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        thread 1 time taken:0.3268179460137617
+        thread 3 time taken:0.45344153299811296
+        thread 0 time taken:0.5882447679905454
+        thread 2 time taken:0.6934408980014268
+
+        terminal output (statistics):
+        Thread 1
+        s - 49
+        i - 1
+        r - 0
+        Thread 3
+        s - 49
+        i - 1
+        r - 0
+        Thread 0
+        s - 49
+        i - 1
+        r - 0
+        Thread 2
+        s - 49
+        i - 1
+        r - 0
+    
+    200 people split over 2 maps day 1 data:
+        
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        thread 1 time taken:0.29600529400340747
+        thread 0 time taken:0.5029253609973239
+
+        terminal output (statistics):
+        Thread 1
+        s - 99
+        i - 1
+        r - 0
+        Thread 0
+        s - 99
+        i - 1
+        r - 0
+    
+    200 people split over 1 map day 1 data:
+        
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        thread 0 time taken:0.5419814760098234
+
+        terminal output (statistics):
+        Thread 0
+        s - 199
+        i - 1
+        r - 0
+
+Efficiency test 2 (28/09/22):
+    400 people split over 4 maps day 1 data:
+        
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        maximum time taken 1.4875857849983731, minimum time taken 0.8659962880046805
+        thread 2 time taken:0.8659962880046805
+        thread 1 time taken:1.0569321450020652
+        thread 3 time taken:1.2669224290002603
+        thread 0 time taken:1.4875857849983731
+
+        terminal output (statistics):
+        Thread 2
+        s - 99
+        i - 1
+        r - 0
+        Thread 1
+        s - 99
+        i - 1
+        r - 0
+        Thread 3
+        s - 99
+        i - 1
+        r - 0
+        Thread 0
+        s - 99
+        i - 1
+        r - 0
+    
+    400 people split over 2 maps day 1 data:
+      
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        thread 1 time taken:0.5352276129997335
+        thread 0 time taken:0.9171215910027968
+
+        terminal output (statistics):
+        Thread 1
+        s - 199
+        i - 1
+        r - 0
+        Thread 0
+        s - 199
+        i - 1
+        r - 0
+    
+    400 people split over 1 map day 1 data:
+        
+        disease attributes:
+        c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
+
+        time taken:
+        thread 0 time taken:0.9614723730046535
+
+        terminal output (statistics):
+        Thread 0
+        s - 399
+        i - 1
+        r - 0
+
+        

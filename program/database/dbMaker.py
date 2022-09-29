@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS Person(
     status      TEXT,
     rTime       FLOAT,
     iTime       FLOAT,
+    ibTime      FLOAT,
     xPos        INTEGER,
     yPos        INTEGER,
     diseaseID       INTEGER,
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS Disease(
     contagion           FLOAT,
     transmissionRadius  INTEGER,
     infectedTime        FLOAT,
+    incubationTime      FLOAT,
     PRIMARY KEY(id)
 );
 '''

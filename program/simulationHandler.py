@@ -12,6 +12,7 @@ import logger
 import simulation as model
 import sqlite3
 import threading
+import multiprocessing
 import random
 
 """
@@ -31,8 +32,8 @@ then we load the dbMaker
 then we load the createPopulation and createMap
 then we run the main simulationHandler
 """
-PEOPLE_NUMBER = 40
-MAP_NUMBER = 2
+PEOPLE_NUMBER = 200
+MAP_NUMBER = 4
 
 class Main():
     def __init__(self) -> None:
@@ -49,20 +50,28 @@ class Main():
     # really bad should just delete old population.db and then run dbMaker and createPop
     def resetPopulationTables(self): 
         for id in range(1, (PEOPLE_NUMBER+1)):
-            if id == 1 or id == 21:
+            if id == 1 or id == 51 or id == 101 or id == 151:
                 self.__dbQueryHandler.updatePersonStatus(id, 'I')
                 self.__dbQueryHandler.updateDiseaseID(id, '1')
+                self.__dbQueryHandler.updatePersonIBtime(id, 0.0)
             else:
                 self.__dbQueryHandler.updatePersonStatus(id, 'S')
                 self.__dbQueryHandler.updateDiseaseID(id, None)
+                self.__dbQueryHandler.updatePersonIBtime(id, None)
             self.__dbQueryHandler.updatePersonRtime(id, 0.0)
             self.__dbQueryHandler.updatePersonItime(id, 0.0)
-            if id < 20:
+            if id < 50 :
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(1))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapHeight(1))[0]))
-            else:
+            elif id < 100:
                 self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
                 self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
+            elif id < 150:
+                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(3))[0]))
+                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(3))[0]))
+            else:
+                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(4))[0]))
+                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(4))[0]))
         for id in range(1, (MAP_NUMBER+1)):
             self.__dbQueryHandler.updateMapDay(id, 0)
 
@@ -74,11 +83,13 @@ class Main():
         sim.countStatistics()
         
 
+    # need to sort out multiprocessing
     def run(self):
         running = True 
         while running:
             self.threads = []
             for index, map in enumerate(self.__maps):
+                #  x = multiprocessing.Process(target=self.sim, args=(map,index))
                 x = threading.Thread(target=self.sim, args=(map,index))
                 self.threads.append(x)
                 x.start()

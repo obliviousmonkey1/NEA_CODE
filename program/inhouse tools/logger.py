@@ -52,7 +52,7 @@ class DiscontinousLog(S):
     
     
     def log(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S")) -> None:
-        self.holder = self.holder + f"{reference}:{additionalInfo}:{time},"
+        self.holder = self.holder + f"{reference}:{additionalInfo} : {time},"
     
 
     def localDump(self, trackingID:str, path:str="") -> None:

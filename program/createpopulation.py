@@ -41,11 +41,15 @@ class db:
 class person:
     pass
 
-# dbMaker.createMap([1,'city1',5,5,1],[1,1])
-# dbMaker.createPerson([1,'Tom','Elliott','S',1])
-
 WIDTH = 5
 HEIGHT = 5
+
+WIDTH2 = 10
+HEIGHT2 = 10
+
+
+WIDTH = 10
+HEIGHT = 10
 
 WIDTH2 = 10
 HEIGHT2 = 10
@@ -57,9 +61,9 @@ c = conn.cursor()
 
 insert = '''
 INSERT INTO Disease VALUES
-(?,?,?,?,?,?)
+(?,?,?,?,?,?,?)
 '''
-c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0))
+c.execute(insert, ('1','Disease1', 2.0, 0.1, 2, 3.0, 0.0))
 
 
 insert = '''
@@ -67,7 +71,9 @@ INSERT INTO Population VALUES
 (?)
 '''
 c.execute(insert, (1,))
-c.execute(insert, (2,))
+#c.execute(insert, (2,))
+# c.execute(insert, (3,))
+# c.execute(insert, (4,))
 
 
 insert = '''
@@ -75,34 +81,57 @@ INSERT INTO Map VALUES
 (?,?,?,?,?,?)
 '''
 c.execute(insert, (1, 'City1', WIDTH, HEIGHT, 0, 1))
-c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 0, 2))
+#c.execute(insert, (2, 'City2', WIDTH2, HEIGHT2, 0, 2))
+# c.execute(insert, (3, 'City3', WIDTH2, HEIGHT2, 0, 3))
+# c.execute(insert, (4, 'City4', WIDTH2, HEIGHT2, 0, 4))
+
 
 
 insert = '''
 INSERT INTO Person VALUES
-(?,?,?,?,?,?,?,?)
+(?,?,?,?,?,?,?,?,?)
 '''
-NUMB_PEOPLE = 20
+NUMB_PEOPLE = 1600
 NUMB_STARTING_INFECTED = 1
 a = 0 
 id = 1
 for i in range(NUMB_PEOPLE):
     if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),'1',1))
+        c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),'1',1))
         a+=1
     else:
-        c.execute(insert, (id,'S',0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),None,1))
+        c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH),random.randrange(HEIGHT),None,1))
     id +=1
 
-a = 0 
-for i in range(NUMB_PEOPLE):
-    if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',2))
+# a = 0 
+# for i in range(NUMB_PEOPLE):
+#     if a < NUMB_STARTING_INFECTED:
+#         c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',2))
 
-        a+=1
-    else:
-        c.execute(insert, (id,'S',0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,2))
-    id +=1
+#         a+=1
+#     else:
+#         c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,2))
+#     id +=1
+
+# a = 0 
+# for i in range(NUMB_PEOPLE):
+#     if a < NUMB_STARTING_INFECTED:
+#         c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',3))
+
+#         a+=1
+#     else:
+#         c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,3))
+#     id +=1
+
+# a = 0 
+# for i in range(NUMB_PEOPLE):
+#     if a < NUMB_STARTING_INFECTED:
+#         c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',4))
+
+#         a+=1
+#     else:
+#         c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,4))
+#     id +=1
 
 conn.commit()
 c.close()
