@@ -10,13 +10,13 @@ in order to be able to go through old data the db should be named after what the
 
 createPersonTable = '''
 CREATE TABLE IF NOT EXISTS Person(
-    id          INTEGER,
-    status      TEXT,
-    rTime       FLOAT,
-    iTime       FLOAT,
-    ibTime      FLOAT,
-    xPos        INTEGER,
-    yPos        INTEGER,
+    id              INTEGER,
+    status          TEXT,
+    rTime           FLOAT,
+    iTime           FLOAT,
+    ibTime          FLOAT,
+    xPos            INTEGER,
+    yPos            INTEGER,
     diseaseID       INTEGER,
     populationID    INTEGER,    
     FOREIGN KEY(populationID) REFERENCES Population(id),
@@ -34,11 +34,11 @@ CREATE TABLE IF NOT EXISTS Population(
 
 createMapTable = '''
 CREATE TABLE IF NOT EXISTS Map(
-    id          INTEGER,
-    name        TEXT,
-    width       INTEGER,
-    height      INTEGER,
-    day         INTEGER,
+    id                 INTEGER,
+    name               TEXT,
+    width              INTEGER,
+    height             INTEGER,
+    day                INTEGER,
     populationID       INTEGER,
     FOREIGN KEY(populationID) REFERENCES Population(id),
     PRIMARY KEY(id)
@@ -47,14 +47,26 @@ CREATE TABLE IF NOT EXISTS Map(
 
 createDiseaseTable = '''
 CREATE TABLE IF NOT EXISTS Disease(
-    id          STRING,
-    name        TEXT,
+    id                  STRING,
+    name                TEXT,
     transmissionTime    FLOAT,
     contagion           FLOAT,
     transmissionRadius  INTEGER,
     infectedTime        FLOAT,
     incubationTime      FLOAT,
     PRIMARY KEY(id)
+);
+'''
+
+createStatisticsTable = '''
+CREATE TABLE IF NOT EXISTS Statistics(
+    id          STRING,
+    day         INTEGER,
+    map         INTEGER, 
+    susceptible INTEGER,
+    infected    INTEGER,
+    removed     INTEGER,
+    PRIMARY KEY(id)  
 );
 '''
 
@@ -74,6 +86,7 @@ c.execute(createPersonTable)
 c.execute(createPopulationTable)
 c.execute(createMapTable)
 c.execute(createDiseaseTable)
+c.execute(createStatisticsTable)
 c.close()
 
 

@@ -13,6 +13,7 @@ import simulation as model
 import sqlite3
 import threading
 import multiprocessing
+import timeit
 import random
 
 """
@@ -80,11 +81,12 @@ class Main():
         sim = model.Simulation(map)
         sim.day(threadID)
         print(f'Thread {threadID}')
-        sim.countStatistics()
         
 
     # need to sort out multiprocessing
     def run(self):
+        self.startTime = timeit.default_timer()
+        print(f'startTime: {self.startTime}')
         running = True 
         while running:
             self.threads = []
@@ -95,6 +97,8 @@ class Main():
                 x.start()
             for index, thread in enumerate(self.threads):
                 thread.join()
+            print(f'endTime: {timeit.default_timer()}')
+            print(f'time taken : {timeit.default_timer() - self.startTime}')
         
             # do stuff like update graph idk some other stuff
             a = input('> ')

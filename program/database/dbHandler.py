@@ -261,6 +261,83 @@ class DBManager:
         return c.fetchone()
 
 
+    # Statistics
+    def createStatistics(self, id: str, day: int, map: int, susceptible: int, infected: int, removed: int) -> None:
+        cStatistics = '''
+        INSERT INTO Statistics VALUES
+        (?,?,?,?,?,?)
+        '''
+        c = self.conn.cursor()
+        c.execute(cStatistics, (id, day, map, susceptible, infected, removed))
+        self.conn.commit()
+
+
+    def getAllSusceptible(self, day: int) -> int:
+        gAllSusceptible = '''
+        SELECT susceptible
+        FROM Statistics
+        WHERE day = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllSusceptible, (day,))
+        return c.fetchall()
+
+
+    def getAllInfected(self, day: int) -> int:
+        gAllInfected = '''
+        SELECT infected
+        FROM Statistics
+        WHERE day = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllInfected, (day,))
+        return c.fetchall()
+
+
+    def getAllRemoved(self, day: int) -> int:
+        gAllRemoved = '''
+        SELECT removed
+        FROM Statistics
+        WHERE day = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllRemoved, (day,))
+        return c.fetchall()
+
+
+    def getAllSusceptibleFromMap(self, day: int, mapID: int) -> int:
+        gAllSusceptibleFromMap= '''
+        SELECT susceptible
+        FROM Statistics
+        WHERE day = ? and map = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllSusceptibleFromMap, (day, mapID))
+        return c.fetchone()
+
+
+    def getAllInfectedFromMap(self, day: int, mapID: int) -> int:
+        gAllInfectedFromMap= '''
+        SELECT infected
+        FROM Statistics
+        WHERE day = ? and map = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllInfectedFromMap, (day, mapID))
+        return c.fetchone()
+
+
+    def getAllRemovedFromMap(self, day: int, mapID: int) -> int:
+        gAllRemovedFromMap= '''
+        SELECT removed
+        FROM Statistics
+        WHERE day = ? and map = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllRemovedFromMap, (day, mapID))
+        return c.fetchone()
+
+
     def close(self):
         self.conn.close()
         

@@ -99,6 +99,7 @@ class Simulation:
 
         self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
         self.__map.updateDay()
+        self.updateStatisticsDB()
         self.updateDB(threadID)
 
 
@@ -176,7 +177,7 @@ class Simulation:
         self.__logger.localDump(f'{threadID}')
 
 
-    def countStatistics(self):
+    def updateStatisticsDB(self):
         s,i,r = 0,0,0
         for person in self.__map.getPopulation():
             if person.getStatus() == 'S':
@@ -185,12 +186,8 @@ class Simulation:
                 i +=1
             elif person.getStatus() == 'R':
                 r +=1
-        print('s - ', end="")
-        print(s)
-        print('i - ', end="")
-        print(i)
-        print('r - ', end="")
-        print(r)
+
+        self.__dbQueryHandler.createStatistics(f'{self.__map.getName()}.{self.__map.getDay()}', self.__map.getDay(), self.__map.getID(), s, i, r)
 
 
 class Map:
