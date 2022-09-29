@@ -276,7 +276,7 @@ class DBManager:
         gAllSusceptible = '''
         SELECT susceptible
         FROM Statistics
-        WHERE day = ?
+        WHERE day = ? 
         '''
         c = self.conn.cursor()
         c.execute(gAllSusceptible, (day,))

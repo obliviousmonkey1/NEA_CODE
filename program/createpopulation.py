@@ -90,7 +90,7 @@ insert = '''
 INSERT INTO Person VALUES
 (?,?,?,?,?,?,?,?,?)
 '''
-NUMB_PEOPLE = 100
+NUMB_PEOPLE = 20
 NUMB_STARTING_INFECTED = 1
 a = 0 
 id = 1

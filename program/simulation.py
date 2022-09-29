@@ -99,7 +99,7 @@ class Simulation:
 
         self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
         self.__map.updateDay()
-        self.updateStatisticsDB()
+        self.updateStatistics()
         self.updateDB(threadID)
 
 
@@ -159,6 +159,7 @@ class Simulation:
         return newDiseaseID
 
 
+    # merge update Statistics to this functon optimistation
     def updateDB(self, threadID):
         for person in self.__map.getPopulation():
             self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
@@ -169,6 +170,8 @@ class Simulation:
             self.__dbQueryHandler.updateDiseaseID(person.getID(), person.getDiseaseId())
             self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
+        self.__dbQueryHandler.createStatistics(f'{self.__map.getName()}.{self.__map.getDay()}', self.__map.getDay(), self.__map.getID(), self.s, self.i, self.r)
+
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()
 
@@ -177,17 +180,15 @@ class Simulation:
         self.__logger.localDump(f'{threadID}')
 
 
-    def updateStatisticsDB(self):
-        s,i,r = 0,0,0
+    def updateStatistics(self):
+        self.s,self.i,self.r = 0,0,0
         for person in self.__map.getPopulation():
             if person.getStatus() == 'S':
-                s +=1
+                self.s +=1
             elif person.getStatus() == 'I':
-                i +=1
+                self.i +=1
             elif person.getStatus() == 'R':
-                r +=1
-
-        self.__dbQueryHandler.createStatistics(f'{self.__map.getName()}.{self.__map.getDay()}', self.__map.getDay(), self.__map.getID(), s, i, r)
+                self.r +=1
 
 
 class Map:
