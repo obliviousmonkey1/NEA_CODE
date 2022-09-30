@@ -1,0 +1,23 @@
+{
+    "general" : {
+        "mutation_chance" : "float"
+    },
+    "population" : {
+        "populationSize" : 100
+    },
+    "person" : {
+        "dbREF" : "str"
+    },
+    "map" : {
+        "numberOfMaps" : 2
+    },
+    "disease" : {
+        "name" : "string",
+        "transmissionTime" : "float",
+        "contagion" : "float",
+        "transmissionRadius" : "int",
+        "infectedTime" : "float",
+        "incubationTime" : "float",
+        "mutation_chance" : "float"
+    }
+}

@@ -8,7 +8,7 @@ sys.path.append(FILE_PATH_DBH)
 
 import dbHandler as dbH
 import logger  
-import threading
+from multiprocessing import Pool
 import random
 from itertools import count 
 import pandas as pd
@@ -79,21 +79,15 @@ class Simulation:
                             infectedPerson.setIBtime()
 
                 susceptibleGroup = self.tempoaryGroup(0, 'S')
-                infecetdGroup = self.tempoaryGroup(0 ,'I') 
+                self.infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
                 self.movement()
 
+                # pool = Pool()
+                # for susceptiblePerson in susceptibleGroup:
+                    # pool.apply_async(self.infection, susceptiblePerson)
                 for susceptiblePerson in susceptibleGroup:
-                    for infectedPerson in infecetdGroup:
-                        if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
-                            susceptiblePerson.setRtime()
-                            if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
-                                if random.random() < MUTATION_CHANCE:
-                                    susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
-                                else:
-                                    susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
-                                susceptiblePerson.setIBtime(0.0)
-                                susceptiblePerson.setStatus('I')
+                    self.infection(susceptiblePerson)
                 
                 self.__hour +=1
 
@@ -101,6 +95,19 @@ class Simulation:
         self.__map.updateDay()
         self.updateStatistics()
         self.updateDB(threadID)
+
+
+    def infection(self, susceptiblePerson):
+        for infectedPerson in self.infecetdGroup:
+            if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
+                susceptiblePerson.setRtime()
+                if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
+                    if random.random() < MUTATION_CHANCE:
+                        susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+                    else:
+                        susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+                    susceptiblePerson.setIBtime(0.0)
+                    susceptiblePerson.setStatus('I')
 
 
     def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  
@@ -341,3 +348,4 @@ class Person:
             - ibTime : {self.__ibTime}
             - pos : {self.__pos}
         ''')
+

@@ -20,9 +20,7 @@ that can be used to affet results
 store that data in database 
 read it and use it to affect results and stuff
 population is stored in a database 
-
 two tables one called people the other called families (might change ot relationships if i add friends and such)
-
 age:
 https://www.statista.com/statistics/270370/age-distribution-in-the-united-kingdom/
 sex:
@@ -90,7 +88,7 @@ insert = '''
 INSERT INTO Person VALUES
 (?,?,?,?,?,?,?,?,?)
 '''
-NUMB_PEOPLE = 20
+NUMB_PEOPLE = 200
 NUMB_STARTING_INFECTED = 1
 a = 0 
 id = 1
