@@ -21,13 +21,13 @@ class DBManager:
         self.conn.commit()
 
 
-    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, xPos: int, yPos: int, diseaseID: int, populationID: int) -> None:
+    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, xPos: int, yPos: int, travelling: bool, travellingTime: float, originalHome: int, diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
-        (?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,xPos,yPos,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,xPos,yPos,travelling,travellingTime,originalHome,diseaseID,populationID))
         self.conn.commit()
 
 

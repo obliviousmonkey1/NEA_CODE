@@ -2,6 +2,7 @@ FILE_PATH_DBH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
 FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
 FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
 
+from ast import Pass
 import sys
 sys.path.append(FILE_PATH_LOG)
 sys.path.append(FILE_PATH_DBH)
@@ -40,8 +41,9 @@ NEED TO ADD GETTERS AND SETTERS
 DEBUG = False
 
 MAX_MOVE_AMOUNT = 2
-MOVE_PROB = 0.5
-MUTATION_CHANCE = 0.01
+MOVE_PROBABILITY = 0.5
+MUTATION_CHANCE = 0.1
+MOVE_CITY_CHANCE = 0.01
 
 P = 1 # probablity ????
 
@@ -94,8 +96,9 @@ class Simulation:
         self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
         self.__map.updateDay()
         self.updateStatistics()
-        self.updateDB(threadID)
 
+        self.updateDB(threadID)
+    
 
     def infection(self, susceptiblePerson):
         for infectedPerson in self.infecetdGroup:
@@ -115,6 +118,8 @@ class Simulation:
             return True 
 
 
+    # maps have different ways to get to each other either driving which means no infection or flying which means the people on
+    # the same flight as an infected person will have the time tick up 
     def movement(self):
         """
         x change:
@@ -128,7 +133,9 @@ class Simulation:
         Add those values to the current values 
         """
         notR_group = self.tempoaryGroup(1 ,'R')
-        if random.random() < MOVE_PROB:
+        if random.random() < MOVE_CITY_CHANCE:
+            pass
+        if random.random() < MOVE_PROBABILITY:
             for person in notR_group:
                 # x direction 
                 x_amount = random.randint(1, MAX_MOVE_AMOUNT)
@@ -177,7 +184,7 @@ class Simulation:
             self.__dbQueryHandler.updateDiseaseID(person.getID(), person.getDiseaseId())
             self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
-        self.__dbQueryHandler.createStatistics(f'{self.__map.getName()}.{self.__map.getDay()}', self.__map.getDay(), self.__map.getID(), self.s, self.i, self.r)
+        self.__dbQueryHandler.createStatistics(f'{self.__map.getDay()}.{self.__map.getName()}', self.__map.getDay(), self.__map.getID(), self.s, self.i, self.r)
 
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()

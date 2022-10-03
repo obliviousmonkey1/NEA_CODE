@@ -17,6 +17,10 @@ import dbHandler as dbH
 need to make a class which holds reference to the map ids 
 '''
 
+class Main:
+    def __init__(self) -> None:
+        pass
+
 dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
 
 plt.style.use('fivethirtyeight')
@@ -46,21 +50,21 @@ def animate(i):
 
 
 # interval is in milli seconds
-ani = FuncAnimation(plt.gcf(),animate, interval=1000)
+# ani = FuncAnimation(plt.gcf(),animate, interval=1000)
 
-plt.tight_layout()
-plt.show()
+# plt.tight_layout()
+# plt.show()
 
-nDays = 1
-'''
-need to get the day as welll so it can be summed up and organised via day
-'''
-print(dbQueryHandler.getAllSusceptible(1))
-print(np.sum(dbQueryHandler.getAllSusceptible(1),dtype=int))
-print(np.sum(dbQueryHandler.getAllInfected(1),dtype=int))
-print(np.sum(dbQueryHandler.getAllRemoved(1),dtype=int))
+# nDays = 1
+# '''
+# need to get the day as welll so it can be summed up and organised via day
+# '''
+# print(dbQueryHandler.getAllSusceptible(1))
+# print(np.sum(dbQueryHandler.getAllSusceptible(1),dtype=int))
+# print(np.sum(dbQueryHandler.getAllInfected(1),dtype=int))
+# print(np.sum(dbQueryHandler.getAllRemoved(1),dtype=int))
 
-if __name__ == "__main__":
-    ani = FuncAnimation(plt.gcf(),animate, interval=1000)
-    plt.tight_layout()
-    plt.show()  
+# if __name__ == "__main__":
+#     ani = FuncAnimation(plt.gcf(),animate, interval=1000)
+#     plt.tight_layout()
+#     plt.show()  

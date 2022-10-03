@@ -40,41 +40,11 @@ class Main():
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
         self.__maps = self.populateMapsFromDatabase()
-        self.run()
+        self.__running = True
 
 
     def populateMapsFromDatabase(self):
        return self.__dbQueryHandler.getMaps()
-
-
-    # Debugging (prevent having to delete the db over and over again)
-    # really bad should just delete old population.db and then run dbMaker and createPop
-    def resetPopulationTables(self): 
-        for id in range(1, (PEOPLE_NUMBER+1)):
-            if id == 1 or id == 51 or id == 101 or id == 151:
-                self.__dbQueryHandler.updatePersonStatus(id, 'I')
-                self.__dbQueryHandler.updateDiseaseID(id, '1')
-                self.__dbQueryHandler.updatePersonIBtime(id, 0.0)
-            else:
-                self.__dbQueryHandler.updatePersonStatus(id, 'S')
-                self.__dbQueryHandler.updateDiseaseID(id, None)
-                self.__dbQueryHandler.updatePersonIBtime(id, None)
-            self.__dbQueryHandler.updatePersonRtime(id, 0.0)
-            self.__dbQueryHandler.updatePersonItime(id, 0.0)
-            if id < 50 :
-                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(1))[0]))
-                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapHeight(1))[0]))
-            elif id < 100:
-                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
-                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(2))[0]))
-            elif id < 150:
-                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(3))[0]))
-                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(3))[0]))
-            else:
-                self.__dbQueryHandler.updatePersonXPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(4))[0]))
-                self.__dbQueryHandler.updatePersonYPos(id, random.randrange((self.__dbQueryHandler.getMapWidth(4))[0]))
-        for id in range(1, (MAP_NUMBER+1)):
-            self.__dbQueryHandler.updateMapDay(id, 0)
 
 
     def sim(self, map, threadID):
@@ -84,13 +54,13 @@ class Main():
         
 
     # need to sort out multiprocessing
-    def run(self):
-        self.startTime = timeit.default_timer()
-        print(f'startTime: {self.startTime}')
-        running = True 
-        while running:
+    def run(self): 
+        while self.__running:
+            self.startTime = timeit.default_timer()
+            print(f'startTime: {self.startTime}')
             self.threads = []
             for index, map in enumerate(self.__maps):
+                # self.sim(map, index)
                 #  x = multiprocessing.Process(target=self.sim, args=(map,index))
                 x = threading.Thread(target=self.sim, args=(map,index))
                 self.threads.append(x)
@@ -101,11 +71,13 @@ class Main():
             print(f'time taken : {timeit.default_timer() - self.startTime}')
         
             # do stuff like update graph idk some other stuff
-            a = input('> ')
-            if a == '1':
-                self.resetPopulationTables()
+            input('> ')
             self.__maps = self.populateMapsFromDatabase()
                 
+
+    def setRunning(self, value: bool) -> None:
+        self.__running = value
+
 
 if __name__ == "__main__":
     Main()

@@ -1,25 +1,28 @@
 import graphHandler as gH
 import simulationHandler as sH
 import creationHandler as cH
-from view import *
 
 '''
 controls all the handlers
 '''
 
-class Controller:
-    def __init__(self, gH, sH, cH, view) -> None:
-        self.graphHandler = gH
-        self.simulationHandler = sH
-        self.creationHandler = cH
-        self._view = view
-        self._view.register(self)
+class Handler:
+    def __init__(self) -> None:
+        self.__graphHandler = gH.Main()
+        self.__simulationHandler = sH.Main()
 
 
-if __name__ == "__main__":
-    graphHandler = gH
-    simulationHandler = sH
-    creationHandler = cH
-    ui = UI()
-    c = Controller(graphHandler, simulationHandler, creationHandler, ui)
-    ui.mainloop()
+    def setSimulationHandlerRunning(self, value: bool):
+        self.__simulationHandler.__running.setRunning(value)
+
+
+    def runSimulationHandler(self):
+        running = True 
+        while running:
+            self.__simulationHandler.run()
+
+
+    def createAndPopulateDatabase(self):
+        self.__creationHandler = cH.Main()
+
+   

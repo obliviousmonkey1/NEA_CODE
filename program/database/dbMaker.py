@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS Person(
     ibTime          FLOAT,
     xPos            INTEGER,
     yPos            INTEGER,
+    travelling      BOOLEAN,
+    travellingTime  FLOAT,
+    originalHome    INTEGER,
     diseaseID       INTEGER,
     populationID    INTEGER,    
     FOREIGN KEY(populationID) REFERENCES Population(id),
@@ -71,7 +74,17 @@ CREATE TABLE IF NOT EXISTS Statistics(
 '''
 
 # mapRelationship or mapConnections
-createMapRelationshipsTable = ''''''
+createMapRelationshipsTable = '''
+CREATE TABLE IF NOT EXISTS MapRelationships(
+    map1ID      ID,
+    map2ID      ID,
+    time        FLOAT, 
+    drivable    BOOLEAN,
+    flyable     BOOLEAN,
+    FOREIGN KEY(map1ID) REFERENCES Map(id),
+    FOREIGN KEY(map2ID) REFERENCES Map(id)
+);
+'''
 
 createTemporaryPopulationTable = ''''''
 
@@ -79,7 +92,7 @@ createTemporaryPersonTable = ''''''
 
 # contain routines that people have one routine shared between many people 
 createWeeklyRoutinesTable = ''''''
-  
+
 conn = sqlite3.connect(FILE_PATH)
 c = conn.cursor()
 c.execute(createPersonTable)

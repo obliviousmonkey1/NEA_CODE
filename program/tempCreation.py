@@ -1,5 +1,6 @@
 FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
 FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
+from pickle import FALSE
 import sys
 
 sys.path.append(FILE_PATH)
@@ -84,51 +85,27 @@ c.execute(insert, (3, 'City3', WIDTH2, HEIGHT2, 0, 3))
 c.execute(insert, (4, 'City4', WIDTH2, HEIGHT2, 0, 4))
 
 
-insert = '''
-INSERT INTO Person VALUES
-(?,?,?,?,?,?,?,?,?)
-'''
-NUMB_PEOPLE = 200
-NUMB_STARTING_INFECTED = 1
-a = 0 
-id = 1
-for i in range(NUMB_PEOPLE):
-    if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),'1',1))
-        a+=1
-    else:
-        c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH),random.randrange(HEIGHT),None,1))
-    id +=1
+def pop(id, popID):
+    NUMB_PEOPLE = 250
+    NUMB_STARTING_INFECTED = 1
+    insert = '''
+    INSERT INTO Person VALUES
+    (?,?,?,?,?,?,?,?,?,?,?,?)
+    '''
+    a = 0
+    for i in range(NUMB_PEOPLE):
+        if a < NUMB_STARTING_INFECTED:
+            c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH),random.randrange(HEIGHT),0,None,popID,'1',popID))
+            a+=1
+        else:
+            c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH),random.randrange(HEIGHT),0,None,popID,None,popID))
+        id +=1
+    return id
 
-a = 0 
-for i in range(NUMB_PEOPLE):
-    if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',2))
+id = 0
+for i in range(1,5):
+    id = pop(id,i)
 
-        a+=1
-    else:
-        c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,2))
-    id +=1
-
-a = 0 
-for i in range(NUMB_PEOPLE):
-    if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',3))
-
-        a+=1
-    else:
-        c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,3))
-    id +=1
-
-a = 0 
-for i in range(NUMB_PEOPLE):
-    if a < NUMB_STARTING_INFECTED:
-        c.execute(insert, (id,'I',0.0,0.0,0.0,random.randrange(WIDTH2),random.randrange(HEIGHT2),'1',4))
-
-        a+=1
-    else:
-        c.execute(insert, (id,'S',0.0,0.0,None,random.randrange(WIDTH2),random.randrange(HEIGHT2),None,4))
-    id +=1
 
 conn.commit()
 c.close()

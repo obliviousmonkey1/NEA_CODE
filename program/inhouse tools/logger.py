@@ -56,9 +56,16 @@ class DiscontinousLog(S):
     
 
     def localDump(self, trackingID:str, path:str="") -> None:
-        f = open(f"{path}{trackingID}.log","w")
-        f.write(self.holder[:-1])
-        f.close()
+        if os.path.exists(f'{path}{trackingID}.log'):
+            f = open(f"{path}{trackingID}.log","a")
+            f.write('\n')
+            f.write(self.holder[:-1])
+            f.close()
+        else:
+            f = open(f"{path}{trackingID}.log","w")
+            f.write(self.holder[:-1])
+            f.close()
+
 
 
 if __name__ == "__main__": 

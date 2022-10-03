@@ -2,14 +2,16 @@
     "general" : {
         "mutation_chance" : "float"
     },
-    "population" : {
+    "populations" : {
         "populationSize" : 100
     },
-    "person" : {
+    "people" : {
         "dbREF" : "str"
     },
-    "map" : {
-        "numberOfMaps" : 2
+    "maps" : {
+        "numberOfMaps" : 2,
+        "minNumberOfConnections" : 1,
+        "cityNames" : "city1,city2"
     },
     "disease" : {
         "name" : "string",

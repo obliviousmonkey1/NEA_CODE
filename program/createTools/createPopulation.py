@@ -1,6 +1,5 @@
 import names
 import random
-import createMap
 
 """
 map gets generated first
@@ -23,33 +22,25 @@ https://www.health.org.uk/evidence-hub/health-inequalities/proportion-of-populat
 https://www.blood.co.uk/why-give-blood/blood-types/
 """
 
+
 class Main:
-    def __init__(self, dbH) -> None:
+    def __init__(self, dbH, populationSettings, peopleSettings) -> None:
         self.__dbQueryHandler = dbH
-
-
-class Population(Main):
-    def __init__(self, dbH) -> None:
-        super().__init__(dbH)
-    
-    def createPopulation(self, id: int, diseaseID: str, populationSize: int) -> None:
-        self.__dbQueryHandler.createPopulation(id)
-        Person(id, populationSize, diseaseID)
-        
-
-class Person(Main):
-    def __init__(self, dbH, populatioID: int, diseaseID: str, populationSize: int) -> None:
-        super().__init__(dbH)
-        self.__populatioID = populatioID
-        self.__diseaseID = diseaseID
-        self.__populationSize = populationSize
-        self.createPerson()
+        self.setUp(populationSettings, peopleSettings)
     
 
-    # runs the person creation algorithm 
-    def createPerson(self):
+    def setUp(self, populationSettings, peopleSettings):
         pass
 
+    
+    def createPerson(self, populationID, diseaseID):
+        pass
+
+
+    def createPopulation(self, populationID: int, diseaseID: str) -> None:
+        self.__dbQueryHandler.createPopulation(populationID)
+        self.createPerson(populationID, diseaseID)
+        
 
 # NUMB_PEOPLE = 20
 # NUMB_STARTING_INFECTED = 1
