@@ -1,9 +1,9 @@
-FILE_PATH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
-FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
 
 import sys
-
-sys.path.append(FILE_PATH)
+import os 
+sys.path.append(os.path.expanduser(FILE_PATH))
 
 from itertools import count 
 import pandas as pd
@@ -21,7 +21,7 @@ class Main:
     def __init__(self) -> None:
         pass
 
-dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
+dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
 plt.style.use('fivethirtyeight')
 

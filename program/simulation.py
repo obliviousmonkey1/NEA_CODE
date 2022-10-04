@@ -1,11 +1,11 @@
-FILE_PATH_DBH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
-FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
-FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
+FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
 
-from ast import Pass
 import sys
-sys.path.append(FILE_PATH_LOG)
-sys.path.append(FILE_PATH_DBH)
+import os
+sys.path.append(os.path.expanduser(FILE_PATH_LOG))
+sys.path.append(os.path.expanduser(FILE_PATH_DBH))
 
 import dbHandler as dbH
 import logger  
@@ -50,7 +50,7 @@ P = 1 # probablity ????
 
 class Simulation:
     def __init__(self, map) -> None:
-        self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
+        self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
         self.__disease = Disease(self.__dbQueryHandler)
         self.__map = Map(map)
         self.__logger = logger.DiscontinousLog()

@@ -1,10 +1,11 @@
-FILE_PATH_DB = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database/population.db'
-FILE_PATH_DBH = '/Users/parzavel/Documents/NEA/NEA_CODE/program/database'
-FILE_PATH_LOG = '/Users/parzavel/Documents/NEA/NEA_CODE/program/inhouse tools'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
+FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
 
 import sys
-sys.path.append(FILE_PATH_LOG)
-sys.path.append(FILE_PATH_DBH)
+import os 
+sys.path.append(os.path.expanduser(FILE_PATH_LOG))
+sys.path.append(os.path.expanduser(FILE_PATH_DBH))
 
 import dbHandler as dbH
 import logger 
@@ -38,7 +39,7 @@ MAP_NUMBER = 4
 
 class Main():
     def __init__(self) -> None:
-        self.__dbQueryHandler = dbH.DBManager(FILE_PATH_DB)
+        self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
         self.__maps = self.populateMapsFromDatabase()
         self.__running = True
 
