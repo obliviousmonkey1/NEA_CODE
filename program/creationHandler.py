@@ -17,7 +17,6 @@ class Main:
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
         dbM
-        print('hello')
         self.run()
     
     

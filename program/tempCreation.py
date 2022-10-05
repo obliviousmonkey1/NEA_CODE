@@ -103,8 +103,8 @@ def pop(id, popID):
     return id
 
 id = 0
-for i in range(1,5):
-    id = pop(id,i)
+for popID in range(1,5):
+    id = pop(id,popID)
 
 
 conn.commit()

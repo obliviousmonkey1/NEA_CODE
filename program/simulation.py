@@ -42,7 +42,7 @@ DEBUG = False
 
 MAX_MOVE_AMOUNT = 2
 MOVE_PROBABILITY = 0.5
-MUTATION_CHANCE = 0.1
+MUTATION_CHANCE = 0.001
 MOVE_CITY_CHANCE = 0.01
 
 P = 1 # probablity ????
@@ -103,7 +103,6 @@ class Simulation:
     def infection(self, susceptiblePerson):
         for infectedPerson in self.infecetdGroup:
             if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
-                susceptiblePerson.setRtime()
                 if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
                     if random.random() < MUTATION_CHANCE:
                         susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
@@ -111,6 +110,9 @@ class Simulation:
                         susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
                     susceptiblePerson.setIBtime(0.0)
                     susceptiblePerson.setStatus('I')
+                else:
+                    susceptiblePerson.setRtime()
+
 
 
     def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  
@@ -244,9 +246,9 @@ class Map:
 
 
     def populatePopulationFromDataBase(self, mapID):
-        dbpopulation = dbH.DBManager(FILE_PATH_DB).getPopulation(mapID)
-        dbH.DBManager(FILE_PATH_DB).close()
-        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7]) for person in dbpopulation]
+        dbpopulation = dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).getPopulation(mapID)
+        dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).close()
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[10]) for person in dbpopulation]
 
 
 # doesn't store anything only has getters and setters for the database so multiple disease can be around 
