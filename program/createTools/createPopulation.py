@@ -30,9 +30,9 @@ class Main:
     
 
     def setUp(self, populationSettings, peopleSettings):
-        pass
+        self.__populationSize = int(populationSettings['populationSize'][0])
 
-    
+
     def createPerson(self, populationID, diseaseID):
         pass
 
@@ -41,6 +41,10 @@ class Main:
         self.__dbQueryHandler.createPopulation(populationID)
         self.createPerson(populationID, diseaseID)
         
+    
+    def getPopulationSize(self) -> int:
+        return self.__populationSize
+
 
 # NUMB_PEOPLE = 20
 # NUMB_STARTING_INFECTED = 1

@@ -1,4 +1,5 @@
-""""
+from random import randint
+"""
 data structre of the map ?????
 needs to be used in cretepopulation.py
 take information from the settings.json
@@ -10,13 +11,50 @@ class Main:
 
 
     def setUp(self, settings):
-        self.__numberOfMaps = settings['numberOfMaps']
-        self.__cityNames = settings['cityNames'].split(',')
+        for key, value in settings.items():
+            if value[1] == 1:
+                if key == 'numberOfMaps':
+                    self.__numberOfMaps = randint(1,6)
+                elif key == 'minNumberOfConnections':
+                    self.__minNumberOfConnections = randint(1, (self.__numberOfMaps // 2))
+                elif key == 'cityNames':
+                    self.__cityNames = []
+                    for i in range(self.__numberOfMaps):
+                        self.__cityNames.append(f'city{i+1}')
+            else:
+                if key == 'numberOfMaps':
+                    self.__numberOfMaps = int(value[0])
+                elif key == 'minNumberOfConnections':
+                    self.__minNumberOfConnections = int(value[0])
+                elif key == 'cityNames':
+                    self.__cityNames = value[0].split(',')
+        
+    def addOne(i):
+        return i + 1 
+
+    def factors(self, f, n, i):
+        if i > n:
+            return []
+        else:
+            if (n % i) == 0:
+                return [i] + self.factors(f, n, f(i))
+            else:
+                return self.factors(f, n, f(i))
 
 
-    def createMap(self, id: int, name: str, width: int, height: int, day: int, populationID: int):
-        self.__dbQueryHandler.createMap(id,name,width,height,day,populationID)
+    def generateMapSize(self, populationSize):
+        a = self.factors(self.addOne, populationSize,1)
+        width = a[len(a)//2]
+        return width, populationSize//width
+
+
+    def createMap(self, id: int, populationID: int, populationSize: int):
+        width, height = self.generateMapSize(populationSize)
+        self.__dbQueryHandler.createMap(id,self.__cityNames[id-1],width,height,0,populationID)
+        
     
+    def connections(self):
+        pass
 
     def getNumberOfMaps(self) -> int:
         return self.__numberOfMaps
@@ -26,5 +64,4 @@ class Main:
         return self.__cityNames
 
 
-    def connections(self):
-        pass
+    

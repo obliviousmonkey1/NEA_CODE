@@ -25,11 +25,10 @@ class Main:
         self.mainHandler.createAndPopulateDatabase()
         self.runSimulation()
 
-      
 
 if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    # ui.mainloop()
-    c.setUpSimulationData()
+    ui.entryPoint()
+    # c.setUpSimulationData()

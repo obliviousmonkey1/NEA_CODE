@@ -24,8 +24,10 @@ class Main:
     # create population 1 and map 1 together then the next population 2 and map 2 etc ...
     def create(self):
         self.__diseaseCreationHandler.run()
+        print(self.__diseaseCreationHandler.getDiseaseID())
         for i in range(1, self.__mapCreationHandler.getNumberOfMaps()+1):
             self.__populationCreationHandler.createPopulation(i , self.__diseaseCreationHandler.getDiseaseID())
+            self.__mapCreationHandler.createMap(i,i, self.__populationCreationHandler.getPopulationSize())
 
 
     def run(self):

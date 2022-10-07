@@ -42,7 +42,6 @@ class Main():
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
         self.__maps = self.populateMapsFromDatabase()
         self.__running = True
-        self.run()
 
 
     def populateMapsFromDatabase(self):
