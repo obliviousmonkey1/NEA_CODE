@@ -23,8 +23,7 @@ class Main:
 
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
-        self.runSimulation()
-
+        return True 
 
 if __name__ == "__main__":
     mainHandler = Handler()

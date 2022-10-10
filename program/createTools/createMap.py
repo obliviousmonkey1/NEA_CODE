@@ -16,6 +16,7 @@ class Main:
                 if key == 'numberOfMaps':
                     self.__numberOfMaps = randint(1,6)
                 elif key == 'minNumberOfConnections':
+                    print(self.__numberOfMaps)
                     self.__minNumberOfConnections = randint(1, (self.__numberOfMaps // 2))
                 elif key == 'cityNames':
                     self.__cityNames = []
@@ -29,7 +30,7 @@ class Main:
                 elif key == 'cityNames':
                     self.__cityNames = value[0].split(',')
         
-    def addOne(i):
+    def addOne(self, i):
         return i + 1 
 
     def factors(self, f, n, i):
@@ -43,8 +44,8 @@ class Main:
 
 
     def generateMapSize(self, populationSize):
-        a = self.factors(self.addOne, populationSize,1)
-        width = a[len(a)//2]
+        factors = self.factors(self.addOne, populationSize,1)
+        width = factors[len(factors)//2]
         return width, populationSize//width
 
 

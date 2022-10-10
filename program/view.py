@@ -37,8 +37,28 @@ class UI(tk.Tk):
         self.create_wigets()
         self.mainloop()
 
+    def mainScreen(self):
+        pass
+
+    def loading(self):
+        for widget in tk.Frame.winfo_children(self):
+            widget.destroy()
+        self.title('Simulation')
+        label = ttk.Label(self, foreground='red', text='Setting Up DataBase and other stuff')
+        label.grid(column=1, row=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        a = False
+        while not a:
+            a = self._controller.setUpSimulationData()
+            label.destroy()
+            label = ttk.Label(self, foreground='green', text='Setup complete')
+            label.grid(column=1, row=1)
+        label.destroy()
+        self.mainScreen()
+
     def setUpSimulation(self):
-        self._controller.setUpSimulationData()
+        self.loading()
 
     def create_wigets(self):
         # padding for widgets using the grid layout

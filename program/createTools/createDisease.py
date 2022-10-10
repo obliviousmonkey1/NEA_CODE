@@ -16,16 +16,16 @@ class Main:
         for key, value in settings.items():
             if value[1] == 1:
                 if key == "name":
-                    store ,self.__numberOfMaps = '1'
+                   pass
 
-                randomVariables.append([key, ])
-                self.__diseaseID = settings["name"][0]
-                self.__diseaseName = settings["name"][0]
-                self.__transmissionTime = settings["transmissionTime"][0]
-                self.__contagion = settings["contagion"][0]
-                self.__transmissionRadius = settings["infectedTime"][0]
-                self.__infectedTime = settings["incubationTime"][0]
-                self.__incubationTime = settings["mutation_chance"][0]
+                # randomVariables.append([key, ])
+            self.__diseaseID = settings["name"][0]
+            self.__diseaseName = settings["name"][0]
+            self.__transmissionTime = settings["transmissionTime"][0]
+            self.__contagion = settings["contagion"][0]
+            self.__transmissionRadius = settings["infectedTime"][0]
+            self.__infectedTime = settings["incubationTime"][0]
+            self.__incubationTime = settings["mutation_chance"][0]
 
 
     def run(self):
