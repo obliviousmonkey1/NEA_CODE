@@ -1,11 +1,11 @@
-FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database'
 
 import os 
 import sys 
 import json
 sys.path.append(os.path.expanduser(FILE_PATH))
-sys.path.append(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/createTools'))
+sys.path.append(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/databaseCreation'))
 
 import createMap as cM
 import createPopulation as cP
@@ -16,8 +16,7 @@ import dbMaker as dbM
 class Main:
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
-        dbM
-        self.run()
+        dbM.createDB()
     
     
     # create one map and one population at the same time and go through number of maps so if their were 3 maps
@@ -31,11 +30,12 @@ class Main:
 
 
     def run(self):
-        with open(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/createTools/settings.json')) as f:
+        with open(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json')) as f:
             data = json.load(f)
         self.__diseaseCreationHandler = cD.Main(self.__dbQueryHandler, data['disease'])
         self.__populationCreationHandler = cP.Main(self.__dbQueryHandler, data['populations'], data['people'])
         self.__mapCreationHandler = cM.Main(self.__dbQueryHandler, data['maps'])
         self.create()
+        return True 
 
 

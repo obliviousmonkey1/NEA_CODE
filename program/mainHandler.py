@@ -9,6 +9,7 @@ controls all the handlers
 class Handler:
     def __init__(self) -> None:
         self.__graphHandler = gH.Main()
+        self.__creationHandler = cH.Main()
         self.__simulationHandler = sH.Main()
 
 
@@ -16,13 +17,14 @@ class Handler:
         self.__simulationHandler.__running.setRunning(value)
 
 
+    def getUpdatedGraphs(self):
+        pass
+
+
     def runSimulationHandler(self):
-        running = True 
-        while running:
-            self.__simulationHandler.run()
+        self.__simulationHandler.run()
 
 
     def createAndPopulateDatabase(self):
-        self.__creationHandler = cH.Main()
-
+        return self.__creationHandler.run()
    

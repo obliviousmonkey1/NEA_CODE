@@ -1,7 +1,8 @@
 import sqlite3
 import os
 
-FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
+
 
 """
 person and pop have one to many
@@ -94,14 +95,15 @@ createTemporaryPersonTable = ''''''
 # contain routines that people have one routine shared between many people 
 createWeeklyRoutinesTable = ''''''
 
-conn = sqlite3.connect(os.path.expanduser(FILE_PATH))
-c = conn.cursor()
-c.execute(createPersonTable)
-c.execute(createPopulationTable)
-c.execute(createMapTable)
-c.execute(createDiseaseTable)
-c.execute(createStatisticsTable)
-c.close()
+def createDB():
+    conn = sqlite3.connect(os.path.expanduser(FILE_PATH))
+    c = conn.cursor()
+    c.execute(createPersonTable)
+    c.execute(createPopulationTable)
+    c.execute(createMapTable)
+    c.execute(createDiseaseTable)
+    c.execute(createStatisticsTable)
+    c.close()
 
 
 

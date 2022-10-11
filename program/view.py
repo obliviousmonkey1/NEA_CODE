@@ -2,8 +2,14 @@ import os
 import json
 import tkinter as tk
 from tkinter import ttk
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+import numpy as np
 
-FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/createTools/settings.json'
+FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
 
 """
 main menu which is the general collumns then you have sub menus so if 2 diseases it will created d1 d2 in sub menu 
@@ -37,10 +43,47 @@ class UI(tk.Tk):
         self.create_wigets()
         self.mainloop()
 
-    def mainScreen(self):
-        pass
 
-    def loading(self):
+    def loadStatistics(self):
+        # get the values from graph handler
+        if self.graphReference == "wholePopulation":
+            fig = Figure(figsize=(5, 4), dpi=100)
+            t = np.arange(0, 3, .01)
+            fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
+        
+        return fig
+
+    def gCurrentGraph(self, *args):
+        stats = self.loadStatistics()
+            # get the values from graph handler
+       
+        canvas = FigureCanvasTkAgg(stats, master=self)  # A tk.DrawingArea.
+        canvas.draw()
+        canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
+        
+    def graphButtons(self):
+        self.b = []
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
+            self.data = json.load(file)
+        cityNames = self.data['maps']['cityNames'][0].split(',')
+        r = 0
+        for cityName in cityNames:
+            print(cityName)
+            button = ttk.Button(self, text=cityName, command=self.gCurrentGraph)
+            button.pack(side=tk.RIGHT)
+            self.b.append(button)
+            r+=1            
+        
+
+    def mainScreen(self):
+        # set up widgets on the screen, launch first day of simulation 
+        # then wait for a True response once first loop has finisehd, and request graphs 
+        self.gCurrentGraph()
+        self.graphButtons()
+        self._controller.runSimulation()
+        
+
+    def setUpSimulation(self):
         for widget in tk.Frame.winfo_children(self):
             widget.destroy()
         self.title('Simulation')
@@ -48,17 +91,17 @@ class UI(tk.Tk):
         label.grid(column=1, row=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        a = False
-        while not a:
-            a = self._controller.setUpSimulationData()
-            label.destroy()
-            label = ttk.Label(self, foreground='green', text='Setup complete')
-            label.grid(column=1, row=1)
+        self._controller.setUpSimulationData()
         label.destroy()
+        label = ttk.Label(self, foreground='green', text='Setup complete')
+        label.grid(column=1, row=1)
+        label.destroy()
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.graphReference = 'wholePopulation'
         self.mainScreen()
 
-    def setUpSimulation(self):
-        self.loading()
+
 
     def create_wigets(self):
         # padding for widgets using the grid layout
@@ -96,7 +139,7 @@ class UI(tk.Tk):
                 self.data[self.type][key][1] = 0
                 self.data[self.type][key][0] = self.e[value].get()
 
-        with open(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/createTools/settings.json'),'w') as file:
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:
             json.dump(self.data, file)
         
         self.output_label.destroy()
@@ -146,7 +189,7 @@ class UI(tk.Tk):
     def displaySettings(self, *args):
         paddings = {'padx': 5, 'pady': 5}
 
-        with open(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/createTools/settings.json'),'r') as file:
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file)
 
         r = 1

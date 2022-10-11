@@ -1,5 +1,5 @@
 FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
-FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
 
 import sys
@@ -186,7 +186,6 @@ class Simulation:
             self.__dbQueryHandler.updateDiseaseID(person.getID(), person.getDiseaseId())
             self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
-        self.__dbQueryHandler.createStatistics(f'{self.__map.getDay()}.{self.__map.getName()}', self.__map.getDay(), self.__map.getID(), self.s, self.i, self.r)
 
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()
@@ -194,6 +193,7 @@ class Simulation:
         self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
         self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
         self.__logger.localDump(f'{threadID}')
+        return [self.__map.getID, self.__map.getDay, self.s,self.i,self.r]
 
 
     def updateStatistics(self):

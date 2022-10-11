@@ -1,12 +1,12 @@
 import sqlite3
-
+import os 
 """
 This handles for everything 
 so have seperate functions for each database and stuff y
 """
 
 class DBManager:
-    def __init__(self, dbPath='') -> None:
+    def __init__(self, dbPath=os.path.expanduser('~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db')) -> None:
         self.conn = sqlite3.connect(dbPath)
     
 

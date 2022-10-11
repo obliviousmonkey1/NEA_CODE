@@ -1,4 +1,4 @@
-FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
 FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
 
@@ -40,8 +40,8 @@ MAP_NUMBER = 4
 class Main():
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
-        self.__maps = self.populateMapsFromDatabase()
         self.__running = True
+        self.a = []
 
 
     def populateMapsFromDatabase(self):
@@ -50,35 +50,34 @@ class Main():
 
     def sim(self, map, threadID):
         sim = model.Simulation(map)
-        sim.day(threadID)
+        b = sim.day(threadID)
+        print(b)
         print(f'Thread {threadID}')
         
 
     # need to sort out multiprocessing
     def run(self): 
-        while self.__running:
-            self.startTime = timeit.default_timer()
-            print(f'startTime: {self.startTime}')
-            self.threads = []
-            for index, map in enumerate(self.__maps):
-                # self.sim(map, index)
-                #  x = multiprocessing.Process(target=self.sim, args=(map,index))
-                x = threading.Thread(target=self.sim, args=(map,index))
-                self.threads.append(x)
-                x.start()
-            for index, thread in enumerate(self.threads):
-                thread.join()
-            print(f'endTime: {timeit.default_timer()}')
-            print(f'time taken : {timeit.default_timer() - self.startTime}')
+        self.__maps = self.populateMapsFromDatabase()
+        self.startTime = timeit.default_timer()
+        print(f'startTime: {self.startTime}')
+        self.threads = []
+        for index, map in enumerate(self.__maps):
+            # self.sim(map, index)
+            #  x = multiprocessing.Process(target=self.sim, args=(map,index))
+            x = threading.Thread(target=self.sim, args=(map,index))
+            self.threads.append(x)
+            x.start()
+        for index, thread in enumerate(self.threads):
+            thread.join()
+        print(f'endTime: {timeit.default_timer()}')
+        print(f'time taken : {timeit.default_timer() - self.startTime}')
+
+        print(self.a)
+        # debug input 
+        input('> ')
         
-            # do stuff like update graph idk some other stuff
-            input('> ')
-            self.__maps = self.populateMapsFromDatabase()
+        self.__maps = self.populateMapsFromDatabase()
                 
 
     def setRunning(self, value: bool) -> None:
         self.__running = value
-
-
-if __name__ == "__main__":
-    Main()

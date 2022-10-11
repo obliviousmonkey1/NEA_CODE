@@ -22,10 +22,17 @@ class Main:
 
 
     def setUpSimulationData(self):
-        self.mainHandler.createAndPopulateDatabase()
-        return True 
+        return self.mainHandler.createAndPopulateDatabase()
+
 
 if __name__ == "__main__":
+    # debug 
+    import os 
+    try:
+        os.remove('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db')
+    except:
+        pass
+    #
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)

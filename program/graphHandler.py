@@ -1,5 +1,5 @@
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database'
-FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/database/population.db'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 
 import sys
 import os 
