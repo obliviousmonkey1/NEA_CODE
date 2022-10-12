@@ -24,13 +24,15 @@ https://www.blood.co.uk/why-give-blood/blood-types/
 
 
 class Main:
-    def __init__(self, dbH, populationSettings, peopleSettings) -> None:
+    def __init__(self, dbH, settings) -> None:
         self.__dbQueryHandler = dbH
-        self.setUp(populationSettings, peopleSettings)
+        self.setUp(settings)
     
 
-    def setUp(self, populationSettings, peopleSettings):
-        self.__populationSize = int(populationSettings['populationSize'][0])
+    def setUp(self, settings):
+        for key, value in settings['populations'].items():
+            if key == 'populationSize':
+                self.__populationSize = int(value[0])
 
 
     def createPerson(self, populationID, diseaseID):

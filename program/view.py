@@ -1,3 +1,4 @@
+from ast import arg
 import os 
 import json
 import tkinter as tk
@@ -54,12 +55,12 @@ class UI(tk.Tk):
         return fig
 
     def gCurrentGraph(self, *args):
+        # need to delete canvas every call
         stats = self.loadStatistics()
             # get the values from graph handler
-       
-        canvas = FigureCanvasTkAgg(stats, master=self)  # A tk.DrawingArea.
-        canvas.draw()
-        canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
+        self.canvas = FigureCanvasTkAgg(stats, master=self)  # A tk.DrawingArea.
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
         
     def graphButtons(self):
         self.b = []
@@ -191,7 +192,6 @@ class UI(tk.Tk):
 
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file)
-
         r = 1
         self.e = []
         self.l = []

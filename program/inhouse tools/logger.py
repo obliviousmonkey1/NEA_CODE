@@ -31,7 +31,7 @@ class ContinousLog(S):
 
     # local dump single file 
     # need to make it so os.listdir is in reference to a specific path 
-    def logLDSF(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S"), trackingID="add trackingID", path:str=""):
+    def logLDSF(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S"), trackingID="add trackingID", path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/program/logs")):
         try:
             all_files = os.listdir()
             fName = [i for i in all_files if trackingID in i and i.endswith('.log')]
@@ -55,7 +55,7 @@ class DiscontinousLog(S):
         self.holder = self.holder + f"{reference}:{additionalInfo} : {time},"
     
 
-    def localDump(self, trackingID:str, path:str="") -> None:
+    def localDump(self, trackingID:str, path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/program/logs")) -> None:
         if os.path.exists(f'{path}{trackingID}.log'):
             f = open(f"{path}{trackingID}.log","a")
             f.write('\n')

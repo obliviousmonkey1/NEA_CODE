@@ -15,13 +15,14 @@ import dbHandler as dbH
 
 '''
 need to make a class which holds reference to the map ids 
+maybe have the data update every hour so graph updates per hour in real time while sim is running
 '''
 
 class Main:
     def __init__(self) -> None:
         pass
 
-dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
+# dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
 plt.style.use('fivethirtyeight')
 

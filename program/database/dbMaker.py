@@ -63,17 +63,17 @@ CREATE TABLE IF NOT EXISTS Disease(
 );
 '''
 
-createStatisticsTable = '''
-CREATE TABLE IF NOT EXISTS Statistics(
-    id          STRING,
-    day         INTEGER,
-    map         INTEGER, 
-    susceptible INTEGER,
-    infected    INTEGER,
-    removed     INTEGER,
-    PRIMARY KEY(id)  
-);
-'''
+# createStatisticsTable = '''
+# CREATE TABLE IF NOT EXISTS Statistics(
+#     id          STRING,
+#     day         INTEGER,
+#     map         INTEGER, 
+#     susceptible INTEGER,
+#     infected    INTEGER,
+#     removed     INTEGER,
+#     PRIMARY KEY(id)  
+# );
+# '''
 
 # mapRelationship or mapConnections
 createMapRelationshipsTable = '''
@@ -102,7 +102,7 @@ def createDB():
     c.execute(createPopulationTable)
     c.execute(createMapTable)
     c.execute(createDiseaseTable)
-    c.execute(createStatisticsTable)
+    # c.execute(createStatisticsTable)
     c.close()
 
 

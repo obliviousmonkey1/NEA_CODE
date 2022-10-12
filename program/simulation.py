@@ -11,12 +11,8 @@ import dbHandler as dbH
 import logger  
 from multiprocessing import Pool
 import random
-from itertools import count 
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 import timeit
-
+import csv 
 
 '''
 very naive model
@@ -163,10 +159,10 @@ class Simulation:
     def diseaseMutation(self, infectedID, susceptibleID, diseaseID):
         '''
         when a person first catches a disease chance for a mutaion to happen 
-        disease id is going to be made up off day + infected id + susceptibleID + map name + og disease id
+        disease id is going to be made up off day + infected id + susceptibleID + map name +  disease name
         name is going to be the disease name
         '''
-        newDiseaseID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{str(diseaseID)}'
+        newDiseaseID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{self.__disease.getName(diseaseID)}'
         self.__dbQueryHandler.createDisease(
             newDiseaseID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
             self.__disease.getContagion(diseaseID), self.__disease.getTransmissionRadius(diseaseID),
@@ -189,7 +185,7 @@ class Simulation:
 
         print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
         self.__dbQueryHandler.close()
-
+        self.recordStatistics()
         self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
         self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
         self.__logger.localDump(f'{threadID}')
@@ -205,6 +201,34 @@ class Simulation:
                 self.i +=1
             elif person.getStatus() == 'R':
                 self.r +=1
+
+    def recordStatistics(self):
+        try:
+            fieldnames = ["day", "Susceptible", "Infected", "Removed"]
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'w') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                csv_writer.writeheader()
+            
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+                info={
+                    "day" : self.__map.getDay(),
+                    "Susceptible" : self.s,
+                    "Infected" : self.i,
+                    "Removed" : self.r
+                }
+                csv_writer.writerow(info)
+
+        except:
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+                info={
+                    "day" : self.__map.getDay(),
+                    "Susceptible" : self.s,
+                    "Infected" : self.i,
+                    "Removed" : self.r
+                }
+                csv_writer.writerow(info)
 
 
 class Map:

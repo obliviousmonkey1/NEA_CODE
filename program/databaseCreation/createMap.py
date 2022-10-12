@@ -4,24 +4,32 @@ data structre of the map ?????
 needs to be used in cretepopulation.py
 take information from the settings.json
 """
+import os
+import json
+FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
+
+
 class Main:
     def __init__(self, dbH, settings) -> None:
         self.__dbQueryHandler = dbH
+        self.tag = 'maps'
         self.setUp(settings)
 
 
     def setUp(self, settings):
-        for key, value in settings.items():
+        for key, value in settings[self.tag].items():
             if value[1] == 1:
                 if key == 'numberOfMaps':
                     self.__numberOfMaps = randint(1,6)
+                    settings[self.tag][key][0] = self.__numberOfMaps
                 elif key == 'minNumberOfConnections':
-                    print(self.__numberOfMaps)
                     self.__minNumberOfConnections = randint(1, (self.__numberOfMaps // 2))
+                    settings[self.tag][key][0] = self.__minNumberOfConnections
                 elif key == 'cityNames':
                     self.__cityNames = []
                     for i in range(self.__numberOfMaps):
                         self.__cityNames.append(f'city{i+1}')
+                    settings[self.tag][key][0] = ','.join(self.__cityNames)
             else:
                 if key == 'numberOfMaps':
                     self.__numberOfMaps = int(value[0])
@@ -29,6 +37,10 @@ class Main:
                     self.__minNumberOfConnections = int(value[0])
                 elif key == 'cityNames':
                     self.__cityNames = value[0].split(',')
+        
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:
+            json.dump(settings, file)
+        
         
     def addOne(self, i):
         return i + 1 

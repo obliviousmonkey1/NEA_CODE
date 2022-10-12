@@ -19,7 +19,7 @@ class Main:
 
     def runSimulation(self):
         self.mainHandler.runSimulationHandler()
-
+    
 
     def setUpSimulationData(self):
         return self.mainHandler.createAndPopulateDatabase()
@@ -36,5 +36,5 @@ if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    ui.entryPoint()
+    ui.entry_point()
     # c.setUpSimulationData()

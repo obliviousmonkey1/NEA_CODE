@@ -22,6 +22,8 @@ class Main:
     # create one map and one population at the same time and go through number of maps so if their were 3 maps
     # create population 1 and map 1 together then the next population 2 and map 2 etc ...
     def create(self):
+        # disease has to be created at the same time as the people so the 1st person from every population has to have a disease created
+        # with it 
         self.__diseaseCreationHandler.run()
         print(self.__diseaseCreationHandler.getDiseaseID())
         for i in range(1, self.__mapCreationHandler.getNumberOfMaps()+1):
@@ -30,11 +32,11 @@ class Main:
 
 
     def run(self):
-        with open(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json')) as f:
+        with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json')) as f:
             data = json.load(f)
-        self.__diseaseCreationHandler = cD.Main(self.__dbQueryHandler, data['disease'])
-        self.__populationCreationHandler = cP.Main(self.__dbQueryHandler, data['populations'], data['people'])
-        self.__mapCreationHandler = cM.Main(self.__dbQueryHandler, data['maps'])
+        self.__diseaseCreationHandler = cD.Main(self.__dbQueryHandler, data)
+        self.__populationCreationHandler = cP.Main(self.__dbQueryHandler, data)
+        self.__mapCreationHandler = cM.Main(self.__dbQueryHandler, data)
         self.create()
         return True 
 
