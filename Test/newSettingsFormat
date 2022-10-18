@@ -1,0 +1,28 @@
+
+For data base and config files, list of attributes that each thing will have need to split up between
+config and database
+
+simulation 
+    - number of cities
+    - travel rate
+    - social distance probability
+
+city  
+    - shopping frequency 
+    - infection time before quarantine
+    - population
+    - social distance trigger infection count 
+    - identify and isolate trigger infection count 
+
+disease  
+    - infection time
+    - infection radius
+
+
+person  
+    - id 
+    - p symptomatic on infection
+    - social distance factor 0-2
+    - blood type [O+,O-,A+,A-,B+,B-,AB+,AB-]
+    - age 0.0 - 66.0
+    - health 0.0 - 1.0

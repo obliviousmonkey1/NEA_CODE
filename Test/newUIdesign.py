@@ -19,22 +19,14 @@ class UI(tk.Tk):
         self.controller = None
         self.type = "general"
         self.currentIndex = 0
+        self.c = 0
         self.optionMenuIndex = 0
         self.settings = []
         self.e = []
         self.l = []
+        self.values = []
         self.initialize_user_interface()
-   
-        # initialize data
-        # self.settings = ("Select option",
-        #                 "General",
-        #                 "Disease",
-        #                 "Population",
-        #                 "Person",
-        #                 "Map")
 
-        # # set up variable
-        # self.option_var = tk.StringVar(self)
 
     def initialize_user_interface(self):
         self.parent.geometry("960x540")
@@ -46,15 +38,10 @@ class UI(tk.Tk):
     def register(self, controller):
         self._controller = controller
     
-    def updateSettings(self) -> None:
-        print('hi')
-        paddings = {'padx': 5, 'pady': 5}
-        
+    def typeLoop(self):
         ty = 0
         for p in range(len(self.e)):
-            values = [x.get() for x in self.e[p]] 
-            print(values)
-            print(self.type)
+            self.values = [x.get() for x in self.e[p]] 
             if self.type != 'general':
                 if ty == 0:
                     self.type = 'maps'
@@ -64,88 +51,85 @@ class UI(tk.Tk):
                     self.type = 'populations'
                 elif ty == 3:
                     self.type = 'people'
-
-            i = 0 
-            for value, key in enumerate(self.data[self.type][self.currentIndex]):
-                self.data[self.type][self.currentIndex][key][0] = values[i]
-                i += 1
+            self.verification()
             ty += 1
 
+        self.updateSettings()
+
+    def updateData(self,key,value) -> None:        
+        i = 0 
+        for value, key in enumerate(self.data[self.type][self.currentIndex]):
+            self.data[self.type][self.currentIndex][key][0] = self.values[i]
+            i += 1
+       
+    def updateSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:
             json.dump(self.data, file)
-    
-        if self.type != 'general':
-            self.settings[self.settings.index(self.option_var.get())] = self.data['maps'][self.currentIndex]['cityName'][0]
-        self.output_label = ttk.Label(self.parent, foreground='green',text='changes have been applied for all collumns')
-        self.output_label.grid(column=3, row=100, sticky=tk.W, **paddings)
+
+        # if self.type != 'general':
+        #     self.settings[self.settings.index(self.option_var.get())] = self.data['maps'][self.currentIndex]['cityName'][0]
+        self.complete_label = ttk.Label(self.parent, foreground='green',text='changes have been applied')
+        self.complete_label.grid(column=3, row=100, sticky=tk.S)
+        self.complete_label.after(3000, lambda: self.complete_label.destroy() )
+
 
     def verification(self):
         paddings = {'padx': 5, 'pady': 5}    
-        print(self.e)
         try:
-            ty = 0
-            # type verification
-            for p in range(len(self.e)):
-                values = [x.get() for x in self.e[p]] 
-                print(values)
-                if self.type != 'general':
-                    if ty == 0:
-                        self.type = 'maps'
-                    elif ty == 1:
-                        self.type = 'disease'
-                    elif ty == 2:
-                        self.type = 'populations'
-                    elif ty == 3:
-                        self.type = 'people'
+            
+            i = 0
+            for key in self.data[self.type][self.currentIndex]:
+                r = 0
+                if self.values[i] == "random":
+                    r = 1
+                elif not self.values[i]:
+                    raise ValueError(f'Missing value in {key}')
+                elif self.data[self.type][self.currentIndex][key][3] == "str":
+                    if not isinstance(self.values[i], str):
+                        raise ValueError(f'Incorrect type in {key}')
+                elif self.data[self.type][self.currentIndex][key][3] == "float":
+                    if not isinstance(float(self.values[i]), float) or (float(self.values[i]) < 0.0):
+                        raise ValueError(f'Incorrect type or negative value in {key}')
+                elif self.data[self.type][self.currentIndex][key][3] == "int":
+                    if not isinstance(int(self.values[i]), int) or (int(self.values[i]) < 0.0):
+                        raise ValueError(f'Incorrect type or negative value in {key}')
 
-                i = 0
-                for key in self.data[self.type][self.currentIndex]:
-                    r = 0
-                    if values[i] == "random":
-                        r = 1
-                    elif not values[i]:
-                        raise ValueError(f'Missing value in {key}')
-                    elif self.data[self.type][self.currentIndex][key][3] == "str":
-                        if not isinstance(values[i], str):
-                            raise ValueError(f'Incorrect type in {key}')
-                    elif self.data[self.type][self.currentIndex][key][3] == "float":
-                        if not isinstance(float(values[i]), float) or (float(values[i]) < 0.0):
-                            raise ValueError(f'Incorrect type or negative value in {key}')
-                    elif self.data[self.type][self.currentIndex][key][3] == "int":
-                        if not isinstance(int(values[i]), int) or (int(values[i]) < 0.0):
-                            raise ValueError(f'Incorrect type or negative value in {key}')
-
-                    # special variable verification
-                    if self.type == 'maps':
-                        if key == 'minNumberOfConnections' and r == 0:
-                            if(int(values[0]) < int(values[i])):
-                                raise ValueError(f'{key} cannot be larger than the number of cities')
-                        elif key == 'cityNames' and r == 0:
-                            if len(values[i].split(',')) != int(values[0]):
-                                raise ValueError(f'{key} requires {values[0]} names since their are {values[0]} cities')
-                        
-                    i+=1
-                ty +=1
-            self.updateSettings()
+                # special variable verification
+                if self.type == 'general':
+                    if key == 'numberOfMaps':
+                        if r == 1:
+                            raise ValueError(f'{key} cannot be random')
+                if self.type == 'maps':
+                    if key == 'minNumberOfConnections' and r == 0:
+                        if(int(self.values[0]) < int(self.values[i])):
+                            raise ValueError(f'{key} cannot be larger than the number of cities')
+                    elif key == 'cityNames' and r == 0:
+                        if len(self.values[i].split(',')) != int(self.values[0]):
+                            raise ValueError(f'{key} requires {self.values[0]} names since their are {self.values[0]} cities')
+             
+                self.updateData(key, self.values[i])
+                i+=1
         except ValueError as err:
-            self.output_label.destroy()
-            self.output_label = ttk.Label(self.parent, foreground='red',text=err.args)
-            self.output_label.grid(column=1, row=101, sticky=tk.W, **paddings)
+            self.errorLabel = ttk.Label(self.parent, foreground='red',text=err.args)
+            self.errorLabel.grid(column=1, row=101, sticky=tk.W, **paddings)
+            self.errorLabel.after(3000, lambda: self.errorLabel.destroy() )
+
 
 
     def setUpSimulation(self):
         print('setUpSimulation')
 
-    def displaySettings(self, c=0):
-        paddings = {'padx': 5, 'pady': 5}
-
+    def openSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file)
+
+    def displaySettings(self):
+        paddings = {'padx': 5, 'pady': 5}
 
         r = 1
 
         label = ttk.Label(self.parent,  text=f'{self.type.upper()} :')
-        label.grid(column=c, row=0, sticky=tk.W,**paddings)
+        label.grid(column=self.c, row=0, sticky=tk.W,**paddings)
 
         if self.type in ['maps','disease','populations','people']:
             option_menu = ttk.OptionMenu(
@@ -154,14 +138,14 @@ class UI(tk.Tk):
                 self.settings[self.optionMenuIndex],
                 *self.settings,
                 command=self.option_changed)
-            option_menu.grid(column=c+1, row=0, sticky=tk.W, **paddings)
+            option_menu.grid(column=self.c+1, row=0, sticky=tk.W, **paddings)
         p = []
         for key, value in self.data[self.type][self.currentIndex].items():
             label = ttk.Label(self.parent,  text=key)
-            label.grid(column=c, row=r, sticky=tk.W,**paddings)
+            label.grid(column=self.c, row=r, sticky=tk.W,**paddings)
             self.l.append(label)
             entry = tk.Entry(self.parent) 
-            entry.grid(column=c+1, row=r, sticky=tk.S,**paddings)
+            entry.grid(column=self.c+1, row=r, sticky=tk.S,**paddings)
             entry.insert(0, value[0])
             p.append(entry)
             # label = ttk.Label(self.parent,  text=f'Example : {value[2]}')
@@ -173,23 +157,24 @@ class UI(tk.Tk):
             r+=1
         self.e.append(p)
         
-        commit_button = ttk.Button(self.parent, text='Commit', command=self.verification)
-        commit_button.grid(column=c+1, row=r, sticky=tk.S, **paddings)
+        commit_button = ttk.Button(self.parent, text='Commit', command=self.typeLoop)
+        commit_button.grid(column=self.c+1, row=99, sticky=tk.S)
 
     def setUpTwo(self):
+        self.openSettings()
         self.clear_widgets()
         types = ['maps','disease','populations','people']
-        c = 0
+        self.c = 0
         for type in types:
             self.type = type
-            self.displaySettings(c)
-            c += 2
+            self.displaySettings()
+            self.c += 2
 
-        simulation_button = ttk.Button(self.parent, text='BACK', command=self.setUpOne)
-        simulation_button.grid(column=0, row=100, sticky=tk.S)
+        back_button = ttk.Button(self.parent, text='BACK', command=self.back)
+        back_button.grid(column=0, row=100, sticky=tk.S)
 
         simulation_button = ttk.Button(self.parent, text='Start Simulation', command=self.setUpSimulation)
-        simulation_button.grid(column=c//2, row=100, sticky=tk.S)
+        simulation_button.grid(column=self.c//2, row=100, sticky=tk.S)
 
 
     def setSettings(self):
@@ -214,14 +199,24 @@ class UI(tk.Tk):
         self.option_var = tk.StringVar(self.parent)
         self.cleanUp()
         self.optionMenuIndex = 0
+        self.parent.geometry("1400x540")
+        self.parent.minsize(1400,540)
+        self.parent.maxsize(1400,540)
         self.setUpTwo()
 
-
-    def setUpOne(self):
+    def back(self):
         self.cleanUp()
+        self.parent.geometry("960x540")
+        self.parent.minsize(960,540)
+        self.parent.maxsize(960,540)
         self.currentIndex = 0
         self.type = 'general'
         self.clear_widgets()
+        self.setUpOne()
+
+    def setUpOne(self):
+        self.openSettings()
+        # self.clear_widgets()
         self.displaySettings()
         nextButton = ttk.Button(self.parent, text='Next', command=self.setSettings)
         nextButton.grid(column=1, row=100, sticky=tk.S)

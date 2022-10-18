@@ -15,22 +15,23 @@ import timeit
 import csv 
 
 '''
-very naive model
-
 S - Susceptible
 I - Infected
 R - Removed
 people randomly move about map and if they are within the area of contagion of an infected person for 
 x amount of time they become infected SIR model 
 
-should add death chance 
+NEED TO ADD :
 
-USE THREADING IN ORDER TO SPLIT 
-UP THE LIST OF PEOPLE INTO SECTIONS SO THAT THE CHECKING IF A PERSON IS IN AN 
-INFECTION AREA IS QUICKER, YOU COULD HAVE THE NUMBER OF THREADS, AND THEIRFORE THE 
-MORE SPLIT THE LIST TIE INTO THE NUMBER OF PEOPLE USED.
+    should add death chance 
+    need to add identify and isolate features 
+    socal distancing
+    travel restrictions
+    r
+    central hubs
 
-NEED TO ADD GETTERS AND SETTERS
+NEED TO WORK OUT THREAD DEADLOCK FOR DATABASE
+
 '''
 
 # Constants 
@@ -369,16 +370,4 @@ class Person:
 
     def setDiseaseID(self, diseaseID: int)-> None:
         self.__diseaseID = diseaseID
-
-
-    def display_stats(self):
-        print(f''' 
-        ID : {self.__iD}
-        Data :
-            - status : {self.__status}
-            - rTime : {self.__rTime}
-            - iTime : {self.__iTime}
-            - ibTime : {self.__ibTime}
-            - pos : {self.__pos}
-        ''')
 
