@@ -31,8 +31,7 @@ class UI(tk.Tk):
     def initialize_user_interface(self):
         self.parent.geometry("960x540")
         self.parent.title('Setup')
-        self.parent.minsize(960,540)
-        self.parent.maxsize(960,540)
+        self.parent.resizable(False,False)
         self.entry_point()
     
     def register(self, controller):
@@ -56,11 +55,9 @@ class UI(tk.Tk):
 
         self.updateSettings()
 
-    def updateData(self,key,value) -> None:        
-        i = 0 
-        for value, key in enumerate(self.data[self.type][self.currentIndex]):
-            self.data[self.type][self.currentIndex][key][0] = self.values[i]
-            i += 1
+    def updateData(self,key,value) -> None:   
+        self.data[self.type][self.currentIndex][key][0] = value
+        
        
     def updateSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:
@@ -113,7 +110,6 @@ class UI(tk.Tk):
             self.errorLabel = ttk.Label(self.parent, foreground='red',text=err.args)
             self.errorLabel.grid(column=1, row=101, sticky=tk.W, **paddings)
             self.errorLabel.after(3000, lambda: self.errorLabel.destroy() )
-
 
 
     def setUpSimulation(self):
@@ -200,17 +196,17 @@ class UI(tk.Tk):
         self.cleanUp()
         self.optionMenuIndex = 0
         self.parent.geometry("1400x540")
-        self.parent.minsize(1400,540)
-        self.parent.maxsize(1400,540)
+        self.parent.resizable(False,False)
         self.setUpTwo()
 
     def back(self):
         self.cleanUp()
         self.parent.geometry("960x540")
-        self.parent.minsize(960,540)
-        self.parent.maxsize(960,540)
+        self.parent.resizable(False,False)
+
         self.currentIndex = 0
         self.type = 'general'
+        self.c = 0
         self.clear_widgets()
         self.setUpOne()
 

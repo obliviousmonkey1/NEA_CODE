@@ -36,5 +36,5 @@ if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    ui.entry_point()
+    ui.entryPoint()
     # c.setUpSimulationData()
