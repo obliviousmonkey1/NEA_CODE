@@ -23,6 +23,7 @@ class UI(tk.Tk):
         self.optionMenuIndex = 0
         self.settings = []
         self.e = []
+        self.valueLabel = []
         self.l = []
         self.values = []
         self.initialize_user_interface()
@@ -140,10 +141,18 @@ class UI(tk.Tk):
             label = ttk.Label(self.parent,  text=key)
             label.grid(column=self.c, row=r, sticky=tk.W,**paddings)
             self.l.append(label)
-            entry = tk.Entry(self.parent) 
-            entry.grid(column=self.c+1, row=r, sticky=tk.S,**paddings)
-            entry.insert(0, value[0])
-            p.append(entry)
+            if value[3] == 'float' and self.randomCheck(value[0]):
+                slider = ttk.Scale(self.parent, from_=0,to=1,orient='horizontal',value= value[0])
+                slider.grid(column=self.c+1, row=r, sticky=tk.S,**paddings)
+                self.valueLabel = ttk.Label(self.parent, text=slider.get())
+                self.valueLabel.grid(column=self.c+2, row=r, sticky=tk.S,**paddings)
+                p.append(slider)
+                
+            else:
+                entry = tk.Entry(self.parent) 
+                entry.grid(column=self.c+1, row=r, sticky=tk.S,**paddings)
+                entry.insert(0, value[0])
+                p.append(entry)
             # label = ttk.Label(self.parent,  text=f'Example : {value[2]}')
             # label.grid(column=c+2, row=r, sticky=tk.W,**paddings)
             # self.l.append(label)
@@ -155,6 +164,11 @@ class UI(tk.Tk):
         
         commit_button = ttk.Button(self.parent, text='Commit', command=self.typeLoop)
         commit_button.grid(column=self.c+1, row=99, sticky=tk.S)
+
+    def randomCheck(self, value):
+        if not value.lower == 'random':
+            return False
+        return True
 
     def setUpTwo(self):
         self.openSettings()
@@ -173,6 +187,7 @@ class UI(tk.Tk):
         simulation_button.grid(column=self.c//2, row=100, sticky=tk.S)
 
 
+
     def setSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             data = json.load(file)
@@ -183,7 +198,7 @@ class UI(tk.Tk):
         data['people'] = []
         for i in range(int(numberOfCities)):
             data['maps'].append({"minNumberOfConnections": [1, 1, 2, "int"], "cityName": [f"city{i+1}", 1, "city1", "str"]})
-            data['disease'].append({"name": ["random", 1, "bob", "str"], "transmissionTime": ["random", 1, 0.1, "float"], "contagion": ["random", 1, 2, "int"], "transmissionRadius": ["random", 1, 2, "int"], "infectedTime": ["random", 1, 0.2, "float"], "incubationTime": ["random", 1, 0.2, "float"], "mutation_chance": ["random", 1, 0.2, "float"]})
+            data['disease'].append({"name": ["random", 1, "bob", "str"], "transmissionTime": [0.2, 1, 0.1, "float"], "contagion": ["random", 1, 2, "int"], "transmissionRadius": ["random", 1, 2, "int"], "infectedTime": [0.2, 1, 0.2, "float"], "incubationTime": [0.2, 1, 0.2, "float"], "mutation_chance": [0.2, 1, 0.2, "float"]})
             data['populations'].append({"populationSize": [100, 0, 100, "int"]})
             data['people'].append({"dbREF": ["random", 1, "h", "str"]})
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:

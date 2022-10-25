@@ -81,10 +81,12 @@ class Simulation:
                 self.infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
                 self.movement()
-
+                
+                # split up suscpetible list into sub lists and then 
+                # thread over them 
                 # pool = Pool()
-                # for susceptiblePerson in susceptibleGroup:
-                    # pool.apply_async(self.infection, susceptiblePerson)
+                # for susceptibleGroup in susceptibleGroups:
+                    # pool.apply_async(self.infection, susceptibleGroup)
                 for susceptiblePerson in susceptibleGroup:
                     self.infection(susceptiblePerson)
                 
@@ -109,7 +111,6 @@ class Simulation:
                     susceptiblePerson.setStatus('I')
                 else:
                     susceptiblePerson.setRtime()
-
 
 
     def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  

@@ -28,7 +28,7 @@ def quarantine(person):
     if (person.status == 'I') and (not person.getSymptomatic) and (person.getNumbDaysInfected >= quarantineInfectedDays): 
         person.setQuarantine(True)
     elif ((person.getLastMapID != map.getMapID) and (person.getDaysSpent =< quarantineSusceptibleDays)):
-        person.setQuarantine(True )
+        person.setQuarantine(True)
 
 # social distancing system
 '''
@@ -44,7 +44,6 @@ def movement():
     if socialDistanceFactor > 0:
         pass
 
-
 # transmisson system
 '''
 Transmisson between people
@@ -53,7 +52,7 @@ Chance to leave a trace which is infected person leaving infection on the positi
 this will fade away and decrease in transmitabliltiy as time goes on  
 '''
 def set_status():
-    # determins whether symptomatic or asymptomatic 
+    # determins whether a newley infected person is symptomatic or asymptomatic 
     if random.random() < p_symptomatic_on_infection:
         symptomatic = True
 

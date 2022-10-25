@@ -12,3 +12,9 @@ def run_simulation_handler(self):
     if self.running:
         # call simulation handler 
         pass
+
+'''
+probably want to call update graph data from here call graph handler 
+then handler returns data which gets sent to view
+'''
+
