@@ -1,5 +1,7 @@
 # NEA_CODE
 
+Main code is in the program file
+
 TO RUN:
 1) dbMaker.py
 2) createPopulation.py
