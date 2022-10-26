@@ -1,0 +1,101 @@
+
+For data base and config files, list of attributes that each thing will have need to split up between
+config and database
+
+simulation 
+    - number of cities
+    - travel rate
+    - social distance probability
+
+city  
+    - shopping frequency 
+    - infection time before quarantine
+    - population
+    - social distance trigger infection count 
+    - identify and isolate trigger infection count 
+
+disease  
+    - infection time
+    - infection radius
+
+person  
+    - id 
+    - p symptomatic on infection
+    - social distance factor 0-2
+    - blood type [O+,O-,A+,A-,B+,B-,AB+,AB-]
+    - age 0.0 - 66.0
+    - health 0.0 - 1.0
+
+blood type affect the chance of getting the disease i.e speed up the transmission of it 
+
+
+JSON: 
+
+[value[0], example/range[1], type[2]]
+
+"disease": [{
+    "name": ["random", "COVID", "str"], 
+    "transmissionTime": ["random", "0.0<value<1.0", "float"], 
+    "contagion": ["random", 2, "int"], 
+    "transmissionRadius": ["random", "1<value<4", "int"], 
+    "infectedTime": ["random", "0.0<value<1.0", "float"],
+    "incubationTime": ["random", "0.0<value<1.0", "float"],
+    "mutationChance": ["random", "0.0<value<1.0", "float"],
+    "numbBloodTypesSusceptible" : ["random",  "0<value<8", "int"], 
+    "ageMostSusceptible" : ["random", "10<value<100", "int"],
+    "pAsymptomaticOnInfection": ["random", "0.0<value<1.0", "float"],
+    "canKill" : ["random", "0,1","bool"]
+    }]
+
+"general": {
+    "generalMutationChance": ["0.2", "0.0<value<1.0", "float"],
+    "numberOfMaps": [3, "0<value<∞", "int"]
+    }
+
+"populations": [{
+    "populationSize": [100, "0<value<∞", "int"],
+    "travelRate" : [0.5,"0.0<value<1.0","float"],
+    "socialDistanceProb" : [0.5,"0.0<value<1.0","float"],
+    "numbStartingInfected" : [2,"0<value<pop","int"]
+    }]
+
+
+"maps": [{
+    "govermentActionReliabilty" : [3.0,"0.0<value<∞","float"],
+    "minNumberOfConnections": [1, "0<value<=numbCities", "int"],
+    "cityName": ["city1", "city1", "str"],
+    "infectionTimeBeforeQuarantine": [3.0,"0.0<value<∞","float"],
+    "socialDistanceTriggerInfectionCount": [10, "1<value<∞", "int"],
+    "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"]
+    }] 
+   
+{   
+    "general" :[{
+        "generalMutationChance": ["0.2", "0.0<value<1.0", "float"],
+        "numberOfMaps": [3, "0<value<∞", "int"]
+        }],
+    "populations": [{
+        "populationSize": [100, "0<value<∞", "int"],
+        "travelRate" : [0.5,"0.0<value<1.0","float"],
+        "socialDistanceProb" : [0.5,"0.0<value<1.0","float"]
+        }],
+    "maps": [{
+        "govermentActionReliabilty" : [3.0,"0.0<value<∞","float"],
+        "minNumberOfConnections": [1, "0<value<=numbCities", "int"],
+        "cityName": ["city1", "city1", "str"],
+        "infectionTimeBeforeQuarantine": [3.0,"0.0<value<∞","float"],
+        "socialDistanceTriggerInfectionCount": [10, "1<value<∞", "int"],
+        "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"]
+        }],
+    "disease": [{
+        "name": ["random", "COVID", "str"], 
+        "transmissionTime": ["random", "0.0<value<1.0", "float"], 
+        "contagion": ["random", 2, "int"], 
+        "transmissionRadius": ["random", "1<value<4", "int"], 
+        "infectedTime": ["random", "0.0<value<1.0", "float"],
+        "incubationTime": ["random", "0.0<value<1.0", "float"],
+        "mutationChance": ["random", "0.0<value<1.0", "float"],
+        "numbBloodTypesSusceptible" : ["random",  "0<value<8", "int"], 
+        "ageMostSusceptible" : ["random", "10<value<100", "int"]
+        }]
+}

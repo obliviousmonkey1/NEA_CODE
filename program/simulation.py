@@ -42,7 +42,7 @@ MOVE_PROBABILITY = 0.5
 MUTATION_CHANCE = 0.001
 MOVE_CITY_CHANCE = 0.01
 
-P = 1 # probablity ????
+P_INFECTION_PER_DAY = 1 # probablity ????
 
 
 class Simulation:
@@ -102,11 +102,12 @@ class Simulation:
     def infection(self, susceptiblePerson):
         for infectedPerson in self.infecetdGroup:
             if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
-                if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P * self.__disease.getContagion(infectedPerson.getDiseaseId()):
-                    if random.random() < MUTATION_CHANCE:
-                        susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
-                    else:
-                        susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+                if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P_INFECTION_PER_DAY * self.__disease.getContagion(infectedPerson.getDiseaseId()):
+                    # if random.random() < MUTATION_CHANCE:
+                    #     susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+                    # else:
+                    #     susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+                    susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
                     susceptiblePerson.setIBtime(0.0)
                     susceptiblePerson.setStatus('I')
                 else:
@@ -205,32 +206,16 @@ class Simulation:
                 self.r +=1
 
     def recordStatistics(self):
-        try:
-            fieldnames = ["day", "Susceptible", "Infected", "Removed"]
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'w') as csv_file:
-                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                csv_writer.writeheader()
-            
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
-                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
-                info={
-                    "day" : self.__map.getDay(),
-                    "Susceptible" : self.s,
-                    "Infected" : self.i,
-                    "Removed" : self.r
-                }
-                csv_writer.writerow(info)
-
-        except:
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
-                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
-                info={
-                    "day" : self.__map.getDay(),
-                    "Susceptible" : self.s,
-                    "Infected" : self.i,
-                    "Removed" : self.r
-                }
-                csv_writer.writerow(info)
+        fieldnames = ["day", "Susceptible", "Infected", "Removed"]
+        with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
+            csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+            info={
+                "day" : self.__map.getDay(),
+                "Susceptible" : self.s,
+                "Infected" : self.i,
+                "Removed" : self.r
+            }
+            csv_writer.writerow(info)
 
 
 class Map:
@@ -240,7 +225,7 @@ class Map:
         self.__width = map[2]
         self.__height = map[3]
         self.__day = map[4]
-        self.__population = self.populatePopulationFromDataBase(map[0])
+        self.__population = self.populatePopulationFromDataBase(map[-1])
     
 
     def getName(self) -> str:
@@ -274,7 +259,7 @@ class Map:
     def populatePopulationFromDataBase(self, mapID):
         dbpopulation = dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).getPopulation(mapID)
         dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).close()
-        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[10]) for person in dbpopulation]
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7], person[8], person[9], person[10], person[11], person[12], person[13], person[14], person[15]) for person in dbpopulation]
 
 
 # doesn't store anything only has getters and setters for the database so multiple disease can be around 
@@ -308,12 +293,20 @@ class Disease:
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, posX: int, posY: int, diseaseID: str) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, travelling: int, asymptomatic: int, partialImmunity: float, destination: int, bloodType: str, age: int, health: float, posX: int, posY: int, diseaseID: str) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
         self.__iTime = iTime
         self.__ibTime = ibTime
+        self.__tTime = tTime
+        self.__travelling = travelling
+        self.__asymptomatic = asymptomatic
+        self.__paritalImmunity = partialImmunity
+        self.__destination = destination
+        self.__bloodType = bloodType
+        self.__age = age
+        self.__health = health
         self.__pos = [posX, posY]
         self.__diseaseID = diseaseID
 

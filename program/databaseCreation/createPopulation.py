@@ -1,51 +1,125 @@
 import names
-import random
-
-"""
-map gets generated first
-population can use the map to get a home 
-access a json document with settings for population 
-use data form the web 
-that can be used to affet results 
-store that data in database 
-read it and use it to affect results and stuff
-population is stored in a database 
-
-two tables one called people the other called families (might change ot relationships if i add friends and such)
-
-age:
-https://www.statista.com/statistics/270370/age-distribution-in-the-united-kingdom/
-sex:
-https://www.statista.com/statistics/281240/population-of-the-united-kingdom-uk-by-gender/
-health:
-https://www.health.org.uk/evidence-hub/health-inequalities/proportion-of-population-reporting-good-health-by-age-and-deprivation
-https://www.blood.co.uk/why-give-blood/blood-types/
-"""
+from random import randint, random,randrange, choice
 
 
-class Main:
-    def __init__(self, dbH, settings) -> None:
+BLOOD_TYPES = ['O+','O-','A+','A-','B+','B-','AB+','AB-']
+
+
+class PopulationCreationHandler:
+    def __init__(self, dbH, data) -> None:
         self.__dbQueryHandler = dbH
-        self.setUp(settings)
+        self._handler = None
+        self.tag = 'populations'
+        self.personID = 1
+        self.setUp(data)
     
+    def register(self, mainHandler):
+        self._handler = mainHandler
 
-    def setUp(self, settings):
-        for key, value in settings['populations'].items():
-            if key == 'populationSize':
-                self.__populationSize = int(value[0])
+    def setUp(self, data):
 
+        self.__populationSize = []
+        self.__travelRate = []
+        self.__socialDistanceProb = []
+        self.__numbStartingInfected = []
 
-    def createPerson(self, populationID, diseaseID):
-        pass
+        for i in range((len(data[self.tag]))):
+            for key, value in data[self.tag][i].items():
+                if self.checkRandom(value[0]):
+                    if key == 'populationSize':
+                        self.__populationSize.append(randint(80,600))
+                        data[self.tag][i][key][0] = self.__populationSize[-1]
+                    elif key == 'travelRate':
+                        self.__travelRate.append(random())
+                        data[self.tag][i][key][0] = self.__travelRate[-1]
+                    elif key == 'socialDistanceProb':
+                        self.__socialDistanceProb.append(random())
+                        data[self.tag][i][key][0] = self.__socialDistanceProb[-1]
+                    elif key == 'numbStartingInfected':
+                        self.__numbStartingInfected.append(randint(1,self.__populationSize[-1]))
+                        data[self.tag][i][key][0] = self.__numbStartingInfected[-1]
+                else:
+                    if key == 'populationSize':
+                        self.__populationSize.append(int(value[0]))
+                    elif key == 'travelRate':
+                        self.__travelRate.append(float(value[0]))
+                    elif key == 'socialDistanceProb':
+                        self.__socialDistanceProb.append(float(value[0]))
+                    elif key == 'numbStartingInfected':
+                        self.__numbStartingInfected.append(int(value[0]))
+            i+=1
 
-
-    def createPopulation(self, populationID: int, diseaseID: str) -> None:
-        self.__dbQueryHandler.createPopulation(populationID)
-        self.createPerson(populationID, diseaseID)
+        return data
         
+    def checkRandom(self, value):
+        try:
+            if not value.lower() == 'random':
+                return False
+            return True
+        except:
+            return False
+
+    def seedPopulationTable(self, populationID: int, indexZero=False) -> None:
+        self.id = populationID
+        self.__dbQueryHandler.createPopulation(self.id)
+        if not indexZero:
+            self.seedMap()
+            self.seedPeopleTable()
     
+    def seedMap(self):
+        self._handler.startMapSeed(self.id, self.id,self.__populationSize[(self.id-1)])
+
+    def seedPeopleTable(self):
+        infected = 0 
+        for _ in range(self.__populationSize[(self.id-1)]):
+            pID = self.personID
+            if infected < self.__numbStartingInfected[self.id-1]:
+                status = 'I'
+                infected += 1
+                incubationTime = 0.0
+                diseaseID = self._handler.getDiseaseID(self.id, pID)
+                asymptomatic = self.setAsymptomatic()
+            else:
+                status = 'S'
+                asymptomatic = None
+                incubationTime = None
+                diseaseID = None
+
+            partialImmunity = None
+            radiusTime = 0.0 
+            infectedTime = 0.0
+            populationID = self.id
+            xPos = randrange(self._handler.getMapWidth())
+            yPos = randrange(self._handler.getMapHeight())
+            travelling = 0
+            travellingTime = 0.0
+            destination = None
+            bloodType = choice(BLOOD_TYPES)
+            age = self.calcuateAge()
+            health = 1-((age/100)**5)
+
+            self.__dbQueryHandler.createPerson(pID,status,radiusTime,infectedTime,incubationTime,travellingTime,travelling,asymptomatic,partialImmunity,destination,bloodType,age,health,xPos,yPos,diseaseID,self.id)
+
+            self.personID += 1
+
+    def calcuateAge(self) -> int:
+        chance = random()
+        if chance < 0.21:
+            return randint(10,18)
+        elif chance > 0.21 and chance < 0.5:
+            return randint(18,39)
+        elif chance > 0.5 and chance < 0.77:
+            return randint(40,59)
+        elif chance > 0.77:
+            return randint(60,80)
+
+    def setAsymptomatic(self) -> int:
+        if random() < self._handler.getDiseasePasympto(self.id):
+            return 1 
+        return 0
+
     def getPopulationSize(self) -> int:
-        return self.__populationSize
+        pass
 
 
 # NUMB_PEOPLE = 20

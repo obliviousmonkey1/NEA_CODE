@@ -1,5 +1,6 @@
 from mainHandler import *
 from view import *
+import miscFunctions
 import threading
 
 '''
@@ -10,6 +11,7 @@ class Main:
     def __init__(self, mH, view) -> None:
         self.mainHandler = mH
         self.view = view
+        self.mainHandler.register(self)
         self.view.register(self)
     
 
@@ -19,11 +21,21 @@ class Main:
 
     def runSimulation(self):
         self.mainHandler.runSimulationHandler()
+
     
-
     def setUpSimulationData(self):
-        return self.mainHandler.createAndPopulateDatabase()
+        self.mainHandler.createAndPopulateDatabase()
 
+
+    # misc funciton calls 
+    def checkRandom(self, value) -> bool:
+        return miscFunctions.randomCheck(value)
+    
+    def readConfig(self):
+        return miscFunctions.readConfig()
+    
+    def writeConfig(self, data):
+        return miscFunctions.writeConfig(data)
 
 if __name__ == "__main__":
     # debug 
@@ -36,5 +48,6 @@ if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    ui.entryPoint()
-    # c.setUpSimulationData()
+    #ui.entryPoint()
+    c.setUpSimulationData()
+    c.runSimulation()

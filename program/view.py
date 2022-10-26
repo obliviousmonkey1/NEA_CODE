@@ -18,7 +18,7 @@ main menu which is the general collumns then you have sub menus so if 2 diseases
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.controller = None
+        self._controller = None
         self.geometry("960x540")
         self.minsize(960,540)
         self.maxsize(960,540)

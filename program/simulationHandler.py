@@ -40,7 +40,6 @@ MAP_NUMBER = 4
 class Main():
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
-        self.__running = True
         self.a = []
 
 
@@ -57,27 +56,26 @@ class Main():
 
     # need to sort out multiprocessing
     def run(self): 
-        self.__maps = self.populateMapsFromDatabase()
-        self.startTime = timeit.default_timer()
-        print(f'startTime: {self.startTime}')
-        self.threads = []
-        for index, map in enumerate(self.__maps):
-            # self.sim(map, index)
-            #  x = multiprocessing.Process(target=self.sim, args=(map,index))
-            x = threading.Thread(target=self.sim, args=(map,index))
-            self.threads.append(x)
-            x.start()
-        for index, thread in enumerate(self.threads):
-            thread.join()
-        print(f'endTime: {timeit.default_timer()}')
-        print(f'time taken : {timeit.default_timer() - self.startTime}')
-
-        print(self.a)
-        # debug input 
-        input('> ')
         
         self.__maps = self.populateMapsFromDatabase()
-                
+        while True:
+            self.startTime = timeit.default_timer()
+            print(f'startTime: {self.startTime}')
+            self.threads = []
+            for index, map in enumerate(self.__maps):
+                # self.sim(map, index)
+                #  x = multiprocessing.Process(target=self.sim, args=(map,index))
+                x = threading.Thread(target=self.sim, args=(map,index))
+                self.threads.append(x)
+                x.start()
+            for index, thread in enumerate(self.threads):
+                thread.join()
+            print(f'endTime: {timeit.default_timer()}')
+            print(f'time taken : {timeit.default_timer() - self.startTime}')
 
-    def setRunning(self, value: bool) -> None:
-        self.__running = value
+            print(self.a)
+            # debug input 
+            input('> ')
+            
+            self.__maps = self.populateMapsFromDatabase()
+                

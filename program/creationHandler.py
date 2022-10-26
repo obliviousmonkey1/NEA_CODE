@@ -1,7 +1,9 @@
 FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database'
 
-import os 
+from ast import Pass
+import csv
+import os
 import sys 
 import json
 sys.path.append(os.path.expanduser(FILE_PATH))
@@ -13,31 +15,102 @@ import createDisease as cD
 import dbHandler as dbH
 import dbMaker as dbM
 
+from random import randint, random
+
 class Main:
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
+        self.tag = 'general'
+
+        self._mainHandler = None
         dbM.createDB()
     
+    def register(self, mH):
+        self._mainHandler = mH
+
+    def seedDatabase(self):
+        self.seedBloodTypeTable()
+        self.__populationCreationHandler.seedPopulationTable(0, True)
+        for id in range(1, self.__numberOfMaps+1):
+            self.__populationCreationHandler.seedPopulationTable(id)
+        self.__mapCreationHandler.seedRelationshipTable()
+
+    def createStatsCSV(self):
+        for name in self.getMapHandlerNames():
+            fieldnames = ["day", "Susceptible", "Infected", "Removed"]
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{name}data.csv'), 'w') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                csv_writer.writeheader()
+            
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{name}data.csv'), 'a') as csv_file:
+                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+                info={
+                    "day" : 0,
+                    "Susceptible" : 0,
+                    "Infected" : 0,
+                    "Removed" : 0
+                }
+                csv_writer.writerow(info)
+
+  
+    def setUpGeneral(self, data):
+
+        i = 0
+        for key, value in data[self.tag][i].items():
+            if self._mainHandler.checkRandom(value[0]):
+                if key == 'generalMutationChance':
+                    self.__generalMutationChance = random(0,0.3)
+                    data[self.tag][i][key][0] = self.__generalMutationChance[i]
+            else:
+                if key == 'generalMutationChance':
+                    self.__generalMutationChance = float(value[0])
+                elif key == 'numberOfMaps':
+                    self.__numberOfMaps = int(value[0])
+            i+=1
+
+        return data 
+
+    def setUpData(self):
+        # pretty sure don't have to keep assigning data 
+        data = self._mainHandler.getReadConfig()
+        data = self.setUpGeneral(data)
+        self.__diseaseCreationHandler = cD.DiseaseCreationHandler(self.__dbQueryHandler, data)
+        self.__populationCreationHandler = cP.PopulationCreationHandler(self.__dbQueryHandler, data)
+        self.__mapCreationHandler = cM.MapCreationHandler(self.__dbQueryHandler, data)
+
+        self._mainHandler.setWriteConfig(data)
+        self.__populationCreationHandler.register(self)
+
+        self.seedDatabase()
+        self.createStatsCSV()
+        #return True 
     
-    # create one map and one population at the same time and go through number of maps so if their were 3 maps
-    # create population 1 and map 1 together then the next population 2 and map 2 etc ...
-    def create(self):
-        # disease has to be created at the same time as the people so the 1st person from every population has to have a disease created
-        # with it 
-        self.__diseaseCreationHandler.run()
-        print(self.__diseaseCreationHandler.getDiseaseID())
-        for i in range(1, self.__mapCreationHandler.getNumberOfMaps()+1):
-            self.__populationCreationHandler.createPopulation(i , self.__diseaseCreationHandler.getDiseaseID())
-            self.__mapCreationHandler.createMap(i,i, self.__populationCreationHandler.getPopulationSize())
+    def startMapSeed(self, id,populationID, popSize):
+        self.__mapCreationHandler.seedMapTable(id, populationID, popSize)
 
+    def getDiseaseID(self, populationID, personID):
+        return self.__diseaseCreationHandler.generateDiseaseID(populationID,personID,self.getMapHandlerName(populationID))
 
-    def run(self):
-        with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json')) as f:
-            data = json.load(f)
-        self.__diseaseCreationHandler = cD.Main(self.__dbQueryHandler, data)
-        self.__populationCreationHandler = cP.Main(self.__dbQueryHandler, data)
-        self.__mapCreationHandler = cM.Main(self.__dbQueryHandler, data)
-        self.create()
-        return True 
+    def seedBloodTypeTable(self):
+        id = 1
+        for bloodType in ['O+','O-','A+','A-','B+','B-','AB+','AB-']:
+            self.__dbQueryHandler.createBloodType(id, bloodType)
+            id +=1
+    
+    def getMapWidth(self) -> int:
+        return self.__mapCreationHandler.getCityWidth()
+
+    def getMapHeight(self) -> int:
+        return self.__mapCreationHandler.getCityHeight()
+
+    def getMapHandlerName(self, id) -> str:
+        return self.__mapCreationHandler.getCityName(id)
+    
+    def getMapHandlerNames(self) -> str:
+        return self.__mapCreationHandler.getCityNames()
+    
+    def getDiseasePasympto(self, id) -> float:
+        return self.__diseaseCreationHandler.getPasymptomaticOnInfection(id)
+
 
 

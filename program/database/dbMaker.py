@@ -17,11 +17,16 @@ CREATE TABLE IF NOT EXISTS Person(
     rTime           FLOAT,
     iTime           FLOAT,
     ibTime          FLOAT,
+    travellingTime  FLOAT,
+    travelling      INTEGER,
+    asymptomatic    INTEGER,
+    paritalImmunity FLOAT,
+    destination     INTEGER,
+    bloodType       STRING,
+    age             INTEGER,
+    health          FLOAT,
     xPos            INTEGER,
     yPos            INTEGER,
-    travelling      BOOLEAN,
-    travellingTime  FLOAT,
-    originalHome    INTEGER,
     diseaseID       INTEGER,
     populationID    INTEGER,    
     FOREIGN KEY(populationID) REFERENCES Population(id),
@@ -39,12 +44,16 @@ CREATE TABLE IF NOT EXISTS Population(
 
 createMapTable = '''
 CREATE TABLE IF NOT EXISTS Map(
-    id                 INTEGER,
-    name               TEXT,
-    width              INTEGER,
-    height             INTEGER,
-    day                INTEGER,
-    populationID       INTEGER,
+    id                                      INTEGER,
+    name                                    TEXT,
+    width                                   INTEGER,
+    height                                  INTEGER,
+    day                                     INTEGER,
+    govermentActionReliabilty               FLOAT,
+    identifyAndIsolateTriggerInfectionCount INTEGER,
+    infectionTimeBeforeQuarantine           FLOAT,
+    socialDistanceTriggerInfectionCount     INTEGER,
+    populationID                            INTEGER,
     FOREIGN KEY(populationID) REFERENCES Population(id),
     PRIMARY KEY(id)
 );
@@ -52,13 +61,17 @@ CREATE TABLE IF NOT EXISTS Map(
 
 createDiseaseTable = '''
 CREATE TABLE IF NOT EXISTS Disease(
-    id                  STRING,
-    name                TEXT,
-    transmissionTime    FLOAT,
-    contagion           FLOAT,
-    transmissionRadius  INTEGER,
-    infectedTime        FLOAT,
-    incubationTime      FLOAT,
+    id                       STRING,
+    name                     STRING,
+    transmissionTime         FLOAT,
+    contagion                FLOAT,
+    transmissionRadius       INTEGER,
+    infectedTime             FLOAT,
+    incubationTime           FLOAT,
+    ageMostSusceptible       INTEGER,
+    canKill                  INTEGER,
+    pAsymptomaticOnInfection FLOAT,
+    danger                   FLOAT,
     PRIMARY KEY(id)
 );
 '''
@@ -78,13 +91,26 @@ CREATE TABLE IF NOT EXISTS Disease(
 # mapRelationship or mapConnections
 createMapRelationshipsTable = '''
 CREATE TABLE IF NOT EXISTS MapRelationships(
-    map1ID      ID,
-    map2ID      ID,
+    map1ID      INTEGER,
+    map2ID      INTEGER,
     time        FLOAT, 
-    drivable    BOOLEAN,
-    flyable     BOOLEAN,
     FOREIGN KEY(map1ID) REFERENCES Map(id),
     FOREIGN KEY(map2ID) REFERENCES Map(id)
+);
+'''
+createBloodTypeTable = '''
+CREATE TABLE IF NOT EXISTS BloodType(
+    id          INTEGER,
+    bloodType   STRING,
+    PRIMARY KEY(id)
+);
+'''
+createDiseaseBloodTypeLinkTable = '''
+CREATE TABLE IF NOT EXISTS DiseaseBloodTypeLink(
+    diseaseID        STRING,
+    bloodTypeID      INTEGER,
+    FOREIGN KEY(diseaseID) REFERENCES Disease(id),
+    FOREIGN KEY(bloodTypeID) REFERENCES BloodType(id)
 );
 '''
 
@@ -101,8 +127,10 @@ def createDB():
     c.execute(createPersonTable)
     c.execute(createPopulationTable)
     c.execute(createMapTable)
+    c.execute(createMapRelationshipsTable)
     c.execute(createDiseaseTable)
-    # c.execute(createStatisticsTable)
+    c.execute(createBloodTypeTable)
+    c.execute(createDiseaseBloodTypeLinkTable)
     c.close()
 
 

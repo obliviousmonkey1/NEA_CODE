@@ -21,19 +21,19 @@ class DBManager:
         self.conn.commit()
 
 
-    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, xPos: int, yPos: int, travelling: bool, travellingTime: float, originalHome: int, diseaseID: int, populationID: int) -> None:
+    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float,travelling:int,asymptomatoc: int, paritalImmunity:float,destination:int,bloodType:str,age:int,health:float, xPos: int, yPos: int, diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,xPos,yPos,travelling,travellingTime,originalHome,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,travelling,asymptomatoc,paritalImmunity,destination,bloodType,age,health,xPos,yPos,diseaseID,populationID))
         self.conn.commit()
 
 
     def getPopulation(self, mapID):
         gPopulation = '''
-        SELECT *
+        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.travellingTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.diseaseID
         FROM Person, Map, Population
         WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
         '''
@@ -120,13 +120,13 @@ class DBManager:
 
 
     # Map
-    def createMap(self, id: int, name: str, width: int, height: int, day: int, populationID: int) -> None:
+    def createMap(self, id: int, name: str, width: int, height: int, day: int,govermentActionReliabilty:float,identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,socialDistanceTriggerInfectionCount:int, populationID: int) -> None:
         cMap = '''
         INSERT INTO Map VALUES
-        (?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cMap, (id, name, width, height, day, populationID))
+        c.execute(cMap, (id, name, width, height, day,govermentActionReliabilty,identifyAndIsolateTriggerInfectionCount,infectionTimeBeforeQuarantine,socialDistanceTriggerInfectionCount, populationID))
         self.conn.commit()
 
 
@@ -185,13 +185,13 @@ class DBManager:
 
 
     # Disease
-    def createDisease(self, id: str, name: str, transmissionTime: float, contagion: float, transmissionRadius: int, infectedTime: float, incubationTime: float) -> None:
+    def createDisease(self, id: str, name: str, transmissionTime: float, contagion: float, transmissionRadius: int, infectedTime: float, incubationTime: float,ageMostSusceptible:int,canKill:int,pAsymptomaticOnInfection:float,danger:float) -> None:
         cDisease = '''
         INSERT INTO Disease VALUES
-        (?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cDisease, (id, name, transmissionTime, contagion, transmissionRadius, infectedTime, incubationTime))
+        c.execute(cDisease, (id, name, transmissionTime, contagion, transmissionRadius, infectedTime, incubationTime,ageMostSusceptible,canKill,pAsymptomaticOnInfection,danger))
         self.conn.commit()
 
 
@@ -260,82 +260,26 @@ class DBManager:
         c.execute(gIncubationTime, (id,))
         return c.fetchone()
 
+    
+    # Blood Type
+    def createBloodType(self, id: int, bloodType: str) -> None:
+        cBloodType = '''
+        INSERT INTO BloodType VALUES
+        (?,?)
+        '''
+        c = self.conn.cursor()
+        c.execute(cBloodType, (id, bloodType))
+        self.conn.commit()
+    
 
-    # # Statistics
-    # def createStatistics(self, id: str, day: int, map: int, susceptible: int, infected: int, removed: int) -> None:
-    #     cStatistics = '''
-    #     INSERT INTO Statistics VALUES
-    #     (?,?,?,?,?,?)
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(cStatistics, (id, day, map, susceptible, infected, removed))
-    #     self.conn.commit()
-
-
-    # def getAllSusceptible(self, day: int) -> int:
-    #     gAllSusceptible = '''
-    #     SELECT susceptible
-    #     FROM Statistics
-    #     WHERE day = ? 
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllSusceptible, (day,))
-    #     return c.fetchall()
-
-
-    # def getAllInfected(self, day: int) -> int:
-    #     gAllInfected = '''
-    #     SELECT infected
-    #     FROM Statistics
-    #     WHERE day = ?
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllInfected, (day,))
-    #     return c.fetchall()
-
-
-    # def getAllRemoved(self, day: int) -> int:
-    #     gAllRemoved = '''
-    #     SELECT removed
-    #     FROM Statistics
-    #     WHERE day = ?
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllRemoved, (day,))
-    #     return c.fetchall()
-
-
-    # def getAllSusceptibleFromMap(self, day: int, mapID: int) -> int:
-    #     gAllSusceptibleFromMap= '''
-    #     SELECT susceptible
-    #     FROM Statistics
-    #     WHERE day = ? and map = ? 
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllSusceptibleFromMap, (day, mapID))
-    #     return c.fetchone()
-
-
-    # def getAllInfectedFromMap(self, day: int, mapID: int) -> int:
-    #     gAllInfectedFromMap= '''
-    #     SELECT infected
-    #     FROM Statistics
-    #     WHERE day = ? and map = ? 
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllInfectedFromMap, (day, mapID))
-    #     return c.fetchone()
-
-
-    # def getAllRemovedFromMap(self, day: int, mapID: int) -> int:
-    #     gAllRemovedFromMap= '''
-    #     SELECT removed
-    #     FROM Statistics
-    #     WHERE day = ? and map = ? 
-    #     '''
-    #     c = self.conn.cursor()
-    #     c.execute(gAllRemovedFromMap, (day, mapID))
-    #     return c.fetchone()
+    def createDiseaseBloodTypeLink(self, diseaseID: str, bloodTypeID: int) -> None:
+        cCreateDiseaseBloodTypeLinkTable = '''
+        INSERT INTO DiseaseBloodTypeLink VALUES
+        (?,?)
+        '''
+        c = self.conn.cursor()
+        c.execute(cCreateDiseaseBloodTypeLinkTable, (diseaseID, bloodTypeID))
+        self.conn.commit()
 
 
     def close(self):

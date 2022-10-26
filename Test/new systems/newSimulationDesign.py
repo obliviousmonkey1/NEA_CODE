@@ -53,8 +53,8 @@ this will fade away and decrease in transmitabliltiy as time goes on
 '''
 def set_status():
     # determins whether a newley infected person is symptomatic or asymptomatic 
-    if random.random() < p_symptomatic_on_infection:
-        symptomatic = True
+    if random.random() < p_asymptomatic_on_infection:
+        asymptomatic = False
 
 def transmission():
     pass
