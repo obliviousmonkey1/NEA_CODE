@@ -1,7 +1,18 @@
+from ast import Delete
+from multiprocessing import Value
 import os 
 import json
 import tkinter as tk
 from tkinter import ttk
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+import numpy as np
 
 FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
 
@@ -9,9 +20,9 @@ FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.jso
 main menu which is the general collumns then you have sub menus so if 2 diseases it will created d1 d2 in sub menu 
 """
 class UI(tk.Tk):
-    def __init__(self, parent):
+    def __init__(self):
         super().__init__()
-        self.parent = parent
+        self.parent = tk.Tk()
         self.controller = None
         self.type = "general"
         self.currentIndex = 0
@@ -22,26 +33,109 @@ class UI(tk.Tk):
         self.valueLabel = []
         self.l = []
         self.values = []
+        self.currentGraphReference = 'allCities'
         self.initialize_user_interface()
 
 
     def initialize_user_interface(self):
         self.windowSizeChange('960','540')
         self.parent.title('Setup')
-        self.entry_point()
+        self.title('Data')
+
     
     def register(self, controller):
         self._controller = controller
     
-
     # SIMULATION SETUP 
+    '''
+    need to make this call graph handler and have all of this done in the grpah handler
+    '''
+    def gCurrentData(self):
+        data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.currentGraphReference}data.csv'))
+        x = data['day']
+        y1 = data['Susceptible']
+        y2 = data['Infected']
+        y3 = data['Removed']
+        fig = Figure(figsize=(5, 4), dpi=100)
+        fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
+        return fig 
+
+    def gCurrentGraph(self):
+        data =self.gCurrentData()
+        self.canvas = FigureCanvasTkAgg(data, master=self.parent)  # A tk.DrawingArea.
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
+        
+    def gCity(self, cName):
+        self.currentGraphReference = cName
+        self.canvas.get_tk_widget().destroy()
+        self.currentGraphLabel['text'] = self.currentGraphReference
+        self.gCurrentGraph()
+
+    def graphButtons(self):
+        self.b = []
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
+            self.data = json.load(file) 
+
+        i = 0
+        cityNames = []
+        for i in range((len(self.data['maps']))):
+            for key, value in self.data['maps'][i].items():
+                if key == 'cityName':
+                    cityNames.append(value[0])
+            i+=1
+        cityNames.reverse()
+      
+        for cityName in cityNames:
+            button = ttk.Button(self.parent, text=cityName, command=lambda cName=cityName: self.gCity(cName))
+            button.pack(anchor=tk.S, side=tk.RIGHT)
+            self.b.append(button)
+
+        button = ttk.Button(self.parent, text='All Cities', command=lambda cName='allCities': self.gCity(cName))
+        button.pack(anchor=tk.S, side=tk.RIGHT)  
+
+        
+    def simulationWindow(self, value=0):
+        if value == 1:
+            self.canvas.get_tk_widget().destroy()
+            self.currentDayLabel.destroy()
+            self.currentGraphLabel.destroy()
+        self.parent.title('Simulation')
+
+        self.currentDayLabel = ttk.Label(self, text=f'Current Day {self._controller.getCurrentDay()}')
+        self.currentDayLabel.pack(anchor=tk.NW, side=tk.LEFT) 
+
+        self.currentGraphLabel = ttk.Label(self, text=f'Selected Graph {self.currentGraphReference}')
+        self.currentGraphLabel.pack(anchor=tk.NW, side=tk.LEFT) 
+
+        self.gCurrentGraph()
+        if value == 0:
+            self.graphButtons()
+
+        # run code 
+        # self._controller.runSimulation()
+  
+
     def loading(self):
         self.clearWidgets()
         self.windowSizeChange('960','540')
         self.parent.title('Loading')
-        self._controller.
 
+        label = ttk.Label(self.parent, foreground='red', text='Setting Up DataBase and other stuff')
+        label.grid(column=1, row=1)
+        self.parent.grid_rowconfigure(1, weight=1)
+        self.parent.grid_columnconfigure(1, weight=1)
 
+        self._controller.setUpSimulationData()
+        print('compeleted')
+
+        label.destroy()
+        label = ttk.Label(self.parent, foreground='green', text='Setup complete')
+        label.grid(column=1, row=1)
+        label.destroy()
+        # label.after(3000, lambda: label.destroy())
+
+        self.simulationWindow()
 
     # CONFIG SETUP
     def typeLoop(self):
@@ -118,15 +212,7 @@ class UI(tk.Tk):
             self.errorLabel = ttk.Label(self.parent, foreground='red',text=err.args)
             self.errorLabel.grid(column=1, row=101, sticky=tk.W, **paddings)
             self.errorLabel.after(6000, lambda: self.errorLabel.destroy() )
-
-
-    def setUpSimulation(self):
-        print('setUpSimulation')
-
-    def openSettings(self):
-        with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
-            self.data = json.load(file)
-
+ 
     def displaySettings(self):
         paddings = {'padx': 5, 'pady': 5}
 
@@ -182,7 +268,7 @@ class UI(tk.Tk):
         back_button = ttk.Button(self.parent, text='BACK', command=self.back)
         back_button.grid(column=0, row=100, sticky=tk.S)
 
-        simulation_button = ttk.Button(self.parent, text='Start Simulation', command=self.setUpSimulation)
+        simulation_button = ttk.Button(self.parent, text='Start Simulation', command=self.loading)
         simulation_button.grid(column=self.c//2, row=100, sticky=tk.S)
 
 
@@ -265,12 +351,12 @@ class UI(tk.Tk):
         self.parent.geometry(f"{width}x{height}")
         self.parent.resizable(False,False)
 
+    def openSettings(self):
+        with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
+            self.data = json.load(file)
+
 
     def entry_point(self):
         self.setUpOne()
 
 
-if __name__ == '__main__':
-   root = tk.Tk()
-   run = UI(root)
-   root.mainloop()

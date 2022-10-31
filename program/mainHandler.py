@@ -1,3 +1,13 @@
+FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
+FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
+FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
+
+import sys
+import os
+sys.path.append(os.path.expanduser(FILE_PATH_LOG))
+sys.path.append(os.path.expanduser(FILE_PATH_DBH))
+
+import dbHandler as dbH
 import graphHandler as gH
 import simulationHandler as sH
 import creationHandler as cH
@@ -12,6 +22,7 @@ class Handler:
         self.__graphHandler = gH.Main()
         self.__creationHandler = cH.Main()
         self.__simulationHandler = sH.Main()
+        self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
         # self.__graphHandler.register(self)
         self.__creationHandler.register(self)
@@ -32,6 +43,8 @@ class Handler:
     def runSimulationHandler(self):
         self.__simulationHandler.run()
 
+    def gCurrentDay(self):
+        return self.__dbQueryHandler.getMapDay(1)
 
     def createAndPopulateDatabase(self):
         return self.__creationHandler.setUpData()

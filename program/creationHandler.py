@@ -36,13 +36,15 @@ class Main:
         self.__mapCreationHandler.seedRelationshipTable()
 
     def createStatsCSV(self):
-        for name in self.getMapHandlerNames():
+        mapNames = self.getMapHandlerNames()
+        mapNames.append('allCities')
+        for name in mapNames:
             fieldnames = ["day", "Susceptible", "Infected", "Removed"]
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{name}data.csv'), 'w') as csv_file:
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{name}data.csv'), 'w') as csv_file:
                 csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
                 csv_writer.writeheader()
             
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{name}data.csv'), 'a') as csv_file:
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{name}data.csv'), 'a') as csv_file:
                 csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
                 info={
                     "day" : 0,
@@ -51,10 +53,9 @@ class Main:
                     "Removed" : 0
                 }
                 csv_writer.writerow(info)
-
+           
   
     def setUpGeneral(self, data):
-
         i = 0
         for key, value in data[self.tag][i].items():
             if self._mainHandler.checkRandom(value[0]):

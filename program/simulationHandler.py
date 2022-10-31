@@ -4,6 +4,7 @@ FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
 
 import sys
 import os 
+import csv 
 sys.path.append(os.path.expanduser(FILE_PATH_LOG))
 sys.path.append(os.path.expanduser(FILE_PATH_DBH))
 
@@ -40,7 +41,6 @@ MAP_NUMBER = 4
 class Main():
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
-        self.a = []
 
 
     def populateMapsFromDatabase(self):
@@ -49,33 +49,44 @@ class Main():
 
     def sim(self, map, threadID):
         sim = model.Simulation(map)
-        b = sim.day(threadID)
-        print(b)
+        sim.day(threadID)
         print(f'Thread {threadID}')
         
+    def getDay(self) -> int:
+        return self.__dbQueryHandler.getMapDay(1)
+
+    def recordTotalStats(self):
+        day = self.getMapDay()
+        # fieldnames = ["day", "Susceptible", "Infected", "Removed"]
+        # with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.__map.getName()}data.csv'), 'a') as csv_file:
+        #     csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+        #     info={
+        #         "day" : self.__map.getDay(),
+        #         "Susceptible" : self.s,
+        #         "Infected" : self.i,
+        #         "Removed" : self.r
+        #     }
+        #     csv_writer.writerow(info)
+
 
     # need to sort out multiprocessing
     def run(self): 
-        
         self.__maps = self.populateMapsFromDatabase()
-        while True:
-            self.startTime = timeit.default_timer()
-            print(f'startTime: {self.startTime}')
-            self.threads = []
-            for index, map in enumerate(self.__maps):
-                # self.sim(map, index)
-                #  x = multiprocessing.Process(target=self.sim, args=(map,index))
-                x = threading.Thread(target=self.sim, args=(map,index))
-                self.threads.append(x)
-                x.start()
-            for index, thread in enumerate(self.threads):
-                thread.join()
-            print(f'endTime: {timeit.default_timer()}')
-            print(f'time taken : {timeit.default_timer() - self.startTime}')
+        self.startTime = timeit.default_timer()
+        print(f'startTime: {self.startTime}')
+        self.threads = []
+        for index, map in enumerate(self.__maps):
+            # self.sim(map, index)
+            #  x = multiprocessing.Process(target=self.sim, args=(map,index))
+            x = threading.Thread(target=self.sim, args=(map,index))
+            self.threads.append(x)
+            x.start()
+        for index, thread in enumerate(self.threads):
+            thread.join()
+        print(f'endTime: {timeit.default_timer()}')
+        print(f'time taken : {timeit.default_timer() - self.startTime}')
 
-            print(self.a)
-            # debug input 
-            input('> ')
-            
-            self.__maps = self.populateMapsFromDatabase()
+        # debug input 
+        #input('> ')
+        
                 

@@ -192,8 +192,6 @@ class Simulation:
         self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
         self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
         self.__logger.localDump(f'{threadID}')
-        return [self.__map.getID, self.__map.getDay, self.s,self.i,self.r]
-
 
     def updateStatistics(self):
         self.s,self.i,self.r = 0,0,0
@@ -207,7 +205,7 @@ class Simulation:
 
     def recordStatistics(self):
         fieldnames = ["day", "Susceptible", "Infected", "Removed"]
-        with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/{self.__map.getName()}data.csv'), 'a') as csv_file:
+        with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.__map.getName()}data.csv'), 'a') as csv_file:
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
             info={
                 "day" : self.__map.getDay(),

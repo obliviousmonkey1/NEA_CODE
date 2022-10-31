@@ -1,5 +1,5 @@
 from mainHandler import *
-from view import *
+from newUIdesign import *
 import miscFunctions
 import threading
 
@@ -21,13 +21,17 @@ class Main:
 
     def runSimulation(self):
         self.mainHandler.runSimulationHandler()
+        self.view.simulationWindow(1)
 
-    
+    # thread this simulation with two threads one that updates progress bar
+    # the other one that doesn't
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
 
-
     # misc funciton calls 
+    def getCurrentDay(self) -> int:
+        return self.mainHandler.gCurrentDay()
+
     def checkRandom(self, value) -> bool:
         return miscFunctions.randomCheck(value)
     
@@ -48,6 +52,7 @@ if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    #ui.entryPoint()
-    c.setUpSimulationData()
-    c.runSimulation()
+    ui.entry_point()
+    ui.parent.mainloop()
+    # c.setUpSimulationData()
+    # c.runSimulation()
