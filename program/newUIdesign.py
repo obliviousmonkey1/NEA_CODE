@@ -10,7 +10,6 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 # Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 import numpy as np
 
@@ -38,6 +37,7 @@ class UI(tk.Tk):
 
 
     def initialize_user_interface(self):
+        # self.parent.iconphoto(False, tk.PhotoImage(file = '/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png'))
         self.windowSizeChange('960','540')
         self.parent.title('Setup')
         self.title('Data')
@@ -51,29 +51,40 @@ class UI(tk.Tk):
     need to make this call graph handler and have all of this done in the grpah handler
     '''
     def gCurrentData(self):
-        data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.currentGraphReference}data.csv'))
-        x = data['day']
-        y1 = data['Susceptible']
-        y2 = data['Infected']
-        y3 = data['Removed']
-        fig = Figure(figsize=(5, 4), dpi=100)
-        fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
-        return fig 
+        # data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.currentGraphReference}data.csv'))
+        return self._controller.gGraphData()
+        # x = data['day']
+        # y1 = data['Susceptible']
+        # y2 = data['Infected']
+        # y3 = data['Removed']
+        # fig = Figure(figsize=(5, 4), dpi=100)
+        # fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
+        # return fig 
 
     def gCurrentGraph(self):
-        data =self.gCurrentData()
+        data = self.gCurrentData()
         self.canvas = FigureCanvasTkAgg(data, master=self.parent)  # A tk.DrawingArea.
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        self.gToolBarWindow()
+
+        # data =self.gCurrentData()
+        # self.canvas = FigureCanvasTkAgg(data, master=self.parent)  # A tk.DrawingArea.
+        # self.canvas.draw()
+        # self.canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
         
     def gCity(self, cName):
+        # self.currentGraphReference = self.option_var.get()
+        self.toolbar.destroy()
         self.currentGraphReference = cName
+        self._controller.sGraphRef(cName)
+        self.option_menu = cName
         self.canvas.get_tk_widget().destroy()
         self.currentGraphLabel['text'] = self.currentGraphReference
         self.gCurrentGraph()
 
     def graphButtons(self):
-        self.b = []
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file) 
 
@@ -85,24 +96,45 @@ class UI(tk.Tk):
                     cityNames.append(value[0])
             i+=1
         cityNames.reverse()
-      
+
+        # self.settings = []
+        # self.settings.append('allCities')
+        # for cityName in cityNames:
+        #     self.settings.append(cityName)
+
+        # self.option_var = tk.StringVar(self)
+        # self.optionMenuIndex = 0
+        # option_menu = ttk.OptionMenu(
+        #         self,
+        #         self.option_var,
+        #         self.settings[self.optionMenuIndex],
+        #         *self.settings,
+        #         command=self.gCity())
+
+        # option_menu.pack(anchor=tk.S, side=tk.RIGHT)
+
+        button = ttk.Button(self.graphSelctorWindow, text='All Cities', command=lambda cName='allCities': self.gCity(cName))
+        button.pack(anchor=tk.S, side=tk.LEFT)  
         for cityName in cityNames:
-            button = ttk.Button(self.parent, text=cityName, command=lambda cName=cityName: self.gCity(cName))
-            button.pack(anchor=tk.S, side=tk.RIGHT)
-            self.b.append(button)
-
-        button = ttk.Button(self.parent, text='All Cities', command=lambda cName='allCities': self.gCity(cName))
-        button.pack(anchor=tk.S, side=tk.RIGHT)  
-
+            button = ttk.Button(self.graphSelctorWindow, text=cityName, command=lambda cName=cityName: self.gCity(cName))
+            button.pack(anchor=tk.S, side=tk.LEFT)
         
+        button = ttk.Button(self, text='Step sim', command=self.rSim)
+        button.pack(anchor=tk.S, side=tk.LEFT)
+
+
+    def rSim(self):
+        self._controller.runSimulation()
+
     def simulationWindow(self, value=0):
         if value == 1:
             self.canvas.get_tk_widget().destroy()
+            self.toolbar.destroy()
             self.currentDayLabel.destroy()
             self.currentGraphLabel.destroy()
         self.parent.title('Simulation')
 
-        self.currentDayLabel = ttk.Label(self, text=f'Current Day {self._controller.getCurrentDay()}')
+        self.currentDayLabel = ttk.Label(self, text=f'Current Day {(self._controller.getCurrentDay())}')
         self.currentDayLabel.pack(anchor=tk.NW, side=tk.LEFT) 
 
         self.currentGraphLabel = ttk.Label(self, text=f'Selected Graph {self.currentGraphReference}')
@@ -115,6 +147,12 @@ class UI(tk.Tk):
         # run code 
         # self._controller.runSimulation()
   
+    def gToolBarWindow(self):
+        # self.toolBarWindow = tk.Tk()
+        # self.toolBarWindow.title = 'Toolbar'
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.parent)
+        self.toolbar.update()
+
 
     def loading(self):
         self.clearWidgets()
@@ -133,7 +171,13 @@ class UI(tk.Tk):
         label = ttk.Label(self.parent, foreground='green', text='Setup complete')
         label.grid(column=1, row=1)
         label.destroy()
-        # label.after(3000, lambda: label.destroy())
+        # label.after(3000, lambda: label.destroy())    
+
+        self.graphSelctorWindow = tk.Tk()
+        self.graphSelctorWindow.title('Graph Selection')
+
+        self._controller.sGraphRef(self.currentGraphReference)
+
 
         self.simulationWindow()
 

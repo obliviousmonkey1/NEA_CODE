@@ -19,7 +19,7 @@ controls all the handlers
 class Handler:
     def __init__(self) -> None:
         self._controller = None
-        self.__graphHandler = gH.Main()
+        self.__graphHandler = gH.GraphDataHandler()
         self.__creationHandler = cH.Main()
         self.__simulationHandler = sH.Main()
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
@@ -49,6 +49,12 @@ class Handler:
     def createAndPopulateDatabase(self):
         return self.__creationHandler.setUpData()
 
+    # graph
+    def gNewGraphData(self):
+        return self.__graphHandler.getData()
+    
+    def sNewGraphRef(self, gR):
+        self.__graphHandler.setNewGraphRef(gR)
 
     # controller calls
     def checkRandom(self, value) -> bool:

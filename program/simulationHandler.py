@@ -35,8 +35,7 @@ then we load the dbMaker
 then we load the createPopulation and createMap
 then we run the main simulationHandler
 """
-PEOPLE_NUMBER = 200
-MAP_NUMBER = 4
+ 
 
 class Main():
     def __init__(self) -> None:
@@ -87,6 +86,6 @@ class Main():
         print(f'time taken : {timeit.default_timer() - self.startTime}')
 
         # debug input 
-        #input('> ')
+        # input('> ')
         
                 

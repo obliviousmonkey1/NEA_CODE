@@ -61,7 +61,7 @@ class PopulationCreationHandler:
 
     def seedPopulationTable(self, populationID: int, indexZero=False) -> None:
         self.id = populationID
-        self.__dbQueryHandler.createPopulation(self.id)
+        self.__dbQueryHandler.createPopulation(self.id,0,0,0)
         if not indexZero:
             self.seedMap()
             self.seedPeopleTable()

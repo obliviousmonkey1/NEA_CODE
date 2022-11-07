@@ -11,13 +11,79 @@ class DBManager:
     
 
     # Population and people 
-    def createPopulation(self, id: int) -> None:
+    def createPopulation(self, id: int, susceptible: int, infected: int, removed: int) -> None:
         cPopulation = '''
         INSERT INTO Population VALUES
-        (?)
+        (?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPopulation, (id,))
+        c.execute(cPopulation, (id,susceptible,infected,removed))
+        self.conn.commit()
+
+
+    def getPopulationSusceptible(self, id: int) -> None:
+        gPopulationSusceptible = '''
+        SELECT Population.susceptible
+        FROM Population
+        WHERE Population.id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationSusceptible, (id,))
+        return c.fetchall()   
+
+
+    def getPopulationInfected(self, id: int) -> None:
+        gPopulationInfected = '''
+        SELECT Population.infected
+        FROM Population
+        WHERE Population.id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationInfected, (id,))
+        return c.fetchall()  
+
+
+    def getPopulationRemoved(self, id: int) -> None:
+        gPopulationRemoved = '''
+        SELECT Population.removed
+        FROM Population
+        WHERE Population.id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationRemoved, (id,))
+        return c.fetchall()  
+
+
+    def updatePopulationSusceptible(self, id: int, susceptible: int) -> None:
+        uPopulationSusceptible = '''
+        UPDATE Population
+        SET susceptible = ?
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPopulationSusceptible, (susceptible, id))
+        self.conn.commit()
+
+
+    def updatePopulationInfected(self, id: int, infected: int) -> None:
+        uPopulationInfected = '''
+        UPDATE Population
+        SET infected = ?
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPopulationInfected, (infected, id))
+        self.conn.commit()
+
+
+    def updatePopulationRemoved(self, id: int, removed: int) -> None:
+        uPopulationRemoved = '''
+        UPDATE Population
+        SET removed = ?
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPopulationRemoved, (removed, id))
         self.conn.commit()
 
 
@@ -260,7 +326,18 @@ class DBManager:
         c.execute(gIncubationTime, (id,))
         return c.fetchone()
 
-    
+
+    def getDiseasetPasymptomatic(self, id: str) -> float:
+        gPasymptomaticOnInfection = '''
+        SELECT pAsymptomaticOnInfection
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPasymptomaticOnInfection, (id,))
+        return c.fetchone()
+
+
     # Blood Type
     def createBloodType(self, id: int, bloodType: str) -> None:
         cBloodType = '''

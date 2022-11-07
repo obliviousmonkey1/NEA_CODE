@@ -18,15 +18,25 @@ class Main:
     def pauseSimulation(self):
         self.mainHandler.setSimulationHandlerRunning(False)
 
+    def run(self):
+        self.mainHandler.runSimulationHandler()
 
     def runSimulation(self):
         self.mainHandler.runSimulationHandler()
         self.view.simulationWindow(1)
 
+
     # thread this simulation with two threads one that updates progress bar
     # the other one that doesn't
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
+
+    # graph
+    def gGraphData(self):
+        return self.mainHandler.gNewGraphData()
+
+    def sGraphRef(self, gR):
+        self.mainHandler.sNewGraphRef(gR)
 
     # misc funciton calls 
     def getCurrentDay(self) -> int:

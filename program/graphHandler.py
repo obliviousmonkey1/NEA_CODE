@@ -11,16 +11,36 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
 import dbHandler as dbH
-
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.figure import Figure
+import numpy as np
 
 '''
 need to make a class which holds reference to the map ids 
 maybe have the data update every hour so graph updates per hour in real time while sim is running
 '''
 
-class Main:
-    def __init__(self) -> None:
-        pass
+class GraphDataHandler:
+    def setNewGraphRef(self,graphReference):
+        self._graphReference = graphReference
+
+    def getData(self):
+        data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self._graphReference}data.csv'))
+        x = data['day']
+        y1 = data['Susceptible']
+        y2 = data['Infected']
+        y3 = data['Removed']
+        fig = Figure(figsize=(5, 4), dpi=100)
+        fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
+
+
+        # currentSus = data['Susceptible'][-1]
+        return fig
 
 # dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 

@@ -59,15 +59,17 @@ class Simulation:
     def day(self, threadID):
         self.startTime = timeit.default_timer()
         self.__logger.log('day function', f'startTime: {self.startTime}, day: {self.__map.getDay()}')
+        
 
         if self.tempoaryGroup(0 ,'I'):
-            while self.__hour < 24:
+            while self.__hour < 24:            
                 self.__logger.log('day function whileloop', f'hour: {self.__hour}')
                 infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
                 # check if infection time is over, if it is not then update infection time 
                 if infecetdGroup != None:
                     for infectedPerson in infecetdGroup:
+                        self.identify(infectedPerson)
                         if infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
                             if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
                                 infectedPerson.setDiseaseID(None)
@@ -99,23 +101,44 @@ class Simulation:
         self.updateDB(threadID)
     
 
+    def identify(self, person):
+        # chance to not identify infected people 
+        if numbCases == criticalThresholdOfCases:
+            if person.getNumbDaysInfected == quarantineDayAfterInfection:
+                self.quarantine(person)
+            elif ((person.getLastMapID != map.getMapID) and (person.getDaysSpent =< quarantineSusceptibleDays)):
+                self.quarantine(person)
+       
+    def quarantine(self):
+        pass
+
+    def setStatus(self, susceptiblePerson, infectedPerson):
+        diseaseID = infectedPerson.getDiseaseId()
+        # if random.random() < MUTATION_CHANCE:
+        #     susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+        # else:
+        #     susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+        susceptiblePerson.setDiseaseID(diseaseID)
+        susceptiblePerson.setIBtime(0.0)
+        susceptiblePerson.setStatus('I')
+        if random.random() < self.__disease.getPasymptomatic(diseaseID):
+            susceptiblePerson.setAsymptomatic(0)
+        else:
+            susceptiblePerson.setAsymptomatic(1)
+
+
     def infection(self, susceptiblePerson):
         for infectedPerson in self.infecetdGroup:
             if self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1], susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], infectedPerson.getDiseaseId()):
                 if susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and random.random() < P_INFECTION_PER_DAY * self.__disease.getContagion(infectedPerson.getDiseaseId()):
-                    # if random.random() < MUTATION_CHANCE:
-                    #     susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
-                    # else:
-                    #     susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
-                    susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
-                    susceptiblePerson.setIBtime(0.0)
-                    susceptiblePerson.setStatus('I')
+                    self.setStatus(susceptiblePerson, infectedPerson)
+                    break
                 else:
                     susceptiblePerson.setRtime()
+                
 
-
-    def checkInsideRadius(self, x, y, c_x, c_y, diseaseID) -> bool:  
-        if ((x - c_x) * (x - c_x) + (y - c_y) * (y - c_y) <= self.__disease.getTransmissionRadius(diseaseID) * self.__disease.getTransmissionRadius(diseaseID)):
+    def checkInsideRadius(self, x1, y1, x2, y2, diseaseID) -> bool:  
+        if (((x1 - x2)**2 + (y1 - y2)**2) <= self.__disease.getTransmissionRadius(diseaseID) * self.__disease.getTransmissionRadius(diseaseID)):
             return True 
 
 
@@ -260,36 +283,6 @@ class Map:
         return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7], person[8], person[9], person[10], person[11], person[12], person[13], person[14], person[15]) for person in dbpopulation]
 
 
-# doesn't store anything only has getters and setters for the database so multiple disease can be around 
-class Disease:
-    def __init__(self, dbQuery) -> None:
-        self.__dbQueryHandler = dbQuery
-    
-
-    def getName(self, id: str) -> str:
-        return self.__dbQueryHandler.getDiseaseName(id)[0]
-
-    
-    def getTransmissionTime(self, id: str) -> float:
-        return self.__dbQueryHandler.getDiseaseTransmissionTime(id)[0]
-    
-
-    def getContagion(self, id: str) -> float:
-        return self.__dbQueryHandler.getDiseaseContagion(id)[0]
-    
-
-    def getTransmissionRadius(self, id: str) -> int:
-        return self.__dbQueryHandler.getDiseaseTransmissionRadius(id)[0]
-      
-
-    def getInfectedTime(self, id: str) -> float:
-        return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
-    
-
-    def getIncubationTime(self, id: str) -> float:
-        return self.__dbQueryHandler.getDiseaseIncubationTime(id)[0]
-
-
 class Person:
     def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, travelling: int, asymptomatic: int, partialImmunity: float, destination: int, bloodType: str, age: int, health: float, posX: int, posY: int, diseaseID: str) -> None:
         self.__iD = id
@@ -337,6 +330,10 @@ class Person:
         return self.__diseaseID
 
 
+    def getAsymptomatic(self) -> int:
+        return self.__asymptomatic
+
+
     def setStatus(self, st: str) -> None:
         self.__status = st
 
@@ -360,6 +357,43 @@ class Person:
         self.__pos[direction] += moveAmount
 
 
-    def setDiseaseID(self, diseaseID: int)-> None:
+    def setDiseaseID(self, diseaseID: int) -> None:
         self.__diseaseID = diseaseID
+    
 
+    def setAsymptomatic(self, bool: int) -> None:
+        self.__asymptomatic = bool
+
+
+# doesn't store anything only has getters and setters for the database so multiple disease can be around 
+class Disease:
+    def __init__(self, dbQuery) -> None:
+        self.__dbQueryHandler = dbQuery
+    
+
+    def getName(self, id: str) -> str:
+        return self.__dbQueryHandler.getDiseaseName(id)[0]
+
+    
+    def getTransmissionTime(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseTransmissionTime(id)[0]
+    
+
+    def getContagion(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseContagion(id)[0]
+    
+
+    def getTransmissionRadius(self, id: str) -> int:
+        return self.__dbQueryHandler.getDiseaseTransmissionRadius(id)[0]
+      
+
+    def getInfectedTime(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseInfectedTime(id)[0]
+    
+
+    def getIncubationTime(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseIncubationTime(id)[0]
+    
+
+    def getPasymptomatic(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseasetPasymptomatic(id)[0]

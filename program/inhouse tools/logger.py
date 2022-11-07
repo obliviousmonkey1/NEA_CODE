@@ -22,7 +22,7 @@ class S:
 # for programs that constantly are running 
 class ContinousLog(S):
     # local dump multi file 
-    def logLDMF(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S"), trackingID="add trackingID", path:str="") -> None:
+    def logLDMF(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S"), trackingID="add trackingID", path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/program/logs")) -> None:
         refTime = datetime.now().strftime("%H:%M:%S")
         f = open(f"{path}{trackingID}{refTime}.log","w")
         f.write(f"{reference}:{additionalInfo}:{time}")

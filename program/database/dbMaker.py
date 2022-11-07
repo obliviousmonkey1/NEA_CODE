@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS Person(
 createPopulationTable = '''
 CREATE TABLE IF NOT EXISTS Population(
     id          INTEGER,
+    susceptible INTEGER,
+    infected    INTEGER,
+    removed     INTEGER,
     PRIMARY KEY(id)
 );
 '''
