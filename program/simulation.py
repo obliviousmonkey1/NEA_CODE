@@ -60,17 +60,28 @@ class Simulation:
         self.startTime = timeit.default_timer()
         self.__logger.log('day function', f'startTime: {self.startTime}, day: {self.__map.getDay()}')
         
+        for person in [person for person in self.__map.getPopulation() if person.getArivalCheck()]:
+            if self.__dbQueryHandler.getPopulationInfected(self.__map.getID())[0] >= self.__map.getIdentifyAndIsolateTriggerInfectionCount():
+                person.setQuar
+                self.quarantine()
+            person.setArivalCheck(0)
 
         if self.tempoaryGroup(0 ,'I'):
-            while self.__hour < 24:            
+            while self.__hour < 24:   
+                if self.__dbQueryHandler.getPopulationInfected(self.__map.getID())[0] >= self.__map.getIdentifyAndIsolateTriggerInfectionCount():
+                    self.isIdentiyIsolate = True 
+                else:
+                    self.isIdentiyIsolate = False 
+
                 self.__logger.log('day function whileloop', f'hour: {self.__hour}')
                 infecetdGroup = self.tempoaryGroup(0 ,'I') 
 
                 # check if infection time is over, if it is not then update infection time 
                 if infecetdGroup != None:
                     for infectedPerson in infecetdGroup:
-                        self.identify(infectedPerson)
                         if infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
+                            if self.isIdentiyIsolate:
+                                self.identify(infectedPerson)
                             if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
                                 infectedPerson.setDiseaseID(None)
                                 infectedPerson.setStatus('R')
@@ -89,9 +100,16 @@ class Simulation:
                 # pool = Pool()
                 # for susceptibleGroup in susceptibleGroups:
                     # pool.apply_async(self.infection, susceptibleGroup)
+                for person in  self.__map.getPopulation():
+                    if person.getTravelling():
+                        self.travelling(person)
+
                 for susceptiblePerson in susceptibleGroup:
-                    self.infection(susceptiblePerson)
-                
+                    if not susceptiblePerson.getTravelling():
+                        self.infection(susceptiblePerson)
+
+                self.updateStatistics()
+
                 self.__hour +=1
 
         self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
@@ -101,16 +119,46 @@ class Simulation:
         self.updateDB(threadID)
     
 
+    def travelling(self, person):
+        if not person.getTravelling():
+            newMapID = random.choice(self.__dbQueryHandler.getMapIDs().split())
+            person.setDestination(newMapID)
+            person.setTravelling(1)
+
+        elif person.getTtime() >= self.__dbQueryHandler.getMapTravelTime(person.getDestination()):
+            # quarintine 
+            person.setTtime(None)
+            person.setID(person.getDestination())
+            person.setArivalCheck(1)
+        else:
+            person.setTtime()
+
     def identify(self, person):
+        if person.getItime() >= self.__map.getInfectionTimeBeforeQuarantine() and person.getAsymptomatic() != 1:
+            self.quarantine(person)
         # chance to not identify infected people 
-        if numbCases == criticalThresholdOfCases:
-            if person.getNumbDaysInfected == quarantineDayAfterInfection:
-                self.quarantine(person)
-            elif ((person.getLastMapID != map.getMapID) and (person.getDaysSpent =< quarantineSusceptibleDays)):
-                self.quarantine(person)
+        # if numbCases == criticalThresholdOfCases:
+        #     if person.getNumbDaysInfected == quarantineDayAfterInfection:
+        #         self.quarantine(person)
+        #     elif ((person.getLastMapID != map.getMapID) and (person.getDaysSpent =< quarantineSusceptibleDays)):
+        #         self.quarantine(person)
+        
        
-    def quarantine(self):
-        pass
+    def quarantine(self,person):
+        if person.getQuarantineInfected():
+            if person.getItime() >= self.__disease.getInfectedTime(person.getDiseaseId()):
+                person.setDiseaseID(None)
+                person.setStatus('R')
+                person.setQuarantineInfected(0)
+            else:
+                person.setItime()
+        elif person.getQuarantineTravelling():
+            if person.getQtime() >= self.__map.getTravelQuarantineTime():
+                person.setQuarantineTravelling(0)
+                person.setQtime(0.0)
+            else:
+                person.setQtime()
+
 
     def setStatus(self, susceptiblePerson, infectedPerson):
         diseaseID = infectedPerson.getDiseaseId()
@@ -158,10 +206,13 @@ class Simulation:
         """
         notR_group = self.tempoaryGroup(1 ,'R')
         if random.random() < MOVE_CITY_CHANCE:
-            pass
-        if random.random() < MOVE_PROBABILITY:
-            for person in notR_group:
-                # x direction 
+            self.travelling()
+        
+        for person in notR_group:
+            if travelRate < random.random():
+                self.travelling(person)
+            else:
+            # x direction 
                 x_amount = random.randint(1, MAX_MOVE_AMOUNT)
                 self.checkMovement(0, self.__map.getWidth(), x_amount, person)
                 # y direction  
@@ -198,8 +249,10 @@ class Simulation:
 
 
     # merge update Statistics to this functon optimistation
+    # update to add new data 
     def updateDB(self, threadID):
         for person in self.__map.getPopulation():
+            self.__dbQueryHandler.updatePersonID(person.getID(), person.getDestination())
             self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
             self.__dbQueryHandler.updatePersonRtime(person.getID(), person.getRtime())
             self.__dbQueryHandler.updatePersonItime(person.getID(), person.getItime())
@@ -225,6 +278,11 @@ class Simulation:
                 self.i +=1
             elif person.getStatus() == 'R':
                 self.r +=1
+        
+        self.__dbQueryHandler.updatePopulationSusceptible(self.__map.getID(),self.s)
+        self.__dbQueryHandler.updatePopulationInfected(self.__map.getID(),self.i)
+        self.__dbQueryHandler.updatePopulationRemoved(self.__map.getID(),self.r)
+
 
     def recordStatistics(self):
         fieldnames = ["day", "Susceptible", "Infected", "Removed"]
@@ -246,6 +304,10 @@ class Map:
         self.__width = map[2]
         self.__height = map[3]
         self.__day = map[4]
+        self.__govermentActionReliabilty = map[5]
+        self.__identifyAndIsolateTriggerInfectionCount = map[6]
+        self.__infectionTimeBeforeQuarantine = map[7]
+        self.__socialDistanceTriggerInfectionCount = map[8]
         self.__population = self.populatePopulationFromDataBase(map[-1])
     
 
@@ -268,7 +330,23 @@ class Map:
     def getDay(self) -> int:
         return self.__day
 
-    
+
+    def getGovermentActionReliabilty(self) -> float:
+        return self.__govermentActionReliabilty
+
+
+    def getIdentifyAndIsolateTriggerInfectionCount(self) -> int:
+        return self.__identifyAndIsolateTriggerInfectionCount
+
+
+    def getInfectionTimeBeforeQuarantine(self) -> float:
+        return self.__infectionTimeBeforeQuarantine
+
+
+    def getSocialDistanceTriggerInfectionCount(self) -> int:
+        return self.__socialDistanceTriggerInfectionCount
+        
+
     def getPopulation(self):
         return self.__population
 
@@ -298,6 +376,10 @@ class Person:
         self.__bloodType = bloodType
         self.__age = age
         self.__health = health
+        self.__quarantineInfected = 1
+        self.__quarantineTravelling = 1
+        self.__arivalCheck = 0
+        self.__qTime = 0.1
         self.__pos = [posX, posY]
         self.__diseaseID = diseaseID
 
@@ -322,6 +404,34 @@ class Person:
         return self.__ibTime
 
 
+    def getTtime(self) -> float:
+        return self.__tTime
+
+
+    def getQtime(self) -> float:
+        return self.__qTime
+
+
+    def getTravelling(self) -> int:
+        return self.__travelling
+
+
+    def getDestination(self) -> int:
+        return self.__destination
+
+
+    def getArivalCheck(self) -> int:
+        return self.__arivalCheck
+
+
+    def getQuarantineInfected(self) -> int:
+        return self.__quarantineInfected
+
+
+    def getQuarantineTravelling(self) -> int:
+        return self.__quarantineTravelling
+
+
     def getPos(self) -> list[int]:
         return self.__pos
     
@@ -332,6 +442,10 @@ class Person:
 
     def getAsymptomatic(self) -> int:
         return self.__asymptomatic
+
+
+    def setID(self, id: int) -> None:
+        self.__iD = id
 
 
     def setStatus(self, st: str) -> None:
@@ -351,6 +465,32 @@ class Person:
             self.__ibTime = val
         else:
             self.__ibTime += val/24.0
+
+
+    def setTtime(self, val: float =1.0) -> None:
+        if self.__travelling:
+            self.__ibTime += val/24.0
+        else:
+            self.__ibTime = val
+
+
+    def setQtime(self, val: float =1.0) -> None:
+        if self.__quarantineTravelling:
+            self.__qTime += val/24.0
+        else:
+            self.__qTime = val
+
+
+    def setTravelling(self, val: int) -> None:
+        self.__travelling = val 
+
+
+    def setDestination(self, id: int) -> None:
+        self.__destination = id
+
+
+    def setArivalCheck(self, val: int) -> None:
+        self.__arivalCheck = val
 
 
     def setPos(self, direction, moveAmount) -> None:

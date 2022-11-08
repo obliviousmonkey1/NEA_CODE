@@ -29,7 +29,7 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gPopulationSusceptible, (id,))
-        return c.fetchall()   
+        return c.fetchone()   
 
 
     def getPopulationInfected(self, id: int) -> None:
@@ -40,7 +40,7 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gPopulationInfected, (id,))
-        return c.fetchall()  
+        return c.fetchone()  
 
 
     def getPopulationRemoved(self, id: int) -> None:
@@ -51,7 +51,7 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gPopulationRemoved, (id,))
-        return c.fetchall()  
+        return c.fetchone()  
 
 
     def updatePopulationSusceptible(self, id: int, susceptible: int) -> None:
@@ -107,6 +107,17 @@ class DBManager:
         c.execute(gPopulation, (mapID,))
         return c.fetchall()   
     
+
+    def updatePersonID(self, id: int, newID: int) -> None:
+        uPersonID = '''
+        UPDATE Person
+        SET id = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonID, (newID, id))
+        self.conn.commit()
+
 
     def updatePersonStatus(self, id: int, status: str) -> None:
         uPersonStatus = '''
@@ -205,6 +216,16 @@ class DBManager:
         c.execute(gMaps)
         return c.fetchall()
     
+
+    def getMapIDs(self):
+        gMapIDs = '''
+        SELECT id 
+        FROM Map
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapIDs)
+        return c.fetchall()
+
 
     def getMapWidth(self, id: int) -> int:
         gMapWidth = '''
