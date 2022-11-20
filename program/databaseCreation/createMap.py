@@ -23,6 +23,8 @@ class MapCreationHandler:
         self.__infectionTimeBeforeQuarantine = []
         self.__socialDistanceTriggerInfectionCount = []
         self.__identifyAndIsolateTriggerInfectionCount = []
+        self.__travelTime = []
+        self.__travelProhibitedTriggerInfectionCount = []
 
         for i in range((len(data[self.tag]))):
             for key, value in data[self.tag][i].items():
@@ -45,6 +47,11 @@ class MapCreationHandler:
                     elif key == 'identifyAndIsolateTriggerInfectionCount':
                         self.__identifyAndIsolateTriggerInfectionCount.append(randint(10,20))
                         data[self.tag][i][key][0] = self.__identifyAndIsolateTriggerInfectionCount[-1]
+                    elif key == 'travelTime':
+                        self.__travelTime.append(uniform(1.0,3.0))
+                        data[self.tag][i][key][0] = self.__travelTime[-1]
+                    elif key == 'travelProhibitedTriggerInfectionCount':
+                         self.__travelProhibitedTriggerInfectionCount(randint(5,10))
                 else:
                     if key == 'cityName':
                         self.__cityNames.append(value[0])
@@ -58,6 +65,11 @@ class MapCreationHandler:
                         self.__socialDistanceTriggerInfectionCount.append(int(value[0]))
                     elif key == 'identifyAndIsolateTriggerInfectionCount':
                         self.__identifyAndIsolateTriggerInfectionCount.append(int(value[0]))
+                    elif key == 'travelTime':
+                        self.__travelTime.append(value[0])
+                    elif key == 'travelProhibitedTriggerInfectionCount':
+                        self.__travelProhibitedTriggerInfectionCount.append(value[0])
+
             i+=1
 
         return data
@@ -91,7 +103,7 @@ class MapCreationHandler:
 
     def seedMapTable(self, id: int, populationID: int, populationSize: int):
         self.width, self.height = self.generateMapSize(populationSize)
-        self.__dbQueryHandler.createMap(id,self.__cityNames[populationID-1],self.width,self.height,0,self.__govermentActionReliabilty[(populationID-1)],self.__identifyAndIsolateTriggerInfectionCount[(populationID-1)],self.__infectionTimeBeforeQuarantine[(populationID-1)],self.__socialDistanceTriggerInfectionCount[(populationID-1)], populationID)
+        self.__dbQueryHandler.createMap(id,self.__cityNames[populationID-1],self.width,self.height,0,self.__govermentActionReliabilty[(populationID-1)],self.__identifyAndIsolateTriggerInfectionCount[(populationID-1)],self.__infectionTimeBeforeQuarantine[(populationID-1)],self.__socialDistanceTriggerInfectionCount[(populationID-1)],self.__travelProhibitedTriggerInfectionCount[populationID-1],self.__travelTime[(populationID-1)],0, populationID)
     
     def seedRelationshipTable(self):
         pass

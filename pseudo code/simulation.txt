@@ -1,0 +1,19 @@
+
+METHOD transmssion(self, susceptible person):
+    FOR infected person in self.tempoaryGroup(0 ,'I'):
+        IF self.checkInsideRadius(infectedPerson.getPos()[0], infectedPerson.getPos()[1],
+                                  susceptiblePerson.getPos()[0], susceptiblePerson.getPos()[1], 
+                                  infectedPerson.getDiseaseId()):
+            IF susceptiblePerson.getRtime() >= self.__disease.getTransmissionTime(infectedPerson.getDiseaseId()) and
+                            random.random() < P_INFECTION_PER_DAY * self.__disease.getContagion(infectedPerson.getDiseaseId()):
+                self.setStatus(susceptiblePerson, infectedPerson)
+                BREAK
+            ELSE:
+                susceptiblePerson.setRtime()
+            END IF 
+        END IF 
+    END FOR
+END METHOD 
+    
+
+    

@@ -34,13 +34,14 @@ class GraphDataHandler:
         x = data['day']
         y1 = data['Susceptible']
         y2 = data['Infected']
-        y3 = data['Removed']
+        # y3 = data['Removed']
         fig = Figure(figsize=(5, 4), dpi=100)
-        fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
+        fig.add_subplot(111).plot(x,y1,y2,scalex='Day',scaley='Population')
 
 
         # currentSus = data['Susceptible'][-1]
         return fig
+  
 
 # dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 

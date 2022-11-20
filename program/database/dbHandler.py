@@ -90,16 +90,16 @@ class DBManager:
     def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float,travelling:int,asymptomatoc: int, paritalImmunity:float,destination:int,bloodType:str,age:int,health:float, xPos: int, yPos: int, diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,travelling,asymptomatoc,paritalImmunity,destination,bloodType,age,health,xPos,yPos,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,travelling,asymptomatoc,paritalImmunity,bloodType,destination,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
         self.conn.commit()
 
 
     def getPopulation(self, mapID):
         gPopulation = '''
-        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.travellingTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.diseaseID
+        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.diseaseID
         FROM Person, Map, Population
         WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
         '''
@@ -108,14 +108,14 @@ class DBManager:
         return c.fetchall()   
     
 
-    def updatePersonID(self, id: int, newID: int) -> None:
-        uPersonID = '''
+    def updatePersonPopulationID(self, id: int, newID: int) -> None:
+        uPersonPopulationID = '''
         UPDATE Person
-        SET id = ? 
+        SET populationID = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonID, (newID, id))
+        c.execute(uPersonPopulationID, (newID, id))
         self.conn.commit()
 
 
@@ -130,6 +130,28 @@ class DBManager:
         self.conn.commit()
 
 
+    def updatePersonDestination(self, id: int, destination: str) -> None:
+        uPersonDestinatiom = '''
+        UPDATE Person
+        SET destination = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonDestinatiom, (destination, id))
+        self.conn.commit()
+
+
+    def updatePersonTravelling(self, id: int, travelling: int) -> None:
+        uPersonTravelling = '''
+        UPDATE Person
+        SET travelling = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonTravelling, (travelling, id))
+        self.conn.commit()
+
+
     def updatePersonRtime(self, id: int, rTime: float) -> None:
         uPersonRtime = '''
         UPDATE Person
@@ -138,6 +160,17 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(uPersonRtime, (rTime, id))
+        self.conn.commit()
+    
+
+    def updatePersonTtime(self, id: int, tTime: float) -> None:
+        uPersonTtime = '''
+        UPDATE Person
+        SET tTime = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonTtime, (tTime, id))
         self.conn.commit()
 
     
@@ -197,13 +230,13 @@ class DBManager:
 
 
     # Map
-    def createMap(self, id: int, name: str, width: int, height: int, day: int,govermentActionReliabilty:float,identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,socialDistanceTriggerInfectionCount:int, populationID: int) -> None:
+    def createMap(self, id: int, name: str, width: int, height: int, day: int,govermentActionReliabilty:float,identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,socialDistanceTriggerInfectionCount:int, travelProhibitedTriggerInfectionCount:int,travelTime:float, travelProhibited:int, populationID: int) -> None:
         cMap = '''
         INSERT INTO Map VALUES
-        (?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cMap, (id, name, width, height, day,govermentActionReliabilty,identifyAndIsolateTriggerInfectionCount,infectionTimeBeforeQuarantine,socialDistanceTriggerInfectionCount, populationID))
+        c.execute(cMap, (id, name, width, height, day,govermentActionReliabilty,identifyAndIsolateTriggerInfectionCount,infectionTimeBeforeQuarantine,socialDistanceTriggerInfectionCount,travelProhibitedTriggerInfectionCount,travelTime,travelProhibited, populationID))
         self.conn.commit()
 
 
@@ -217,13 +250,14 @@ class DBManager:
         return c.fetchall()
     
 
-    def getMapIDs(self):
+    def getMapIDs(self,id):
         gMapIDs = '''
         SELECT id 
         FROM Map
+        WHERE id != ?
         '''
         c = self.conn.cursor()
-        c.execute(gMapIDs)
+        c.execute(gMapIDs,(id,))
         return c.fetchall()
 
 
@@ -258,6 +292,28 @@ class DBManager:
         c = self.conn.cursor()
         c.execute(gMapDay, (id,))
         return c.fetchone()
+    
+
+    def getMapTravelTime(self, id: int) -> float:
+        gMapTravelTime = '''
+        SELECT travelTime 
+        FROM Map
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapTravelTime, (id,))
+        return c.fetchone()
+
+
+    def getMapCannnotTravelTo(self, id: int) -> float:
+        gMapCannnotTravelTo = '''
+        SELECT travelProhibited 
+        FROM Map
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapCannnotTravelTo, (id,))
+        return c.fetchone()
         
 
     def updateMapDay(self, id: int, day: int) -> None:
@@ -268,6 +324,17 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(uMapDay, (day, id))
+        self.conn.commit()
+    
+    
+    def updateMapCannotTravelTo(self, id: int, value: int) -> None:
+        uMapCanTravelTo = '''
+        UPDATE Map
+        SET travelProhibited = ?
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uMapCanTravelTo, (value, id))
         self.conn.commit()
 
 

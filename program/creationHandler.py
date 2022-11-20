@@ -37,22 +37,35 @@ class Main:
 
     def createStatsCSV(self):
         mapNames = self.getMapHandlerNames()
+        populationSize = self.getPopulationSizes()
+        infectedAmount = self.getInfectedAmounts()
         mapNames.append('allCities')
-        for name in mapNames:
+        for index in range(len(mapNames)):
             fieldnames = ["day", "Susceptible", "Infected", "Removed"]
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{name}data.csv'), 'w') as csv_file:
+            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{mapNames[index]}data.csv'), 'w') as csv_file:
                 csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
                 csv_writer.writeheader()
             
-            with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{name}data.csv'), 'a') as csv_file:
-                csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
-                info={
-                    "day" : 0,
-                    "Susceptible" : 0,
-                    "Infected" : 0,
-                    "Removed" : 0
-                }
-                csv_writer.writerow(info)
+            if mapNames[index] != 'allCities':
+                with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{mapNames[index]}data.csv'), 'a') as csv_file:
+                    csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+                    info={
+                        "day" : 0,
+                        "Susceptible" : populationSize[index]-infectedAmount[index],
+                        "Infected" : infectedAmount[index],
+                        "Removed" : 0
+                    }
+                    csv_writer.writerow(info)
+            else:
+                with open(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{mapNames[index]}data.csv'), 'a') as csv_file:
+                    csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames) 
+                    info={
+                        "day" : 0,
+                        "Susceptible" : 0,
+                        "Infected" : 0,
+                        "Removed" : 0
+                    }
+                    csv_writer.writerow(info)
            
   
     def setUpGeneral(self, data):
@@ -110,6 +123,12 @@ class Main:
     def getMapHandlerNames(self) -> str:
         return self.__mapCreationHandler.getCityNames()
     
+    def getPopulationSizes(self) -> int:
+        return self.__populationCreationHandler.getPopulationSize()
+    
+    def getInfectedAmounts(self) -> int:
+        return  self.__populationCreationHandler.getInfectedAmount()
+
     def getDiseasePasympto(self, id) -> float:
         return self.__diseaseCreationHandler.getPasymptomaticOnInfection(id)
 

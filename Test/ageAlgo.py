@@ -14,3 +14,8 @@ def calcuateAge() -> int:
 age = calcuateAge()
 print(age)
 print(1-((age/100)**5))
+
+a = 1
+
+if  a:
+    print('hello')

@@ -1,4 +1,10 @@
-update database in simulation to include the new data
+>Update database in simulation to include the new data
 
-need to add quarintine, travelQuarintine and quarintine time variables 
+>Need to add quarintine, travelQuarintine and quarintine time variables 
 
+>ADD FUNCTIONS TIO UPDATE TRAVEL DATA IN DB 
+>Make travelProhibitedTriggerInfectionCount variable in ui
+>Make sure randomised variables basae of other things 
+>Make goverment action/map events go off a decision tree based on whats currently happening in the simulation 
+
+theme Solarized Dark Theme

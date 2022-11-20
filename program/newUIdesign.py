@@ -76,6 +76,9 @@ class UI(tk.Tk):
         
     def gCity(self, cName):
         # self.currentGraphReference = self.option_var.get()
+        # if cName != 'allCities':
+        #     self.currentDaySusceptibleStatsLabel['text'] = f'Susceptible : {self._controller.gCurrentDaySusceptibleData(int(cName[-1]))}'
+
         self.toolbar.destroy()
         self.currentGraphReference = cName
         self._controller.sGraphRef(cName)
@@ -140,6 +143,17 @@ class UI(tk.Tk):
         self.currentGraphLabel = ttk.Label(self, text=f'Selected Graph {self.currentGraphReference}')
         self.currentGraphLabel.pack(anchor=tk.NW, side=tk.LEFT) 
 
+        # self.currentDayStatsLabel = ttk.Label(self,text='Current day stats:')
+        # self.currentDayStatsLabel.pack(anchor=tk.W, side=tk.LEFT) 
+
+        # print(self.currentGraphReference)
+        # if self.currentGraphReference != 'allCities':
+        #     self.currentDaySusceptibleStatsLabel = ttk.Label(self,text=f'Susceptible : {self._controller.gCurrentDaySusceptibleData(int(self.currentGraphReference[-1]))}')
+        #     self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.LEFT) 
+        #     self.currentDayInfectedStatsLabel = ttk.Label(self,text='Current day stats:')
+        #     self.currentDayRemovedStatsLabel = ttk.Label(self,text='Current day stats:')
+
+
         self.gCurrentGraph()
         if value == 0:
             self.graphButtons()
@@ -159,7 +173,7 @@ class UI(tk.Tk):
         self.windowSizeChange('960','540')
         self.parent.title('Loading')
 
-        label = ttk.Label(self.parent, foreground='red', text='Setting Up DataBase and other stuff')
+        label = ttk.Label(self.parent, foreground='red', text='Failed to/taking time to Setting Up DataBase and other stuff')
         label.grid(column=1, row=1)
         self.parent.grid_rowconfigure(1, weight=1)
         self.parent.grid_columnconfigure(1, weight=1)
@@ -236,7 +250,7 @@ class UI(tk.Tk):
 
 
                 # special variable verification
-                if key != "infectionTimeBeforeQuarantine" and isValueRandom == 0 and self.data[self.type][self.currentIndex][key][2] == "float":
+                if key != "infectionTimeBeforeQuarantine" and key != "travelTime" and isValueRandom == 0 and self.data[self.type][self.currentIndex][key][2] == "float":
                     if (float(self.values[i]) < 0.0 or float(self.values[i]) > 1.0):
                         raise ValueError(f'{key} float cannot be less than 0.0 or greater than 1.0')
                 if self.type == 'general':
@@ -329,7 +343,9 @@ class UI(tk.Tk):
                                  "minNumberOfConnections": [1, "0<value<maps", "int"],
                                  "infectionTimeBeforeQuarantine": [3.0,"0.0<value<∞","float"],
                                  "socialDistanceTriggerInfectionCount": [10, "1<value<∞", "int"],
-                                 "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"]
+                                 "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"],
+                                 "travelProhibitedTriggerInfectionCount" : [10, "1<value<∞", "int"],
+                                 "travelTime": [2.0, '1.0<value<∞', 'float']
                                 })
             data['disease'].append({"name": ["random", "COVID", "str"], 
                                     "transmissionTime": ["random", "0.0<value<1.0", "float"], 

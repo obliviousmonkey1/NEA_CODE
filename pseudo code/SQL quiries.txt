@@ -1,0 +1,28 @@
+
+FUNCTION getSingleDataPoint(self, id):
+        gSingleDataPoint = '''
+        Execute the SQL query SELECT data from Table where table.id is equal to id
+        '''
+        c = self.conn.cursor()
+        c.execute(gMapIDs,(id,))
+        return c.fetchone()
+END FUNCTION 
+
+FUNCTION getMultipleDataPointsWhereTableValueIsEqualToValue(self, value/s):
+        gMultipleDataPointsWhereTableValueIsEqualToValue = '''
+        Execute the SQL query SELECT data from Table where table.value/s is equal to value/s
+        '''
+        c = self.conn.cursor()
+        c.execute(gMultipleDataPointsWhereTableValueIsEqualToValue,(value/s,))
+        return c.fetchall()
+END FUNCTION 
+
+FUNCTION getAllDataFromTable(self):
+        gAllDataFromTable = '''
+        Execute the SQL query SELECT all data from Table 
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllDataFromTable)
+        return c.fetchall()
+END FUNCTION 
+

@@ -119,7 +119,10 @@ class PopulationCreationHandler:
         return 0
 
     def getPopulationSize(self) -> int:
-        pass
+        return self.__populationSize
+    
+    def getInfectedAmount(self) -> int:
+        return self.__numbStartingInfected
 
 
 # NUMB_PEOPLE = 20

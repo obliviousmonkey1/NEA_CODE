@@ -35,10 +35,8 @@ class Handler:
     def setSimulationHandlerRunning(self, value: bool):
         self.__simulationHandler.__running.setRunning(value)
 
-
     def getUpdatedGraphs(self):
         pass
-
 
     def runSimulationHandler(self):
         self.__simulationHandler.run()
@@ -56,6 +54,8 @@ class Handler:
     def sNewGraphRef(self, gR):
         self.__graphHandler.setNewGraphRef(gR)
 
+    def getCurrentDaySusceptibleData(self, id):
+        return self.__dbQueryHandler.getPopulationSusceptible(id)[0]
     # controller calls
     def checkRandom(self, value) -> bool:
         return self._controller.checkRandom(value)

@@ -31,6 +31,10 @@ class Main:
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
 
+    # db 
+    def gCurrentDaySusceptibleData(self, id):
+        return self.mainHandler.getCurrentDaySusceptibleData(id)
+
     # graph
     def gGraphData(self):
         return self.mainHandler.gNewGraphData()
@@ -62,7 +66,7 @@ if __name__ == "__main__":
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)
-    ui.entry_point()
+    ui.entry_point() 
     ui.parent.mainloop()
     # c.setUpSimulationData()
     # c.runSimulation()
