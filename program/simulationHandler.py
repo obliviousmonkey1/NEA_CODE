@@ -75,6 +75,7 @@ class Main():
         print(f'startTime: {self.startTime}')
         self.threads = []
         for index, map in enumerate(self.__maps):
+            print(map)
             # self.sim(map, index)
             #  x = multiprocessing.Process(target=self.sim, args=(map,index))
             x = threading.Thread(target=self.sim, args=(map,index))

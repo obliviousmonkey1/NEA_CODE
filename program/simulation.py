@@ -35,14 +35,11 @@ NEED TO WORK OUT THREAD DEADLOCK FOR DATABASE
 '''
 
 # Constants 
-DEBUG = False
-
 MAX_MOVE_AMOUNT = 2
 MOVE_PROBABILITY = 0.5
 MUTATION_CHANCE = 0.001
-MOVE_CITY_CHANCE = 0.01
-TRAVEL_RATE = 0.02
-P_INFECTION_PER_DAY = 1 # probablity ????
+TRAVEL_RATE = 0.99
+P_INFECTION_PER_DAY = 1 
 
 
 class Simulation:
@@ -69,7 +66,6 @@ class Simulation:
         if self.tempoaryGroup(0 ,'I'):
             while self.__hour < 24:   
                 self.__logger.log('day function whileloop', f'hour: {self.__hour}')
-                infecetdGroup = self.tempoaryGroup(0 ,'I')
 
                 if self.__dbQueryHandler.getPopulationInfected(self.__map.getID())[0] >= self.__map.getIdentifyAndIsolateTriggerInfectionCount():
                     self.isIdentiyIsolate = True 
@@ -82,71 +78,95 @@ class Simulation:
                     self.__dbQueryHandler.updateMapCannotTravelTo(self.__map.getID(), 0)
 
                 # check if infection time is over, if it is not then update infection time 
-                if infecetdGroup != None:
-                    for infectedPerson in infecetdGroup:
-                        if infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
-                            if self.isIdentiyIsolate:
-                                self.identify(infectedPerson)
-                            if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
-                                infectedPerson.setDiseaseID(None)
-                                infectedPerson.setStatus('R')
-                            else:
-                                infectedPerson.setItime()
-                        else:
-                            infectedPerson.setIBtime()
+                self.startTime = timeit.default_timer()
+                self.__logger.log('Started infected person function', f'hour: {self.__hour}')
+                self.infPass()
+                self.__logger.log('Finished infected person function',f'time taken: {timeit.default_timer() - self.startTime}')
 
-                susceptibleGroup = self.tempoaryGroup(0, 'S')
-                self.infecetdGroup = self.tempoaryGroup(0 ,'I') 
-
-                self.movement()
-                
-                # split up suscpetible list into sub lists and then 
-                # thread over them 
-                # pool = Pool()
-                # for susceptibleGroup in susceptibleGroups:
-                    # pool.apply_async(self.infection, susceptibleGroup)
-                for person in  self.__map.getPopulation():
+                # update travelling
+                self.startTime = timeit.default_timer()
+                self.__logger.log('Started travelling function', f'hour: {self.__hour}')
+                for person in self.__map.getPopulation():
                     if person.getTravelling():
+                        print(f'hour: {self.__hour}')
                         self.travelling(person)
+                self.__logger.log('Finished travelling function',f'time taken: {timeit.default_timer() - self.startTime}')
 
-                for susceptiblePerson in susceptibleGroup:
-                    print('hello')
+                # movement
+                self.startTime = timeit.default_timer()
+                self.__logger.log('Started movement function', f'hour: {self.__hour}')
+                self.movement()
+                self.__logger.log('Finished movement function ',f'time taken: {timeit.default_timer() - self.startTime}')
+
+                # transmission
+                self.startTime = timeit.default_timer()
+                self.__logger.log('Started transmission function', f'hour: {self.__hour}')
+                for susceptiblePerson in self.tempoaryGroup(0, 'S'):
                     if not susceptiblePerson.getTravelling():
                         self.transmission(susceptiblePerson)
+                self.__logger.log('Finished transmission function',f'time taken: {timeit.default_timer() - self.startTime}')
 
+                # update stats 
+                self.startTime = timeit.default_timer()
+                self.__logger.log('Started updating statistics function', f'hour: {self.__hour}')
                 self.updateStatistics()
+                self.__logger.log('Finished updating statistics function',f'time taken: {timeit.default_timer() - self.startTime}')
+
+                self.updateDB(0, threadID)
+                # refreshes map with new pop 
+                self.__map.populatePopulationFromDataBase(self.__map.getID())
 
                 self.__hour +=1
 
         self.__logger.log('day function out of whileloop', f'hour: {self.__hour}')
         self.__map.updateDay()
-        self.updateStatistics()
-
-        self.updateDB(threadID)
+        self.updateDB(1, threadID)
     
 
+    def infPass(self):
+        infecetdGroup = self.tempoaryGroup(0 ,'I')
+        if infecetdGroup != None:
+                for infectedPerson in infecetdGroup:
+                    if infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
+                        if self.isIdentiyIsolate:
+                            self.identify(infectedPerson)
+                        if infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
+                            infectedPerson.setDiseaseID(None)
+                            infectedPerson.setStatus('R')
+                        else:
+                            infectedPerson.setItime()
+                    else:
+                        infectedPerson.setIBtime()
+
+
     def travelling(self, person):
-        print(person.getTravelling())
         if not person.getTravelling():
-            newMapID = random.choice(self.__dbQueryHandler.getMapIDs(self.__map.getID()))[0]
-            if self.__dbQueryHandler.getMapCannnotTravelTo(newMapID)[0] == 0:
+            newMapID = random.choice(self.__dbQueryHandler.getMapIDs(self.__map.getID())[0])
+            if self.__dbQueryHandler.getMapCannnotTravelTo(newMapID)[0] != 1:
                 person.setDestination(newMapID)
                 person.setTravelling(1)
                 self.__dbQueryHandler.updatePersonTravelling(person.getID(), person.getTravelling())
                 self.__dbQueryHandler.updatePersonDestination(person.getID(), newMapID)
+        if person.getTravelling():
+            if person.getTtime() >= self.__dbQueryHandler.getMapTravelTime(person.getDestination())[0]:
+                # quarintine 
+                person.setTtime(0.0)
+                person.setTravelling(0)
+                person.setID(person.getDestination())
+                person.setArivalCheck(1)
+                self.__dbQueryHandler.updatePersonTravelling(person.getID(), person.getTravelling())
+                self.__dbQueryHandler.updatePersonPopulationID(person.getID(), person.getDestination())
+                self.__dbQueryHandler.updatePersonDestination(person.getID(), None)
 
-        elif person.getTtime() >= self.__dbQueryHandler.getMapTravelTime(person.getDestination())[0]:
-            # quarintine 
-            person.setTtime(None)
-            person.setTravelling(0)
-            person.setID(person.getDestination())
-            person.setArivalCheck(1)
-            print('hello')
-            self.__dbQueryHandler.updatePersonTravelling(person.getID(), person.getTravelling())
-            self.__dbQueryHandler.updatePersonPopulationID(person.getID(), person.getDestination())
-
-        else:
-            person.setTtime()
+            else:
+                if self.__dbQueryHandler.getMapCannnotTravelTo(person.getDestination())[0] == 1:
+                    person.setDestination(None)
+                    person.setTravelling(0)
+                    person.setTime(0.0)
+                    self.__dbQueryHandler.updatePersonTravelling(person.getID(), person.getTravelling())
+                    self.__dbQueryHandler.updatePersonDestination(person.getID(), person.getDestination())
+                else:
+                    person.setTtime()
 
 
     def identify(self, person):
@@ -187,7 +207,7 @@ class Simulation:
         susceptiblePerson.setStatus('I')
         if random.random() < self.__disease.getPasymptomatic(diseaseID):
             susceptiblePerson.setAsymptomatic(0)
-        else:
+        else: 
             susceptiblePerson.setAsymptomatic(1)
 
 
@@ -209,18 +229,6 @@ class Simulation:
     # maps have different ways to get to each other either driving which means no infection or flying which means the people on
     # the same flight as an infected person will have the time tick up 
     def movement(self):
-        """
-        x change:
-            Random number between 0 and MAX_MOV_AMMOUNT,
-            Then check poitive and negative direction if one is outbound pick the other one if both in bounds
-            then random pick between them. (checked with the change added to the current value)
-        y change: 
-            Random number between 0 and MAX_MOV_AMMOUNT - pos(x change)
-            Then check poitive and negative direction if one is outbound pick the other one if both in bounds
-            then random pick between them.  (checked with the change added to the current value)
-        Add those values to the current values 
-        """
-        
         for person in self.tempoaryGroup(1 ,'R'):
             if TRAVEL_RATE < random.random():
                 self.travelling(person)
@@ -263,7 +271,7 @@ class Simulation:
 
     # merge update Statistics to this functon optimistation
     # update to add new data 
-    def updateDB(self, threadID):
+    def updateDB(self, type: int, threadID: int):
         for person in self.__map.getPopulation():
             self.__dbQueryHandler.updatePersonStatus(person.getID(), person.getStatus())
             self.__dbQueryHandler.updatePersonRtime(person.getID(), person.getRtime())
@@ -275,12 +283,14 @@ class Simulation:
             self.__dbQueryHandler.updatePersonTtime(person.getID(), person.getTtime())
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
 
-        print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
-        self.__dbQueryHandler.close()
-        self.recordStatistics()
-        self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
-        self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
-        self.__logger.localDump(f'{threadID}')
+        if type:
+            print(self.__dbQueryHandler.getMapDay(self.__map.getID()))
+            self.recordStatistics()
+            self.__logger.log('finished database update', f'endTime: {timeit.default_timer()}')
+            self.__logger.log('time taken', f'{timeit.default_timer() - self.startTime}')
+            self.__logger.localDump(f'{threadID}')
+            self.__dbQueryHandler.close()
+
 
     def updateStatistics(self):
         self.s,self.i,self.r = 0,0,0
@@ -380,7 +390,7 @@ class Map:
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, travelling: int, asymptomatic: int, partialImmunity: float, bloodType: str,destination: int, age: int, health: float, posX: int, posY: int, qTime: float, qInfected: int, qTravelling: int, arrivalCheck: int, diseaseID: str) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, travelling: int, asymptomatic: int, partialImmunity: float, destination: int,bloodType: str, age: int, health: float, posX: int, posY: int, qTime: float, qInfected: int, qTravelling: int, arrivalCheck: int, diseaseID: str) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime

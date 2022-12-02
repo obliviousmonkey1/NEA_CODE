@@ -87,13 +87,13 @@ class DBManager:
         self.conn.commit()
 
 
-    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float,travelling:int,asymptomatoc: int, paritalImmunity:float,destination:int,bloodType:str,age:int,health:float, xPos: int, yPos: int, diseaseID: int, populationID: int) -> None:
+    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float, travelling:int, asymptomatoc: int, paritalImmunity:float, destination:int,bloodType:str,age:int,health:float, xPos: int, yPos: int, diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,travelling,asymptomatoc,paritalImmunity,bloodType,destination,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,travelling,asymptomatoc,paritalImmunity,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
         self.conn.commit()
 
 
@@ -131,13 +131,13 @@ class DBManager:
 
 
     def updatePersonDestination(self, id: int, destination: str) -> None:
-        uPersonDestinatiom = '''
+        uPersonDestination = '''
         UPDATE Person
         SET destination = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonDestinatiom, (destination, id))
+        c.execute(uPersonDestination, (destination, id))
         self.conn.commit()
 
 

@@ -4,6 +4,7 @@ import os
 import json
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image 
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -37,7 +38,7 @@ class UI(tk.Tk):
 
 
     def initialize_user_interface(self):
-        # self.parent.iconphoto(False, tk.PhotoImage(file = '/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png'))
+        # self.parent.iconphoto(False, tk.PhotoImage(Image.open('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png')))
         self.windowSizeChange('960','540')
         self.parent.title('Setup')
         self.title('Data')

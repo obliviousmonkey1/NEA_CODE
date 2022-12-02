@@ -7,4 +7,13 @@
 >Make sure randomised variables basae of other things 
 >Make goverment action/map events go off a decision tree based on whats currently happening in the simulation 
 
-theme Solarized Dark Theme
+> optimise code 
+
+FIXES 
+
+>  File "/Users/parzavel/Documents/NEA/NEA_CODE/program/simulation.py", line 150, in travelling
+    elif person.getTtime() >= self.__dbQueryHandler.getMapTravelTime(person.getDestination())[0]:
+TypeError: 'NoneType' object is not subscriptable
+
+> sqlite3.OperationalError: database is locked
+

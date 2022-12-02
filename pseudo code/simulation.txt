@@ -15,5 +15,48 @@ METHOD transmssion(self, susceptible person):
     END FOR
 END METHOD 
     
+Simulation class:
+METHOD movement(self) -> None:
+    FOR person in self.tempoaryGroup(1, 'R'):
+                    ...
+        ELSE:
+            x_amount = random.randint(1, MAX_MOVE_AMOUNT)
+            self.checkMovement(0, self.__map.getWidth(), x_amount, person)
+            self.checkMovement(1, self.__map.getHeight(), (random.randint(1, MAX_MOVE_AMOUNT) - x_amount), person)
+        END IF 
+    END FOR 
 
-    
+METHOD checkMovement(self, direction, limit, moveAmount, person) -> None:
+    IF person.getPos()[direction] + moveAmount < limit:
+        person.setPos(direction, moveAmount)
+    ELIF person.getPos()[direction] - moveAmount > 0:
+        person.setPos(direction, -moveAmount)
+    END IF 
+   
+Pawn class:
+METHOD setPos(self, direction, moveAmount) -> None:
+    self.__pos[direction] += moveAmount
+
+
+Simulation class:
+METHOD infected pass(self):
+        infecetdGroup = self.tempoaryGroup(0 ,'I')
+        IF infecetdGroup != None:
+                FOR infectedPerson in infecetdGroup:
+                    IF infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
+                        IF self.isIdentiyIsolate:
+                            self.identify(infectedPerson)
+                        END IF 
+                        IF infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
+                            infectedPerson.setDiseaseID(None)
+                            infectedPerson.setStatus('R')
+                        else:
+                            infectedPerson.setItime()
+                        END IF 
+                    ELSE:
+                        infectedPerson.setIBtime()
+                    END IF 
+        END IF 
+
+
+         
