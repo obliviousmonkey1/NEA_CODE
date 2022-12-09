@@ -35,6 +35,10 @@ class Main:
     def gCurrentDaySusceptibleData(self, id):
         return self.mainHandler.getCurrentDaySusceptibleData(id)
 
+    # ui data 
+    def gPopulationData(self, id, type) -> int:
+        return self.mainHandler.gFreshPopulationData(id, type)
+
     # graph
     def gGraphData(self):
         return self.mainHandler.gNewGraphData()

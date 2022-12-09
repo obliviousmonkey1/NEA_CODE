@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS Person(
     iTime           FLOAT,
     ibTime          FLOAT,
     tTime           FLOAT,
+    ntTime          FLOAT,
     travelling      INTEGER,
     asymptomatic    INTEGER,
     paritalImmunity FLOAT,
@@ -86,28 +87,6 @@ CREATE TABLE IF NOT EXISTS Disease(
 );
 '''
 
-# createStatisticsTable = '''
-# CREATE TABLE IF NOT EXISTS Statistics(
-#     id          STRING,
-#     day         INTEGER,
-#     map         INTEGER, 
-#     susceptible INTEGER,
-#     infected    INTEGER,
-#     removed     INTEGER,
-#     PRIMARY KEY(id)  
-# );
-# '''
-
-# mapRelationship or mapConnections
-createMapRelationshipsTable = '''
-CREATE TABLE IF NOT EXISTS MapRelationships(
-    map1ID      INTEGER,
-    map2ID      INTEGER,
-    time        FLOAT, 
-    FOREIGN KEY(map1ID) REFERENCES Map(id),
-    FOREIGN KEY(map2ID) REFERENCES Map(id)
-);
-'''
 createBloodTypeTable = '''
 CREATE TABLE IF NOT EXISTS BloodType(
     id          INTEGER,
@@ -137,7 +116,6 @@ def createDB():
     c.execute(createPersonTable)
     c.execute(createPopulationTable)
     c.execute(createMapTable)
-    c.execute(createMapRelationshipsTable)
     c.execute(createDiseaseTable)
     c.execute(createBloodTypeTable)
     c.execute(createDiseaseBloodTypeLinkTable)

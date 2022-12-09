@@ -16,9 +16,6 @@ import numpy as np
 
 FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
 
-"""
-main menu which is the general collumns then you have sub menus so if 2 diseases it will created d1 d2 in sub menu 
-"""
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -38,29 +35,19 @@ class UI(tk.Tk):
 
 
     def initialize_user_interface(self):
-        # self.parent.iconphoto(False, tk.PhotoImage(Image.open('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png')))
         self.windowSizeChange('960','540')
         self.parent.title('Setup')
-        self.title('Data')
+        # self.parent.iconphoto(False, tk.PhotoImage(Image.open('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png')))
+        self.withdraw()
 
     
     def register(self, controller):
         self._controller = controller
-    
-    # SIMULATION SETUP 
-    '''
-    need to make this call graph handler and have all of this done in the grpah handler
-    '''
+
+
     def gCurrentData(self):
-        # data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self.currentGraphReference}data.csv'))
         return self._controller.gGraphData()
-        # x = data['day']
-        # y1 = data['Susceptible']
-        # y2 = data['Infected']
-        # y3 = data['Removed']
-        # fig = Figure(figsize=(5, 4), dpi=100)
-        # fig.add_subplot(111).plot(x,y1,y2,y3,scalex='Day',scaley='Population')
-        # return fig 
+        
 
     def gCurrentGraph(self):
         data = self.gCurrentData()
@@ -70,23 +57,32 @@ class UI(tk.Tk):
 
         self.gToolBarWindow()
 
-        # data =self.gCurrentData()
-        # self.canvas = FigureCanvasTkAgg(data, master=self.parent)  # A tk.DrawingArea.
-        # self.canvas.draw()
-        # self.canvas.get_tk_widget().pack(anchor=tk.CENTER , expand=0)
-        
+       
     def gCity(self, cName):
-        # self.currentGraphReference = self.option_var.get()
-        # if cName != 'allCities':
-        #     self.currentDaySusceptibleStatsLabel['text'] = f'Susceptible : {self._controller.gCurrentDaySusceptibleData(int(cName[-1]))}'
+        # print('step sim',self.winfo_x())
+        # print('step sim',self.winfo_y())
+        # print('data',self.simulationDataWindow.winfo_x())
+        # print('data',self.simulationDataWindow.winfo_y())
+        # print('graph',self.graphSelctorWindow.winfo_x())
+        # print('graph',self.graphSelctorWindow.winfo_y())
+        # print('sim window',self.parent.winfo_x())
+        # print('sim window',self.parent.winfo_y())
 
+        # destroy 
         self.toolbar.destroy()
+        self.currentDaySusceptibleStatsLabel.destroy()
+        self.currentDayInfectedStatsLabel.destroy()
+        self.currentDayRemovedStatsLabel.destroy()
+        self.currentDayTravellingStatsLabel.destroy()
+
         self.currentGraphReference = cName
         self._controller.sGraphRef(cName)
         self.option_menu = cName
         self.canvas.get_tk_widget().destroy()
-        self.currentGraphLabel['text'] = self.currentGraphReference
         self.gCurrentGraph()
+        self.dataUpdate()
+        self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
+
 
     def graphButtons(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
@@ -99,23 +95,6 @@ class UI(tk.Tk):
                 if key == 'cityName':
                     cityNames.append(value[0])
             i+=1
-        cityNames.reverse()
-
-        # self.settings = []
-        # self.settings.append('allCities')
-        # for cityName in cityNames:
-        #     self.settings.append(cityName)
-
-        # self.option_var = tk.StringVar(self)
-        # self.optionMenuIndex = 0
-        # option_menu = ttk.OptionMenu(
-        #         self,
-        #         self.option_var,
-        #         self.settings[self.optionMenuIndex],
-        #         *self.settings,
-        #         command=self.gCity())
-
-        # option_menu.pack(anchor=tk.S, side=tk.RIGHT)
 
         button = ttk.Button(self.graphSelctorWindow, text='All Cities', command=lambda cName='allCities': self.gCity(cName))
         button.pack(anchor=tk.S, side=tk.LEFT)  
@@ -124,7 +103,7 @@ class UI(tk.Tk):
             button.pack(anchor=tk.S, side=tk.LEFT)
         
         button = ttk.Button(self, text='Step sim', command=self.rSim)
-        button.pack(anchor=tk.S, side=tk.LEFT)
+        button.pack(anchor=tk.CENTER, side=tk.BOTTOM)
 
 
     def rSim(self):
@@ -134,40 +113,35 @@ class UI(tk.Tk):
         if value == 1:
             self.canvas.get_tk_widget().destroy()
             self.toolbar.destroy()
-            self.currentDayLabel.destroy()
-            self.currentGraphLabel.destroy()
-        self.parent.title('Simulation')
-
-        self.currentDayLabel = ttk.Label(self, text=f'Current Day {(self._controller.getCurrentDay())}')
-        self.currentDayLabel.pack(anchor=tk.NW, side=tk.LEFT) 
-
-        self.currentGraphLabel = ttk.Label(self, text=f'Selected Graph {self.currentGraphReference}')
-        self.currentGraphLabel.pack(anchor=tk.NW, side=tk.LEFT) 
-
-        # self.currentDayStatsLabel = ttk.Label(self,text='Current day stats:')
-        # self.currentDayStatsLabel.pack(anchor=tk.W, side=tk.LEFT) 
-
-        # print(self.currentGraphReference)
-        # if self.currentGraphReference != 'allCities':
-        #     self.currentDaySusceptibleStatsLabel = ttk.Label(self,text=f'Susceptible : {self._controller.gCurrentDaySusceptibleData(int(self.currentGraphReference[-1]))}')
-        #     self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.LEFT) 
-        #     self.currentDayInfectedStatsLabel = ttk.Label(self,text='Current day stats:')
-        #     self.currentDayRemovedStatsLabel = ttk.Label(self,text='Current day stats:')
-
-
+            self.currentDaySusceptibleStatsLabel.destroy()
+            self.currentDayInfectedStatsLabel.destroy()
+            self.currentDayRemovedStatsLabel.destroy()
+            self.currentDayTravellingStatsLabel.destroy()
+        
         self.gCurrentGraph()
         if value == 0:
             self.graphButtons()
+        
+        self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
+        self.dataUpdate()
 
-        # run code 
-        # self._controller.runSimulation()
-  
+    def populationInfo(self):
+        pass
+
+    def dataUpdate(self):
+        self.currentDaySusceptibleStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Susceptible : {self._controller.gPopulationData(self.currentGraphReference[-1],"S")}')
+        self.currentDayInfectedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"I")}')
+        self.currentDayRemovedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Removed : {self._controller.gPopulationData(self.currentGraphReference[-1],"R")}')
+        self.currentDayTravellingStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"T")}')
+
+        self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.TOP) 
+        self.currentDayInfectedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
+        self.currentDayRemovedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
+        self.currentDayTravellingStatsLabel.pack(anchor=tk.W, side=tk.TOP)
+
     def gToolBarWindow(self):
-        # self.toolBarWindow = tk.Tk()
-        # self.toolBarWindow.title = 'Toolbar'
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.parent)
         self.toolbar.update()
-
 
     def loading(self):
         self.clearWidgets()
@@ -186,13 +160,25 @@ class UI(tk.Tk):
         label = ttk.Label(self.parent, foreground='green', text='Setup complete')
         label.grid(column=1, row=1)
         label.destroy()
-        # label.after(3000, lambda: label.destroy())    
 
         self.graphSelctorWindow = tk.Tk()
+        self.graphSelctorWindow.geometry("+800+622")
         self.graphSelctorWindow.title('Graph Selection')
 
-        self._controller.sGraphRef(self.currentGraphReference)
+        self.simulationDataWindow = tk.Tk()
+        self.simulationDataWindow.title('Selected graph data')
 
+        self.simulationDataWindow.geometry("216x116+65+171")
+        self.simulationDataWindow.resizable(False,False)
+        self.geometry("302x30+474+622")
+        self.resizable(False,False)
+
+        self.parent.geometry('+347+25')
+
+        self._controller.sGraphRef(self.currentGraphReference)
+        self.deiconify()
+
+        self.parent.title('Simulation')
 
         self.simulationWindow()
 
@@ -208,7 +194,7 @@ class UI(tk.Tk):
                     self.type = 'disease'
                 elif ty == 2:
                     self.type = 'populations'
-            self.verification()
+            self.validation()
             ty += 1
 
         self.updateSettings()
@@ -224,7 +210,8 @@ class UI(tk.Tk):
         self.complete_label.grid(column=3, row=100, sticky=tk.S)
         self.complete_label.after(3000, lambda: self.complete_label.destroy() )
 
-    def verification(self):
+    # validation 
+    def validation(self):
         paddings = {'padx': 5, 'pady': 5}    
         try:
             i = 0
@@ -241,25 +228,42 @@ class UI(tk.Tk):
                     if not isinstance(float(self.values[i]), float) or (float(self.values[i]) < 0.0):
                         raise ValueError(f'Incorrect type or negative value in {key}')
                 elif self.data[self.type][self.currentIndex][key][2] == "int":
-                    if not isinstance(int(self.values[i]), int) or (int(self.values[i]) < 0.0):
+                    if not isinstance(int(self.values[i]), int) or (int(self.values[i]) < 0):
                         raise ValueError(f'Incorrect type or negative value in {key}')
                 elif self.data[self.type][self.currentIndex][key][2] == "bool":
-                    if not isinstance(int(self.values[i]), int) or (int(self.values[i]) < 0.0):
+                    if not isinstance(int(self.values[i]), int) or (int(self.values[i]) < 0):
                         raise ValueError(f'Incorrect type or negative value in {key}')
                     if int(self.values[i]) > 1 or int(self.values[i]) < 0:
                         raise ValueError(f'Incorrect type or negative value in {key}')
 
-
-                # special variable verification
-                if key != "infectionTimeBeforeQuarantine" and key != "travelTime" and isValueRandom == 0 and self.data[self.type][self.currentIndex][key][2] == "float":
-                    if (float(self.values[i]) < 0.0 or float(self.values[i]) > 1.0):
-                        raise ValueError(f'{key} float cannot be less than 0.0 or greater than 1.0')
+                # special variable validation
+                if isValueRandom == 0 and self.data[self.type][self.currentIndex][key][2] == "float":
+                    if '\u221e' not in self.data[self.type][self.currentIndex][key][1]:
+                        if float(self.values[i]) <  float(self.data[self.type][self.currentIndex][key][1][0]) or float(self.values[i]) > float(self.data[self.type][self.currentIndex][key][1][-3]):
+                            raise ValueError(f'{key} float cannot be less than 0.0 or greater than 1.0')
                 if self.type == 'general':
                     if key == 'numberOfMaps':
                         if isValueRandom == 1:
                             raise ValueError(f'{key} cannot be random')
                         elif float(self.values[i]) == 0:
                             raise ValueError(f'{key} cannot be 0')
+                
+                if self.type == 'disease':
+                    if key == 'transmissionRadius':
+                        if isValueRandom != 1 and int(self.values[i]) > 4:
+                            raise ValueError(f'{key} cannot be greater than 4')
+                    if key == 'numbBloodTypesSusceptible':
+                        if isValueRandom != 1 and int(self.values[i]) > 8:
+                            raise ValueError(f'{key} cannot be greater than 8')
+                    if key == 'ageMostSusceptible':
+                        if isValueRandom != 1 and (int(self.values[i]) < 10 or int(self.values[i])> 100):
+                            raise ValueError(f'{key} cannot be greater than 100 or less than 10')
+
+                if self.type == 'populations':
+                    if key == 'numbStartingInfected':
+                        if isValueRandom != 1 and (int(self.data['populations'][self.currentIndex]['populationSize'][0]) < int(self.values[i])):
+                            raise ValueError(f'{key} has to be less than population size')
+
                 if self.type == 'maps':
                     if key == 'minNumberOfConnections' and isValueRandom == 0:
                         if(int(self.data['general'][0]['numberOfMaps'][0]) <= int(self.values[i])):
@@ -349,11 +353,11 @@ class UI(tk.Tk):
                                  "travelTime": [2.0, '1.0<value<∞', 'float']
                                 })
             data['disease'].append({"name": ["random", "COVID", "str"], 
-                                    "transmissionTime": ["random", "0.0<value<1.0", "float"], 
+                                    "transmissionTime": ["random", "0.0<value<∞", "float"], 
                                     "contagion": ["random", 2, "int"], 
                                     "transmissionRadius": ["random", "1<value<4", "int"], 
-                                    "infectedTime": ["random", "0.0<value<1.0", "float"],
-                                    "incubationTime": ["random", "0.0<value<1.0", "float"],
+                                    "infectedTime": ["random", "0.0<value<∞", "float"],
+                                    "incubationTime": ["random", "0.0<value<∞", "float"],
                                     "mutationChance": ["random", "0.0<value<1.0", "float"],
                                     "numbBloodTypesSusceptible" : ["random",  "0<value<8", "int"], 
                                     "ageMostSusceptible" : ["random", "10<value<100", "int"],

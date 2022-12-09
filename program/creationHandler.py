@@ -99,7 +99,7 @@ class Main:
         self.createStatsCSV()
         #return True 
     
-    def startMapSeed(self, id,populationID, popSize):
+    def startMapSeed(self, id, populationID, popSize):
         self.__mapCreationHandler.seedMapTable(id, populationID, popSize)
 
     def getDiseaseID(self, populationID, personID):

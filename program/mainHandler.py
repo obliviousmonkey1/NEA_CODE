@@ -46,6 +46,10 @@ class Handler:
 
     def createAndPopulateDatabase(self):
         return self.__creationHandler.setUpData()
+        
+    # ui data
+    def gFreshPopulationData(self, id, type):
+        return self.__graphHandler.getMapData(id, type)
 
     # graph
     def gNewGraphData(self):

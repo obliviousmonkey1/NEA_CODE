@@ -1,8 +1,4 @@
 from random import randint, uniform, random, choice
-'''
-files deals with the handerling of making disease and it mutations, so creating a disease using the user
-input as well as random generation based on factors 
-'''
 
 class DiseaseCreationHandler:
     def __init__(self, dbH, data) -> None:

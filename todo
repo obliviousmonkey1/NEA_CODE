@@ -9,6 +9,10 @@
 
 > optimise code 
 
+> add data to the data UI 
+
+> add pawn window which displays all pawns in the city allows you to go through the pawns and view variables
+
 FIXES 
 
 >  File "/Users/parzavel/Documents/NEA/NEA_CODE/program/simulation.py", line 150, in travelling

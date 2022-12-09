@@ -1,9 +1,5 @@
 from random import randint, random, uniform
-"""
-data structre of the map ?????
-needs to be used in cretepopulation.py
-take information from the settings.json
-"""
+
 import os
 import json
 FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'

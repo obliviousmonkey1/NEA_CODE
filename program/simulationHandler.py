@@ -9,12 +9,10 @@ sys.path.append(os.path.expanduser(FILE_PATH_LOG))
 sys.path.append(os.path.expanduser(FILE_PATH_DBH))
 
 import dbHandler as dbH
-import logger 
 
 import simulation as model
 import sqlite3
 import threading
-import multiprocessing
 import timeit
 import random
 

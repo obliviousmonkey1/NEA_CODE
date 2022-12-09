@@ -1,4 +1,3 @@
-import names
 from random import randint, random,randrange, choice
 
 

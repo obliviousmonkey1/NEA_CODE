@@ -26,6 +26,22 @@ maybe have the data update every hour so graph updates per hour in real time whi
 '''
 
 class GraphDataHandler:
+    def __init__(self) -> None:
+        self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
+
+    def getMapData(self, id, type):
+        if id != 's':
+            if type == 'S':
+                return self.__dbQueryHandler.getPopulationSusceptible(id)[0]
+            elif type == 'I':
+                return self.__dbQueryHandler.getPopulationInfected(id)[0]
+            elif type == 'R':
+                return self.__dbQueryHandler.getPopulationRemoved(id)[0]
+            else:
+                # print(self.__dbQueryHandler.getPopulationTravelling(id))
+                return len(self.__dbQueryHandler.getPopulationTravelling(id))
+                
+
     def setNewGraphRef(self,graphReference):
         self._graphReference = graphReference
 
