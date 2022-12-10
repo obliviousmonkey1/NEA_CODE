@@ -30,6 +30,7 @@ class GraphDataHandler:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
     def getMapData(self, id, type):
+
         if id != 's':
             if type == 'S':
                 return self.__dbQueryHandler.getPopulationSusceptible(id)[0]
@@ -37,9 +38,36 @@ class GraphDataHandler:
                 return self.__dbQueryHandler.getPopulationInfected(id)[0]
             elif type == 'R':
                 return self.__dbQueryHandler.getPopulationRemoved(id)[0]
+            elif type == 'dID':
+                return [i[0] for i in self.__dbQueryHandler.getAllDiseaseIDsInAmap(id)]
+            elif type == 'dData':
+                return self.__dbQueryHandler.getAllDiseaseInfoFromID(id)
+            elif type == 'QI':
+                return len(self.__dbQueryHandler.getPopulationQuarintineInfected(id))
+            elif type == 'QT':
+                return len(self.__dbQueryHandler.getPopulationQuarintineTravelling(id))
             else:
                 # print(self.__dbQueryHandler.getPopulationTravelling(id))
                 return len(self.__dbQueryHandler.getPopulationTravelling(id))
+        else:
+            if type == 'S':
+                susceptible = 0
+                mapIDs = [i[0] for i in self.__dbQueryHandler.getAllMapIDs()]
+                for mapID in mapIDs:
+                    susceptible += self.__dbQueryHandler.getPopulationSusceptible(mapID)[0]
+                return susceptible
+            elif type == 'I':
+                infected = 0
+                mapIDs = [i[0] for i in self.__dbQueryHandler.getAllMapIDs()]
+                for mapID in mapIDs:
+                    infected += self.__dbQueryHandler.getPopulationInfected(mapID)[0]
+                return infected
+            elif type == 'R':
+                removed = 0
+                mapIDs = [i[0] for i in self.__dbQueryHandler.getAllMapIDs()]
+                for mapID in mapIDs:
+                    removed += self.__dbQueryHandler.getPopulationRemoved(mapID)[0]
+                return removed
                 
 
     def setNewGraphRef(self,graphReference):

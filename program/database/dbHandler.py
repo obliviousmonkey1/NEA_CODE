@@ -92,16 +92,16 @@ class DBManager:
                      diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,populationID,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
         self.conn.commit()
 
 
     def getPopulation(self, mapID):
         gPopulation = '''
-        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.ntTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.diseaseID
+        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.ntTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.sDestination, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.diseaseID
         FROM Person, Map, Population
         WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
         '''
@@ -187,6 +187,17 @@ class DBManager:
         self.conn.commit()
 
 
+    def updatePersonQtime(self, id: int, qTime: float) -> None:
+        uPersonQtime = '''
+        UPDATE Person
+        SET qTime = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonQtime, (qTime, id))
+        self.conn.commit()
+
+
     def updatePersonIBtime(self, id: int, ibTime: float) -> None:
         uPersonIBtime = '''
         UPDATE Person
@@ -231,6 +242,39 @@ class DBManager:
         self.conn.commit()
 
 
+    def updateQinfected(self, id: int, qInfected: int) -> None:
+        uQinfected = '''
+        UPDATE Person
+        SET qInfected = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uQinfected, (qInfected, id))
+        self.conn.commit()
+
+
+    def updateQtravelling(self, id: int, qTravelling: int) -> None:
+        uQtravelling = '''
+        UPDATE Person
+        SET qTravelling = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uQtravelling, (qTravelling, id))
+        self.conn.commit()
+
+
+    def updateArrivalCheck(self, id: int, arrivalCheck: int) -> None:
+        uArrivalCheck = '''
+        UPDATE Person
+        SET arrivalCheck = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uArrivalCheck, (arrivalCheck, id))
+        self.conn.commit()
+
+
     def updateDiseaseID(self, id: int, diseaseID: int) -> None:
         uPersonDiseaseID = '''
         UPDATE Person
@@ -244,14 +288,14 @@ class DBManager:
 
     # Map
     def createMap(self, id: int, name: str, width: int, height: int, day: int,govermentActionReliabilty:float,
-                 identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,socialDistanceTriggerInfectionCount:int,
+                 identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,travelQuarintineTime:float,socialDistanceTriggerInfectionCount:int,
                  travelProhibitedTriggerInfectionCount:int,travelTime:float, travelProhibited:int, populationID: int) -> None:
         cMap = '''
         INSERT INTO Map VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cMap, (id, name, width, height, day,govermentActionReliabilty,identifyAndIsolateTriggerInfectionCount,infectionTimeBeforeQuarantine,socialDistanceTriggerInfectionCount,travelProhibitedTriggerInfectionCount,travelTime,travelProhibited, populationID))
+        c.execute(cMap, (id, name, width, height, day,govermentActionReliabilty,identifyAndIsolateTriggerInfectionCount,infectionTimeBeforeQuarantine,travelQuarintineTime,socialDistanceTriggerInfectionCount,travelProhibitedTriggerInfectionCount,travelTime,travelProhibited, populationID))
         self.conn.commit()
 
 
@@ -273,6 +317,16 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gMapIDs,(id,))
+        return c.fetchall()
+
+
+    def getAllMapIDs(self):
+        gAllMapIDs = '''
+        SELECT Map.id 
+        FROM Map
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllMapIDs)
         return c.fetchall()
 
 
@@ -465,7 +519,7 @@ class DBManager:
 
 
     # Stats 
-    def getPopulationTravelling(self, id: int) -> None:
+    def getPopulationTravelling(self, id: int):
         gPopulationTravelling = '''
         SELECT *
         FROM Person
@@ -478,7 +532,7 @@ class DBManager:
     # quarintine 
     # travel ban
     # quarintining people 
-    def getPopulationTravelling(self, id: int) -> None:
+    def getPopulationTravelling(self, id: int):
         gPopulationTravelling = '''
         SELECT Person.destination
         FROM Person
@@ -486,6 +540,50 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gPopulationTravelling, (id,))
+        return c.fetchall()  
+
+
+    def getAllDiseaseIDsInAmap(self, id: int):
+        gPopulationTravelling = '''
+        SELECT Person.diseaseID
+        FROM Person
+        WHERE Person.populationID = ? AND Person.status = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationTravelling, (id,'I'))
+        return c.fetchall()  
+
+
+    def getAllDiseaseInfoFromID(self, id: int):
+        gAllDiseaseInfoFromID = '''
+        SELECT *
+        FROM Disease
+        WHERE Disease.id = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gAllDiseaseInfoFromID, (id,))
+        return c.fetchone()  
+    
+    
+    def getPopulationQuarintineInfected(self, id: int):
+        gPopulationQuarintineInfected = '''
+        SELECT Person.qInfected
+        FROM Person
+        WHERE Person.populationID = ?  AND Person.qInfected = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationQuarintineInfected, (id,1))
+        return c.fetchall()  
+
+
+    def getPopulationQuarintineTravelling(self, id: int):
+        gPopulationQuarintineTravelling = '''
+        SELECT Person.qTravelling
+        FROM Person
+        WHERE Person.populationID = ? AND Person.qTravelling = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gPopulationQuarintineTravelling, (id,1))
         return c.fetchall()  
 
 

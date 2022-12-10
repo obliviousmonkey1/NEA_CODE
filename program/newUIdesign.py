@@ -67,6 +67,11 @@ class UI(tk.Tk):
         # print('graph',self.graphSelctorWindow.winfo_y())
         # print('sim window',self.parent.winfo_x())
         # print('sim window',self.parent.winfo_y())
+        # print('sim window',self.diseaseDataWindow.winfo_x())
+        # print('sim window',self.diseaseDataWindow.winfo_y())
+
+        self.diseaseInfo = self._controller.gPopulationData(cName[-1],"dID")
+        self.diseaseMenuIndex = 0
 
         # destroy 
         self.toolbar.destroy()
@@ -74,6 +79,8 @@ class UI(tk.Tk):
         self.currentDayInfectedStatsLabel.destroy()
         self.currentDayRemovedStatsLabel.destroy()
         self.currentDayTravellingStatsLabel.destroy()
+        self.currentDayQuarantineInfected.destroy()
+        self.currentDayQuarantineTravelling.destroy()
 
         self.currentGraphReference = cName
         self._controller.sGraphRef(cName)
@@ -81,6 +88,7 @@ class UI(tk.Tk):
         self.canvas.get_tk_widget().destroy()
         self.gCurrentGraph()
         self.dataUpdate()
+        self.updateDInfo()
         self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
 
 
@@ -103,7 +111,14 @@ class UI(tk.Tk):
             button.pack(anchor=tk.S, side=tk.LEFT)
         
         button = ttk.Button(self, text='Step sim', command=self.rSim)
-        button.pack(anchor=tk.CENTER, side=tk.BOTTOM)
+        button.pack(anchor=tk.CENTER, side=tk.TOP)
+
+
+        scrollBar = ttk.Scrollbar(self, orient='horizontal', command=self.xview)
+        scrollBar.pack(anchor=tk.CENTER, side=tk.BOTTOM)
+
+        self.configure(xscrollcommand=scrollBar.set)
+
 
 
     def rSim(self):
@@ -117,10 +132,26 @@ class UI(tk.Tk):
             self.currentDayInfectedStatsLabel.destroy()
             self.currentDayRemovedStatsLabel.destroy()
             self.currentDayTravellingStatsLabel.destroy()
+            self.currentDayQuarantineInfected.destroy()
+            self.currentDayQuarantineTravelling.destroy()
+            # self.diseaseIDlabel.destroy()
+            # self.diseaseNameLabel.destroy()
+            # self.diseaseTransmissionTimeLabel.destroy()
+            # self.diseaseContagionLabel.destroy()
+            # self.diseaseTransmissionRadiusLabel.destroy()
+            # self.diseaseInfectedTimeLabel.destroy()
+            # self.diseaseIncubationTimeLabel.destroy()
+            # self.diseaseAgeMostSusceptibleLabel.destroy()
+            # self.diseaseCanKillLabel.destroy()
+            # self.diseasePasymptomaticOnInfectionLabel.destroy()
+            # self.diseaseDangerLabel.destroy()
+
         
         self.gCurrentGraph()
         if value == 0:
             self.graphButtons()
+            self.diseaseInfoSetup()
+
         
         self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
         self.dataUpdate()
@@ -128,16 +159,101 @@ class UI(tk.Tk):
     def populationInfo(self):
         pass
 
+    def mapInfo(self):
+        pass
+
+    def diseaseInfoSetup(self):
+        data = [None for _ in range(10)]
+        id = None
+
+        button = ttk.Button(self.diseaseDataWindow, text='Next disease', command=lambda change=1: self.updateDInfo(change))
+        button.pack(anchor=tk.CENTER, side=tk.TOP)
+
+        self.diseaseInfo = self._controller.gPopulationData(self.currentGraphReference[-1],"dID")
+
+        if self.diseaseInfo:
+            self.diseaseInfo = list(dict.fromkeys(self.diseaseInfo))
+            data = self._controller.gPopulationData(self.diseaseInfo[self.diseaseMenuIndex],"dData")
+            id = data[0]
+            data = data[1:]
+
+            self.diseaseTransmissionTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission time: {round(data[1], 2)}')
+            self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {round(data[4], 2)}')
+            self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {round(data[5], 2)}')
+            self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {round(data[8], 2)}')
+        else:
+            self.diseaseTransmissionTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission time: {data[1]}')
+            self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {data[4]}')
+            self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {data[5]}')
+            self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {data[8]}')
+        
+        self.diseaseIDlabel = ttk.Label(self.diseaseDataWindow,text=f'ID: {id}')
+        self.diseaseNameLabel = ttk.Label(self.diseaseDataWindow,text=f'Name: {data[0]}')
+        self.diseaseContagionLabel = ttk.Label(self.diseaseDataWindow,text=f'Contagion: {data[2]}')
+        self.diseaseTransmissionRadiusLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission radius: {data[3]}')
+        self.diseaseAgeMostSusceptibleLabel = ttk.Label(self.diseaseDataWindow,text=f'Age most susceptible: {data[6]}')
+        self.diseaseCanKillLabel = ttk.Label(self.diseaseDataWindow,text=f'Can kill: {data[7]}')
+        self.diseaseDangerLabel = ttk.Label(self.diseaseDataWindow,text=f'Danger: {data[9]}')
+
+        self.diseaseIDlabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseNameLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseTransmissionTimeLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseContagionLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseTransmissionRadiusLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseInfectedTimeLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseIncubationTimeLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseAgeMostSusceptibleLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseCanKillLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseasePasymptomaticOnInfectionLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseDangerLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+
+    def updateDInfo(self, change=0):
+        data = [None for _ in range(10)]
+        id = None
+      
+        if self.diseaseInfo:
+            if self.diseaseMenuIndex + change >= len(self.diseaseInfo):
+                self.diseaseMenuIndex = 0
+            else:
+                self.diseaseMenuIndex += change
+
+            self.diseaseInfo = list(dict.fromkeys(self.diseaseInfo))
+            data = self._controller.gPopulationData(self.diseaseInfo[self.diseaseMenuIndex],"dData")
+            id = data[0]
+            data = data[1:]
+            self.diseaseTransmissionTimeLabel['text'] = f'Transmission time: {round(data[1], 2)}'
+            self.diseaseInfectedTimeLabel['text'] = f'Infected time: {round(data[4], 2)}'
+            self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {round(data[5], 2)}'
+            self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {round(data[8], 2)}'
+        else:
+            self.diseaseTransmissionTimeLabel['text'] = f'Transmission time: {data[1]}'
+            self.diseaseInfectedTimeLabel['text'] = f'Infected time: {data[4]}'
+            self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {data[5]}'
+            self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {data[8]}'
+
+        self.diseaseIDlabel['text'] = f'ID: {id}'
+        self.diseaseNameLabel['text'] = f'Name: {data[0]}'
+        self.diseaseContagionLabel['text'] = f'Contagion: {data[2]}'
+        self.diseaseTransmissionRadiusLabel['text'] = f'Transmission radius: {data[3]}'
+        self.diseaseAgeMostSusceptibleLabel['text'] = f'Age most susceptible: {data[6]}'
+        self.diseaseCanKillLabel['text'] = f'Can kill: {data[7]}'
+        self.diseaseDangerLabel['text'] = f'Danger: {data[9]}'
+
     def dataUpdate(self):
         self.currentDaySusceptibleStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Susceptible : {self._controller.gPopulationData(self.currentGraphReference[-1],"S")}')
         self.currentDayInfectedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"I")}')
         self.currentDayRemovedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Removed : {self._controller.gPopulationData(self.currentGraphReference[-1],"R")}')
         self.currentDayTravellingStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"T")}')
 
+        self.currentDayQuarantineInfected  = ttk.Label(self.simulationDataWindow,text=f'Quarantine infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"QI")}')
+        self.currentDayQuarantineTravelling  = ttk.Label(self.simulationDataWindow,text=f'Quarantine travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"QT")}')
+
         self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.TOP) 
         self.currentDayInfectedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
         self.currentDayRemovedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
         self.currentDayTravellingStatsLabel.pack(anchor=tk.W, side=tk.TOP)
+        self.currentDayQuarantineInfected.pack(anchor=tk.W, side=tk.TOP) 
+        self.currentDayQuarantineTravelling.pack(anchor=tk.W, side=tk.TOP)
 
     def gToolBarWindow(self):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.parent)
@@ -166,17 +282,25 @@ class UI(tk.Tk):
         self.graphSelctorWindow.title('Graph Selection')
 
         self.simulationDataWindow = tk.Tk()
-        self.simulationDataWindow.title('Selected graph data')
+        self.simulationDataWindow.title('SIR data')
 
-        self.simulationDataWindow.geometry("216x116+65+171")
+        self.diseaseDataWindow = tk.Tk()
+        self.diseaseDataWindow.title('Disease data')
+
+        self.simulationDataWindow.geometry("216x130+65+171")
         self.simulationDataWindow.resizable(False,False)
         self.geometry("302x30+474+622")
         self.resizable(False,False)
 
+        self.diseaseDataWindow.geometry("216x250+65+328")
+        self.diseaseDataWindow.resizable(False,False)
+       
         self.parent.geometry('+347+25')
 
         self._controller.sGraphRef(self.currentGraphReference)
         self.deiconify()
+
+        self.diseaseMenuIndex = 0
 
         self.parent.title('Simulation')
 
@@ -347,6 +471,7 @@ class UI(tk.Tk):
                                  "govermentActionReliabilty" : [0.3,"0.0<value<1.0","float"],
                                  "minNumberOfConnections": [1, "0<value<maps", "int"],
                                  "infectionTimeBeforeQuarantine": [3.0,"0.0<value<∞","float"],
+                                 "travelQuarintineTime": [2.0,"0.0<value<∞","float"],
                                  "socialDistanceTriggerInfectionCount": [10, "1<value<∞", "int"],
                                  "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"],
                                  "travelProhibitedTriggerInfectionCount" : [10, "1<value<∞", "int"],
