@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS Person(
     qInfected       INTEGER,
     qTravelling     INTEGER,
     arrivalCheck    INTEGER,   
+    isInfectious    INTEGER,
+    isIncubating    INTEGER,
     diseaseID       INTEGER,
     populationID    INTEGER,    
     FOREIGN KEY(populationID) REFERENCES Population(id),
@@ -82,9 +84,9 @@ CREATE TABLE IF NOT EXISTS Disease(
     infectedTime             FLOAT,
     incubationTime           FLOAT,
     ageMostSusceptible       INTEGER,
-    canKill                  INTEGER,
+    virulence                INTEGER,
     pAsymptomaticOnInfection FLOAT,
-    danger                   FLOAT,
+    mutationChance           FLOAT,
     PRIMARY KEY(id)
 );
 '''
@@ -105,9 +107,16 @@ CREATE TABLE IF NOT EXISTS DiseaseBloodTypeLink(
 );
 '''
 
-createTemporaryPopulationTable = ''''''
+createGeneralTable = '''
+CREATE TABLE IF NOT EXISTS General(
+    id                          INTEGER,
+    generalMutationChance       FLOAT,
+    numberOfMaps                INTEGER,
+    timeRequiredBetweenTravels  FLOAT,
+    PRIMARY KEY(id)
+)
+'''
 
-createTemporaryPersonTable = ''''''
 
 # contain routines that people have one routine shared between many people 
 createWeeklyRoutinesTable = ''''''
@@ -121,6 +130,7 @@ def createDB():
     c.execute(createDiseaseTable)
     c.execute(createBloodTypeTable)
     c.execute(createDiseaseBloodTypeLinkTable)
+    c.execute(createGeneralTable)
     c.close()
 
 

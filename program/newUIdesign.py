@@ -1,5 +1,3 @@
-from ast import Delete
-from multiprocessing import Value
 import os 
 import json
 import tkinter as tk
@@ -81,6 +79,8 @@ class UI(tk.Tk):
         self.currentDayTravellingStatsLabel.destroy()
         self.currentDayQuarantineInfected.destroy()
         self.currentDayQuarantineTravelling.destroy()
+        self.currentDayIncubating.destroy()
+        self.currentDayInfectious.destroy()
 
         self.currentGraphReference = cName
         self._controller.sGraphRef(cName)
@@ -114,13 +114,6 @@ class UI(tk.Tk):
         button.pack(anchor=tk.CENTER, side=tk.TOP)
 
 
-        scrollBar = ttk.Scrollbar(self, orient='horizontal', command=self.xview)
-        scrollBar.pack(anchor=tk.CENTER, side=tk.BOTTOM)
-
-        self.configure(xscrollcommand=scrollBar.set)
-
-
-
     def rSim(self):
         self._controller.runSimulation()
 
@@ -134,17 +127,8 @@ class UI(tk.Tk):
             self.currentDayTravellingStatsLabel.destroy()
             self.currentDayQuarantineInfected.destroy()
             self.currentDayQuarantineTravelling.destroy()
-            # self.diseaseIDlabel.destroy()
-            # self.diseaseNameLabel.destroy()
-            # self.diseaseTransmissionTimeLabel.destroy()
-            # self.diseaseContagionLabel.destroy()
-            # self.diseaseTransmissionRadiusLabel.destroy()
-            # self.diseaseInfectedTimeLabel.destroy()
-            # self.diseaseIncubationTimeLabel.destroy()
-            # self.diseaseAgeMostSusceptibleLabel.destroy()
-            # self.diseaseCanKillLabel.destroy()
-            # self.diseasePasymptomaticOnInfectionLabel.destroy()
-            # self.diseaseDangerLabel.destroy()
+            self.currentDayIncubating.destroy()
+            self.currentDayInfectious.destroy()
 
         
         self.gCurrentGraph()
@@ -173,6 +157,7 @@ class UI(tk.Tk):
 
         if self.diseaseInfo:
             self.diseaseInfo = list(dict.fromkeys(self.diseaseInfo))
+            print(self.diseaseInfo)
             data = self._controller.gPopulationData(self.diseaseInfo[self.diseaseMenuIndex],"dData")
             id = data[0]
             data = data[1:]
@@ -181,19 +166,22 @@ class UI(tk.Tk):
             self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {round(data[4], 2)}')
             self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {round(data[5], 2)}')
             self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {round(data[8], 2)}')
+            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {round(data[7],2)}')
+            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {round(data[9])}')
         else:
             self.diseaseTransmissionTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission time: {data[1]}')
             self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {data[4]}')
             self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {data[5]}')
             self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {data[8]}')
+            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {data[7]}')
+            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {data[9]}')
+
         
         self.diseaseIDlabel = ttk.Label(self.diseaseDataWindow,text=f'ID: {id}')
         self.diseaseNameLabel = ttk.Label(self.diseaseDataWindow,text=f'Name: {data[0]}')
         self.diseaseContagionLabel = ttk.Label(self.diseaseDataWindow,text=f'Contagion: {data[2]}')
         self.diseaseTransmissionRadiusLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission radius: {data[3]}')
         self.diseaseAgeMostSusceptibleLabel = ttk.Label(self.diseaseDataWindow,text=f'Age most susceptible: {data[6]}')
-        self.diseaseCanKillLabel = ttk.Label(self.diseaseDataWindow,text=f'Can kill: {data[7]}')
-        self.diseaseDangerLabel = ttk.Label(self.diseaseDataWindow,text=f'Danger: {data[9]}')
 
         self.diseaseIDlabel.pack(anchor=tk.CENTER, side=tk.TOP)
         self.diseaseNameLabel.pack(anchor=tk.CENTER, side=tk.TOP)
@@ -203,9 +191,9 @@ class UI(tk.Tk):
         self.diseaseInfectedTimeLabel.pack(anchor=tk.CENTER, side=tk.TOP)
         self.diseaseIncubationTimeLabel.pack(anchor=tk.CENTER, side=tk.TOP)
         self.diseaseAgeMostSusceptibleLabel.pack(anchor=tk.CENTER, side=tk.TOP)
-        self.diseaseCanKillLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseMutationChanceLabel.pack(anchor=tk.CENTER, side=tk.TOP)
         self.diseasePasymptomaticOnInfectionLabel.pack(anchor=tk.CENTER, side=tk.TOP)
-        self.diseaseDangerLabel.pack(anchor=tk.CENTER, side=tk.TOP)
+        self.diseaseVirulenceLabel.pack(anchor=tk.CENTER, side=tk.TOP)
 
     def updateDInfo(self, change=0):
         data = [None for _ in range(10)]
@@ -225,31 +213,40 @@ class UI(tk.Tk):
             self.diseaseInfectedTimeLabel['text'] = f'Infected time: {round(data[4], 2)}'
             self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {round(data[5], 2)}'
             self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {round(data[8], 2)}'
+            self.diseaseVirulenceLabel['text'] = f'Virulence: {round(data[7],2)}'
+            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {round(data[9],2)}'
+
+
         else:
             self.diseaseTransmissionTimeLabel['text'] = f'Transmission time: {data[1]}'
             self.diseaseInfectedTimeLabel['text'] = f'Infected time: {data[4]}'
             self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {data[5]}'
             self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {data[8]}'
+            self.diseaseVirulenceLabel['text'] = f'Virulence: {data[7]}'
+            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {data[9]}'
 
         self.diseaseIDlabel['text'] = f'ID: {id}'
         self.diseaseNameLabel['text'] = f'Name: {data[0]}'
         self.diseaseContagionLabel['text'] = f'Contagion: {data[2]}'
         self.diseaseTransmissionRadiusLabel['text'] = f'Transmission radius: {data[3]}'
         self.diseaseAgeMostSusceptibleLabel['text'] = f'Age most susceptible: {data[6]}'
-        self.diseaseCanKillLabel['text'] = f'Can kill: {data[7]}'
-        self.diseaseDangerLabel['text'] = f'Danger: {data[9]}'
 
     def dataUpdate(self):
         self.currentDaySusceptibleStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Susceptible : {self._controller.gPopulationData(self.currentGraphReference[-1],"S")}')
-        self.currentDayInfectedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"I")}')
+        self.currentDayInfectedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Total infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"I")}')
         self.currentDayRemovedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Removed : {self._controller.gPopulationData(self.currentGraphReference[-1],"R")}')
         self.currentDayTravellingStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"T")}')
 
         self.currentDayQuarantineInfected  = ttk.Label(self.simulationDataWindow,text=f'Quarantine infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"QI")}')
         self.currentDayQuarantineTravelling  = ttk.Label(self.simulationDataWindow,text=f'Quarantine travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"QT")}')
 
+        self.currentDayIncubating = ttk.Label(self.simulationDataWindow,text=f'Infected Incubating: {self._controller.gPopulationData(self.currentGraphReference[-1],"IB")}')
+        self.currentDayInfectious = ttk.Label(self.simulationDataWindow,text=f'Infected Infectious : {self._controller.gPopulationData(self.currentGraphReference[-1],"IF")}')
+
         self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.TOP) 
         self.currentDayInfectedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
+        self.currentDayInfectious.pack(anchor=tk.W, side=tk.TOP)
+        self.currentDayIncubating.pack(anchor=tk.W, side=tk.TOP)
         self.currentDayRemovedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
         self.currentDayTravellingStatsLabel.pack(anchor=tk.W, side=tk.TOP)
         self.currentDayQuarantineInfected.pack(anchor=tk.W, side=tk.TOP) 
@@ -287,7 +284,7 @@ class UI(tk.Tk):
         self.diseaseDataWindow = tk.Tk()
         self.diseaseDataWindow.title('Disease data')
 
-        self.simulationDataWindow.geometry("216x130+65+171")
+        self.simulationDataWindow.geometry("216x160+65+171")
         self.simulationDataWindow.resizable(False,False)
         self.geometry("302x30+474+622")
         self.resizable(False,False)
@@ -487,7 +484,7 @@ class UI(tk.Tk):
                                     "numbBloodTypesSusceptible" : ["random",  "0<value<8", "int"], 
                                     "ageMostSusceptible" : ["random", "10<value<100", "int"],
                                     "pAsymptomaticOnInfection": ["random", "0.0<value<1.0", "float"],
-                                    "canKill" : [0, "0,1","bool"]
+                                    "virulence" : [0.0, "0.0<value<1.0","float"]
                                 })
             data['populations'].append({"populationSize": [100, "0<value<∞", "int"],
                                         "travelRate" : [0.5,"0.0<value<1.0","float"],
@@ -544,7 +541,6 @@ class UI(tk.Tk):
     def openSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file)
-
 
     def entry_point(self):
         self.setUpOne()

@@ -46,6 +46,10 @@ class GraphDataHandler:
                 return len(self.__dbQueryHandler.getPopulationQuarintineInfected(id))
             elif type == 'QT':
                 return len(self.__dbQueryHandler.getPopulationQuarintineTravelling(id))
+            elif type == 'IB':
+                return len(self.__dbQueryHandler.getInfectedIncubating(id))
+            elif type == 'IF':
+                return len(self.__dbQueryHandler.getInfectedInfectious(id))
             else:
                 # print(self.__dbQueryHandler.getPopulationTravelling(id))
                 return len(self.__dbQueryHandler.getPopulationTravelling(id))

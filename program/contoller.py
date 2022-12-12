@@ -1,7 +1,9 @@
 from mainHandler import *
 from newUIdesign import *
 import miscFunctions
-import threading
+import glob
+import os 
+import sys 
 
 '''
 controls all the handlers
@@ -60,10 +62,15 @@ class Main:
         return miscFunctions.writeConfig(data)
 
 if __name__ == "__main__":
-    # debug 
-    import os 
+    # clean up 
+    sys.setrecursionlimit(15000)
+    os.chdir("/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/simData")
+    extension = 'csv'
+    allFilenames = [file for file in glob.glob('*.{}'.format(extension))]
     try:
-        os.remove('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db')
+        os.remove(os.path.expanduser('~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'))
+        for file in allFilenames:
+            os.remove(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{file}'))
     except:
         pass
     #
@@ -72,5 +79,4 @@ if __name__ == "__main__":
     c = Main(mainHandler, ui)
     ui.entry_point() 
     ui.parent.mainloop()
-    # c.setUpSimulationData()
-    # c.runSimulation()
+

@@ -18,7 +18,7 @@ class DiseaseCreationHandler:
         self.__numbBloodTypesSusceptible = []
         self.__ageMostSusceptible = []
         self.__pAsymptomaticOnInfection = []
-        self.__canKill = []
+        self.__virulence = []
 
         for a in range((len(data[self.tag]))):
             for key, value in data[self.tag][a].items():
@@ -53,9 +53,9 @@ class DiseaseCreationHandler:
                     elif key == 'pAsymptomaticOnInfection':
                         self.__pAsymptomaticOnInfection.append(random())
                         data[self.tag][a][key][0] = self.__pAsymptomaticOnInfection[-1]
-                    elif key == 'canKill':
-                        self.__canKill.append(randint(0,1))
-                        data[self.tag][a][key][0] = self.__canKill[-1]
+                    elif key == 'virulence':
+                        self.__virulence.append(random())
+                        data[self.tag][a][key][0] = self.__virulence[-1]
 
                 else:
                     if key == 'name':
@@ -78,8 +78,8 @@ class DiseaseCreationHandler:
                         self.__ageMostSusceptible.append(int(value[0]))
                     elif key == 'pAsymptomaticOnInfection':
                         self.__pAsymptomaticOnInfection.append(float(value[0]))
-                    elif key == 'canKill':
-                        self.__canKill.append(int(value[0]))
+                    elif key == 'virulence':
+                        self.__virulence.append(float(value[0]))
             a+=1
            
         return data
@@ -98,17 +98,12 @@ class DiseaseCreationHandler:
         return  self.__diseaseID
 
     def seedDiseaseTable(self,populationID):
-        if self.__canKill[populationID-1] == 1:
-            danger = random()
-        else:
-            danger = 0.0
-       
         self.__dbQueryHandler.createDisease(self.__diseaseID, self.__name[(populationID-1)],
                                             self.__transmissionTime[(populationID-1)],self.__contagion[(populationID-1)],
                                             self.__transmissionRadius[(populationID-1)], self.__infectedTime[(populationID-1)], 
                                             self.__incubationTime[(populationID-1)], self.__ageMostSusceptible[(populationID-1)],
-                                            self.__canKill[(populationID-1)], self.__pAsymptomaticOnInfection[(populationID-1)],
-                                            danger
+                                            self.__virulence[(populationID-1)], self.__pAsymptomaticOnInfection[(populationID-1)],
+                                            self.__mutationChance[(populationID-1)]
                                             )
         self.seedBloodTypeRelationshipTable(populationID)
 

@@ -17,6 +17,14 @@
 
 > add scroller to graph selection and setup 2 
 
+> add end button which then saves the db and simData as well as settings in a subfolder of the archive folder with the name being the data 
+and time the simulation happened
+> then allow these old files to be read by the program and then allow for stepping through the days either forward or backwards 
+
+> need to indent infecteced and incubating on the data screen
+
+> need to make the isolation and travel restrictions take into acount only the infected people that are infectiouss
+
 FIXES 
 
 >  File "/Users/parzavel/Documents/NEA/NEA_CODE/program/simulation.py", line 150, in travelling

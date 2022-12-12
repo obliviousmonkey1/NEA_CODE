@@ -15,7 +15,7 @@ import createDisease as cD
 import dbHandler as dbH
 import dbMaker as dbM
 
-from random import randint, random
+from random import randint, random, uniform
 
 class Main:
     def __init__(self) -> None:
@@ -29,6 +29,7 @@ class Main:
         self._mainHandler = mH
 
     def seedDatabase(self):
+        self.seedGeneralDB()
         self.seedBloodTypeTable()
         self.__populationCreationHandler.seedPopulationTable(0, True)
         for id in range(1, self.__numberOfMaps+1):
@@ -66,7 +67,11 @@ class Main:
                         "Removed" : 0
                     }
                     csv_writer.writerow(info)
-           
+
+
+    def seedGeneralDB(self):
+        self.__dbQueryHandler.createGeneral(self.__generalMutationChance, self.__numberOfMaps, self.__timeRequiredBetweenTravels)
+
   
     def setUpGeneral(self, data):
         i = 0
@@ -75,14 +80,20 @@ class Main:
                 if key == 'generalMutationChance':
                     self.__generalMutationChance = random(0,0.3)
                     data[self.tag][i][key][0] = self.__generalMutationChance[i]
+                elif key == 'timeRequiredBetweenTravels':
+                    self.__timeRequiredBetweenTravels = uniform(1.0, 4.0)
+                    data[self.tag][i][key][0] = self.__timeRequiredBetweenTravels[i]
             else:
                 if key == 'generalMutationChance':
                     self.__generalMutationChance = float(value[0])
                 elif key == 'numberOfMaps':
                     self.__numberOfMaps = int(value[0])
+                elif key == 'timeRequiredBetweenTravels':
+                    self.__timeRequiredBetweenTravels = float(value[0])
             i+=1
 
         return data 
+
 
     def setUpData(self):
         # pretty sure don't have to keep assigning data 

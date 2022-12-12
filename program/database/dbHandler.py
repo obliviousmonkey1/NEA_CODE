@@ -92,16 +92,16 @@ class DBManager:
                      diseaseID: int, populationID: int) -> None:
         cPerson = '''
         INSERT INTO Person VALUES
-        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,populationID,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,diseaseID,populationID))
+        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,populationID,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,0,0,diseaseID,populationID))
         self.conn.commit()
 
 
     def getPopulation(self, mapID):
         gPopulation = '''
-        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.ntTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.sDestination, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.diseaseID
+        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.ntTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.sDestination, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.isInfectious, Person.isIncubating, Person.diseaseID
         FROM Person, Map, Population
         WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
         '''
@@ -275,6 +275,28 @@ class DBManager:
         self.conn.commit()
 
 
+    def updateIsInfectious(self, id: int, isInfectious: int) -> None:
+        uPersonIsInfectious = '''
+        UPDATE Person
+        SET isInfectious = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonIsInfectious, (isInfectious, id))
+        self.conn.commit()
+
+
+    def updateIsIncubating(self, id: int, isIncubating: int) -> None:
+        uPersonIsIncubating = '''
+        UPDATE Person
+        SET isIncubating = ? 
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(uPersonIsIncubating, (isIncubating, id))
+        self.conn.commit()
+
+
     def updateDiseaseID(self, id: int, diseaseID: int) -> None:
         uPersonDiseaseID = '''
         UPDATE Person
@@ -409,14 +431,14 @@ class DBManager:
 
     # Disease
     def createDisease(self, id: str, name: str, transmissionTime: float, contagion: float, transmissionRadius: int,
-                     infectedTime: float, incubationTime: float,ageMostSusceptible:int,canKill:int,pAsymptomaticOnInfection:float,
-                     danger:float) -> None:
+                     infectedTime: float, incubationTime: float,ageMostSusceptible:int,virulence:float,pAsymptomaticOnInfection:float,
+                     mutationChance:float) -> None:
         cDisease = '''
         INSERT INTO Disease VALUES
         (?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cDisease, (id, name, transmissionTime, contagion, transmissionRadius, infectedTime, incubationTime,ageMostSusceptible,canKill,pAsymptomaticOnInfection,danger))
+        c.execute(cDisease, (id, name, transmissionTime, contagion, transmissionRadius, infectedTime, incubationTime,ageMostSusceptible,virulence,pAsymptomaticOnInfection,mutationChance))
         self.conn.commit()
 
 
@@ -497,6 +519,17 @@ class DBManager:
         return c.fetchone()
 
 
+    def getDiseaseMutationChance(self, id: str) -> float:
+        gDiseaseMutationChance = '''
+        SELECT mutationChance
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseMutationChance, (id,))
+        return c.fetchone()
+
+
     # Blood Type
     def createBloodType(self, id: int, bloodType: str) -> None:
         cBloodType = '''
@@ -516,6 +549,50 @@ class DBManager:
         c = self.conn.cursor()
         c.execute(cCreateDiseaseBloodTypeLinkTable, (diseaseID, bloodTypeID))
         self.conn.commit()
+
+
+    # General 
+    def createGeneral(self, generalMutationChance: float, numberOfMaps: int, timeRequiredBetweenTravels: float) -> None:
+        cGeneral = '''
+        INSERT INTO General VALUES
+        (?,?,?,?)
+        '''
+        c = self.conn.cursor()
+        c.execute(cGeneral, (0,generalMutationChance,numberOfMaps,timeRequiredBetweenTravels))
+        self.conn.commit()
+
+
+    def getGeneralMutationChance(self, id: int):
+        gGeneralMutationChance = '''
+        SELECT General.generalMutationChance
+        FROM General
+        WHERE General.id = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gGeneralMutationChance, (id,))
+        return c.fetchone() 
+
+
+    def getNumberOfMaps(self, id: int):
+        gNumberOfMaps = '''
+        SELECT General.numberOfMaps
+        FROM General
+        WHERE General.id = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gNumberOfMaps, (id,))
+        return c.fetchone()   
+    
+
+    def getTimeRequiredBetweenTravels(self, id: int):
+        gTimeRequiredBetweenTravels = '''
+        SELECT General.timeRequiredBetweenTravels
+        FROM General
+        WHERE General.id = ? 
+        '''
+        c = self.conn.cursor()
+        c.execute(gTimeRequiredBetweenTravels, (id,))
+        return c.fetchone()   
 
 
     # Stats 
@@ -584,6 +661,28 @@ class DBManager:
         '''
         c = self.conn.cursor()
         c.execute(gPopulationQuarintineTravelling, (id,1))
+        return c.fetchall()  
+
+
+    def getInfectedIncubating(self, id: int):
+        gInfectedIncubating = '''
+        SELECT Person.isIncubating
+        FROM Person
+        WHERE Person.populationID = ? AND Person.isIncubating = ? AND Person.travelling = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gInfectedIncubating, (id,1,0))
+        return c.fetchall()  
+
+
+    def getInfectedInfectious(self, id: int):
+        gInfectedInfectious = '''
+        SELECT Person.isInfectious
+        FROM Person
+        WHERE Person.populationID = ? AND Person.isInfectious = ? AND Person.travelling = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gInfectedInfectious, (id,1,0))
         return c.fetchall()  
 
 

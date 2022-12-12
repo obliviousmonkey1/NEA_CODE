@@ -55,7 +55,7 @@ class DiscontinousLog(S):
         self.holder = self.holder + f"{reference}:{additionalInfo} : {time},"
     
 
-    def localDump(self, trackingID:str, path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/program/logs")) -> None:
+    def localDump(self, trackingID:str, path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/logs/")) -> None:
         if os.path.exists(f'{path}{trackingID}.log'):
             f = open(f"{path}{trackingID}.log","a")
             f.write('\n')

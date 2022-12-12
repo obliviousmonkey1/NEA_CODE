@@ -37,10 +37,9 @@ NEED TO WORK OUT THREAD DEADLOCK FOR DATABASE
 # Constants 
 MAX_MOVE_AMOUNT = 2
 MOVE_PROBABILITY = 0.5
-MUTATION_CHANCE = 0.001
+MUTATION_CHANCE = 0.4
 TRAVEL_RATE = 0.999
 P_INFECTION_PER_DAY = 1 
-NT_TIME = 1.0
 
 
 class Simulation:
@@ -60,9 +59,7 @@ class Simulation:
         
         # anyone travelling to a quarinting place or coming fromm one 
         for person in [person for person in self.__map.getPopulation() if person.getArivalCheck()]:
-            print('hello')
             if self.__dbQueryHandler.getMapCannnotTravelTo(person.getStartingDestination())[0] == 1:
-                print('hello2')
                 person.setQuarantineTravelling()
                 self.quarantine(person)
             person.setArivalCheck(0)
@@ -72,12 +69,12 @@ class Simulation:
         while self.__hour < 24:   
             self.__logger.log('day function whileloop', f'hour: {self.__hour}')
 
-            if self.__dbQueryHandler.getPopulationInfected(self.__map.getID())[0] >= self.__map.getIdentifyAndIsolateTriggerInfectionCount():
+            if len(self.__dbQueryHandler.getInfectedInfectious(self.__map.getID())) >= self.__map.getIdentifyAndIsolateTriggerInfectionCount():
                 self.isIdentiyIsolate = True 
             else:
                 self.isIdentiyIsolate = False 
             
-            if self.__dbQueryHandler.getPopulationInfected(self.__map.getID())[0] >= self.__map.getTravelProhibitedTriggerInfectionCount():
+            if len(self.__dbQueryHandler.getInfectedInfectious(self.__map.getID())) >= self.__map.getTravelProhibitedTriggerInfectionCount():
                 self.__dbQueryHandler.updateMapCannotTravelTo(self.__map.getID(), 1)
                 self.travelRestirctions = True 
             else:
@@ -136,14 +133,19 @@ class Simulation:
                     if infectedPerson.getQuarantineInfected():
                         self.quarantine(infectedPerson)
                     elif infectedPerson.getIBtime() >= self.__disease.getIncubationTime(infectedPerson.getDiseaseId()):
+                        infectedPerson.setIsIncubating(0)
+                        infectedPerson.setIsInfectious(1)
                         if self.isIdentiyIsolate:
                             self.identify(infectedPerson)
                         elif infectedPerson.getItime() >= self.__disease.getInfectedTime(infectedPerson.getDiseaseId()):
+                            infectedPerson.setIsInfectious(0)
                             infectedPerson.setDiseaseID(None)
                             infectedPerson.setStatus('R')
                         else:
+                            infectedPerson.setIsInfectious(1)
                             infectedPerson.setItime()
                     else:
+                        infectedPerson.setIsIncubating(1)
                         infectedPerson.setIBtime()
 
 
@@ -178,6 +180,8 @@ class Simulation:
                 self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
                 self.__dbQueryHandler.updatePersonTtime(person.getID(), person.getTtime())
                 self.__dbQueryHandler.updateArrivalCheck(person.getID(), person.getArivalCheck())
+                self.__dbQueryHandler.updateIsInfectious(person.getID(), person.getIsInfectious())
+                self.__dbQueryHandler.updateIsIncubating(person.getID(), person.getIsIncubating())
                 self.__map.removePerson(person)
             else:
                 if self.__dbQueryHandler.getMapCannnotTravelTo(person.getDestination())[0] != 0:
@@ -203,6 +207,7 @@ class Simulation:
     def quarantine(self,person):
         if person.getQuarantineInfected():
             if person.getItime() >= self.__disease.getInfectedTime(person.getDiseaseId()):
+                person.setIsInfectious(0)
                 person.setDiseaseID(None)
                 person.setStatus('R')
                 person.setQuarantineInfected(0)
@@ -222,10 +227,11 @@ class Simulation:
 
     def setStatus(self, susceptiblePerson, infectedPerson):
         diseaseID = infectedPerson.getDiseaseId()
-        # if random.random() < MUTATION_CHANCE:
-        #     susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
-        # else:
-        #     susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
+        if random.random() < self.__dbQueryHandler.getGeneralMutationChance(0)[0]*self.__disease.getMutationChance(diseaseID):
+            print('mutation')
+            susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
+        else:
+            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
         susceptiblePerson.setDiseaseID(diseaseID)
         susceptiblePerson.setIBtime(0.0)
         susceptiblePerson.setStatus('I')
@@ -255,7 +261,7 @@ class Simulation:
     def movement(self):
         for person in self.tempoaryGroup(1 ,'R'):
             if not person.getTravelling():
-                if person.getNTtime() >= NT_TIME:
+                if person.getNTtime() >= self.__dbQueryHandler.getTimeRequiredBetweenTravels(0)[0] and self.__dbQueryHandler.getNumberOfMaps(0)[0] > 1:
                     if TRAVEL_RATE < random.random():
                         self.travelling(person)
                 else:
@@ -311,10 +317,13 @@ class Simulation:
             self.__dbQueryHandler.updatePersonIBtime(person.getID(), person.getIBtime())
             self.__dbQueryHandler.updatePersonTtime(person.getID(), person.getTtime())
             self.__dbQueryHandler.updatePersonNTtime(person.getID(), person.getNTtime())
+            self.__dbQueryHandler.updateIsInfectious(person.getID(), person.getIsInfectious())
+            self.__dbQueryHandler.updateIsIncubating(person.getID(), person.getIsIncubating())
             if person.getQuarantineTravelling() or person.getQuarantineInfected():
                 self.__dbQueryHandler.updatePersonQtime(person.getID(), person.getQtime())
                 self.__dbQueryHandler.updateQinfected(person.getID(), person.getQuarantineInfected())
                 self.__dbQueryHandler.updateQtravelling(person.getID(), person.getQuarantineTravelling())
+
         self.__dbQueryHandler.updateMapDay(self.__map.getID(), self.__map.getDay())
 
         if type:
@@ -430,11 +439,11 @@ class Map:
     def populatePopulationFromDataBase(self, mapID):
         dbpopulation = dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).getPopulation(mapID)
         dbH.DBManager(os.path.expanduser(FILE_PATH_DB)).close()
-        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7], person[8], person[9], person[10], person[11], person[12], person[13], person[14],person[15],person[16],person[17], person[18],person[19],person[20], person[21]) for person in dbpopulation]
+        return [Person(person[0], person[1], person[2], person[3], person[4], person[5], person[6], person[7], person[8], person[9], person[10], person[11], person[12], person[13], person[14],person[15],person[16],person[17], person[18],person[19],person[20], person[21], person[22], person[23]) for person in dbpopulation]
 
 
 class Person:
-    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, ntTime: float, travelling: int, asymptomatic: int, partialImmunity: float, startingDestination: int, destination: int,bloodType: str, age: int, health: float, posX: int, posY: int, qTime: float, qInfected: int, qTravelling: int, arrivalCheck: int, diseaseID: str) -> None:
+    def __init__(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, tTime: float, ntTime: float, travelling: int, asymptomatic: int, partialImmunity: float, startingDestination: int, destination: int,bloodType: str, age: int, health: float, posX: int, posY: int, qTime: float, qInfected: int, qTravelling: int, arrivalCheck: int, isInfectious: int, isIncubating: int, diseaseID: str) -> None:
         self.__iD = id
         self.__status = status
         self.__rTime = rTime
@@ -455,6 +464,8 @@ class Person:
         self.__quarantineTravelling = qTravelling
         self.__arivalCheck = arrivalCheck
         self.__pos = [posX, posY]
+        self.__isInfectious = isInfectious
+        self.__isIncubating = isIncubating
         self.__diseaseID = diseaseID
 
 
@@ -524,6 +535,14 @@ class Person:
 
     def getAsymptomatic(self) -> int:
         return self.__asymptomatic
+
+
+    def getIsIncubating(self) -> int:
+        return self.__isIncubating
+
+
+    def getIsInfectious(self) -> int:
+        return self.__isInfectious
 
 
     def setID(self, id: int) -> None:
@@ -598,6 +617,14 @@ class Person:
     def setAsymptomatic(self, bool: int) -> None:
         self.__asymptomatic = bool
 
+    
+    def setIsIncubating(self, bool: int = 1) -> None:
+        self.__isIncubating = bool
+    
+
+    def setIsInfectious(self, bool: int = 1) -> None:
+        self.__isInfectious = bool
+
 
 # doesn't store anything only has getters and setters for the database so multiple disease can be around 
 class Disease:
@@ -631,3 +658,7 @@ class Disease:
 
     def getPasymptomatic(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseasetPasymptomatic(id)[0]
+
+    
+    def getMutationChance(self, id: str) -> float:
+        return self.__dbQueryHandler.getDiseaseMutationChance(id)[0]
