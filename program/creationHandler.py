@@ -1,7 +1,6 @@
 FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/database'
 
-from ast import Pass
 import csv
 import os
 import sys 
@@ -75,14 +74,15 @@ class Main:
   
     def setUpGeneral(self, data):
         i = 0
+       
         for key, value in data[self.tag][i].items():
             if self._mainHandler.checkRandom(value[0]):
                 if key == 'generalMutationChance':
-                    self.__generalMutationChance = random(0,0.3)
-                    data[self.tag][i][key][0] = self.__generalMutationChance[i]
+                    self.__generalMutationChance = uniform(0,0.3)
+                    data[self.tag][i][key][0] = self.__generalMutationChance
                 elif key == 'timeRequiredBetweenTravels':
                     self.__timeRequiredBetweenTravels = uniform(1.0, 4.0)
-                    data[self.tag][i][key][0] = self.__timeRequiredBetweenTravels[i]
+                    data[self.tag][i][key][0] = self.__timeRequiredBetweenTravels
             else:
                 if key == 'generalMutationChance':
                     self.__generalMutationChance = float(value[0])

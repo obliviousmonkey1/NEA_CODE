@@ -530,6 +530,17 @@ class DBManager:
         return c.fetchone()
 
 
+    def getDiseaseMutation(self, id: str) -> float:
+        gDiseaseMutationChance = '''
+        SELECT *
+        FROM Disease
+        WHERE id = ?
+        '''
+        c = self.conn.cursor()
+        c.execute(gDiseaseMutationChance, (id,))
+        return c.fetchall()
+
+
     # Blood Type
     def createBloodType(self, id: int, bloodType: str) -> None:
         cBloodType = '''

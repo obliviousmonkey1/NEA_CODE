@@ -1,6 +1,8 @@
 FILE_PATH_DBH = '~/Documents/NEA/NEA_CODE/program/database'
 FILE_PATH_DB = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 FILE_PATH_LOG = '~/Documents/NEA/NEA_CODE/program/inhouse tools'
+FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
+
 
 import sys
 import os
@@ -9,10 +11,11 @@ sys.path.append(os.path.expanduser(FILE_PATH_DBH))
 
 import dbHandler as dbH
 import logger  
-from multiprocessing import Pool
 import random
 import timeit
+import json
 import csv 
+
 
 '''
 S - Susceptible
@@ -37,10 +40,10 @@ NEED TO WORK OUT THREAD DEADLOCK FOR DATABASE
 # Constants 
 MAX_MOVE_AMOUNT = 2
 MOVE_PROBABILITY = 0.5
-MUTATION_CHANCE = 0.4
 TRAVEL_RATE = 0.999
 P_INFECTION_PER_DAY = 1 
-
+MUTATIONS = []
+       
 
 class Simulation:
     def __init__(self, map) -> None:
@@ -65,7 +68,6 @@ class Simulation:
             person.setArivalCheck(0)
             self.__dbQueryHandler.updateArrivalCheck(person.getID(), person.getArivalCheck())
 
-        # if self.tempoaryGroup(0 ,'I'):
         while self.__hour < 24:   
             self.__logger.log('day function whileloop', f'hour: {self.__hour}')
 
@@ -185,16 +187,14 @@ class Simulation:
                 self.__map.removePerson(person)
             else:
                 if self.__dbQueryHandler.getMapCannnotTravelTo(person.getDestination())[0] != 0:
-                    # print('cant travel')
                     person.setDestination(None)
                     person.setTravelling(0)
                     person.setTtime(0.0)
                     self.__dbQueryHandler.updatePersonTravelling(person.getID(), person.getTravelling())
                     self.__dbQueryHandler.updatePersonDestination(person.getID(), person.getDestination())
                 else:
-                    # print(f'set t time : {self.__dbQueryHandler.getMapCannnotTravelTo(person.getDestination())[0]}, map id {self.__map.getID()}')
                     person.setTtime()
-
+ 
 
     def identify(self, person):
         if person.getItime() >= self.__map.getInfectionTimeBeforeQuarantine() and person.getAsymptomatic() != 1:
@@ -231,11 +231,10 @@ class Simulation:
             print('mutation')
             susceptiblePerson.setDiseaseID(self.diseaseMutation(infectedPerson.getID(), susceptiblePerson.getID(), infectedPerson.getDiseaseId()))
         else:
-            susceptiblePerson.setDiseaseID(infectedPerson.getDiseaseId())
-        susceptiblePerson.setDiseaseID(diseaseID)
+            susceptiblePerson.setDiseaseID(diseaseID)
         susceptiblePerson.setIBtime(0.0)
         susceptiblePerson.setStatus('I')
-        if random.random() < self.__disease.getPasymptomatic(diseaseID):
+        if random.random() < self.__disease.getPasymptomatic(susceptiblePerson.getDiseaseId()):
             susceptiblePerson.setAsymptomatic(0)
         else: 
             susceptiblePerson.setAsymptomatic(1)
@@ -257,7 +256,6 @@ class Simulation:
 
 
     # maps have different ways to get to each other either driving which means no infection or flying which means the people on
-    # the same flight as an infected person will have the time tick up 
     def movement(self):
         for person in self.tempoaryGroup(1 ,'R'):
             if not person.getTravelling():
@@ -294,13 +292,55 @@ class Simulation:
         when a person first catches a disease chance for a mutaion to happen 
         disease id is going to be made up off day + infected id + susceptibleID + map name +  disease name
         name is going to be the disease name
+
+        id                       STRING,
+        name                     STRING,
+        transmissionTime         FLOAT,
+        contagion                FLOAT,
+        transmissionRadius       INTEGER,
+        infectedTime             FLOAT,
+        incubationTime           FLOAT,
+        ageMostSusceptible       INTEGER,
+        virulence                INTEGER,
+        pAsymptomaticOnInfection FLOAT,
+        mutationChance           FLOAT
+        
         '''
+
+        # newDiseaseID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{self.__disease.getName(diseaseID)}'
+        # self.__dbQueryHandler.createDisease(
+        #     newDiseaseID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
+        #     self.__disease.getContagion(diseaseID), self.__disease.getTransmissionRadius(diseaseID),
+        #     self.__disease.getInfectedTime(diseaseID), self.__disease.getIncubationTime(diseaseID)
+        # )
+        # return newDiseaseID
         newDiseaseID = f'{str(self.__map.getDay())}.{str(infectedID)}.{str(susceptibleID)}.{self.__map.getName()}.{self.__disease.getName(diseaseID)}'
-        self.__dbQueryHandler.createDisease(
-            newDiseaseID, f'm{self.__disease.getName(diseaseID)}', self.__disease.getTransmissionTime(diseaseID),
-            self.__disease.getContagion(diseaseID), self.__disease.getTransmissionRadius(diseaseID),
-            self.__disease.getInfectedTime(diseaseID), self.__disease.getIncubationTime(diseaseID)
-        )
+        newD = [newDiseaseID, f'm{self.__disease.getName(diseaseID)}']
+        oldDisease = self.__dbQueryHandler.getDiseaseMutation(diseaseID)[0][2:]
+        for index, mutation in enumerate(MUTATIONS):
+            for m in mutation:
+                if m in ['int', 'float']:
+                    type = m
+                else:
+                    key = m[0][1:]
+                    effect = random.choice(m)[0]
+            
+            if type == 'float':
+                change = random.uniform(0.0,0.2)
+
+            elif type == 'int':
+                change = random.randint(0,2)
+
+            value = oldDisease[index]
+            if random.random() < self.__disease.getMutationChance(diseaseID):
+                if effect == '+':
+                    value += change
+                elif effect == '-':
+                    value -= change
+                if value < 0:
+                    value = 0
+            newD.append(value)
+        self.__dbQueryHandler.createDisease(*newD)
         return newDiseaseID
 
 
@@ -662,3 +702,16 @@ class Disease:
     
     def getMutationChance(self, id: str) -> float:
         return self.__dbQueryHandler.getDiseaseMutationChance(id)[0]
+
+def getMutations():
+    '''
+    tuple with (+ and -)
+    '''
+    with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
+                data = json.load(file)
+    for key in data['disease'][0]:
+        if not key in ['name', 'numbBloodTypesSusceptible']:
+            MUTATIONS.append([('+'+key,'-'+key),data['disease'][0][key][-1]])
+
+
+getMutations()

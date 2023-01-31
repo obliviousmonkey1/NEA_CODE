@@ -26,3 +26,23 @@ FUNCTION getAllDataFromTable(self):
         return c.fetchall()
 END FUNCTION 
 
+FUNCTION updateEntry(self):
+        uEntryFromTable = '''
+        Execute the SQL query UPDATE entry FROM Table 
+        WHERE tabel.value = value 
+        '''
+        c = self.conn.cursor()
+        c.execute(uEntryFromTable,(value,value))
+        self.conn.commit()
+END FUNCTION 
+
+
+FUNCTION createTable(self):
+        cTable = '''
+        Execute the SQL query INSERT INTO table
+        VALUES values 
+        '''
+        c = self.conn.cursor()
+        c.execute(cTable,(value/s,))
+        self.conn.commit()
+END FUNCTION 

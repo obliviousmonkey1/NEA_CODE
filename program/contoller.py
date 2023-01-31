@@ -17,19 +17,13 @@ class Main:
         self.view.register(self)
     
 
-    def pauseSimulation(self):
-        self.mainHandler.setSimulationHandlerRunning(False)
-
-    def run(self):
-        self.mainHandler.runSimulationHandler()
-
+    # calls the main handler to start the simulation
     def runSimulation(self):
         self.mainHandler.runSimulationHandler()
         self.view.simulationWindow(1)
 
 
-    # thread this simulation with two threads one that updates progress bar
-    # the other one that doesn't
+    # calls the create and populate database function from the mainHandler class
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
 
@@ -62,7 +56,7 @@ class Main:
         return miscFunctions.writeConfig(data)
 
 if __name__ == "__main__":
-    # clean up 
+    # cleans up previous files and overides the base recursion depth limit to a higher value
     sys.setrecursionlimit(15000)
     os.chdir("/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/simData")
     extension = 'csv'
@@ -73,7 +67,8 @@ if __name__ == "__main__":
             os.remove(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{file}'))
     except:
         pass
-    #
+    
+    # initalises base classes and launches the ui
     mainHandler = Handler()
     ui = UI()
     c = Main(mainHandler, ui)

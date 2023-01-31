@@ -25,6 +25,8 @@ and time the simulation happened
 
 > need to make the isolation and travel restrictions take into acount only the infected people that are infectiouss
 
+> implement a travelling file which holds the ids of newly traveled people so maps can get them as soon as they travel
+
 FIXES 
 
 >  File "/Users/parzavel/Documents/NEA/NEA_CODE/program/simulation.py", line 150, in travelling

@@ -5,12 +5,8 @@ from tkinter import ttk
 from PIL import Image 
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
-# Implement the default Matplotlib key bindings.
-from matplotlib.figure import Figure
-import numpy as np
 
 FILE_PATH_SETTINGS = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/settings.json'
 
@@ -116,6 +112,7 @@ class UI(tk.Tk):
 
     def rSim(self):
         self._controller.runSimulation()
+        self.update()
 
     def simulationWindow(self, value=0):
         if value == 1:
@@ -139,7 +136,7 @@ class UI(tk.Tk):
         
         self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
         self.dataUpdate()
-
+       
     def populationInfo(self):
         pass
 
@@ -157,7 +154,6 @@ class UI(tk.Tk):
 
         if self.diseaseInfo:
             self.diseaseInfo = list(dict.fromkeys(self.diseaseInfo))
-            print(self.diseaseInfo)
             data = self._controller.gPopulationData(self.diseaseInfo[self.diseaseMenuIndex],"dData")
             id = data[0]
             data = data[1:]
@@ -166,15 +162,15 @@ class UI(tk.Tk):
             self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {round(data[4], 2)}')
             self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {round(data[5], 2)}')
             self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {round(data[8], 2)}')
-            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {round(data[7],2)}')
-            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {round(data[9])}')
+            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {round(data[9],2)}')
+            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {round(data[7])}')
         else:
             self.diseaseTransmissionTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Transmission time: {data[1]}')
             self.diseaseInfectedTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Infected time: {data[4]}')
             self.diseaseIncubationTimeLabel = ttk.Label(self.diseaseDataWindow,text=f'Incubation time: {data[5]}')
             self.diseasePasymptomaticOnInfectionLabel = ttk.Label(self.diseaseDataWindow,text=f'P asymptomatic on infection: {data[8]}')
-            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {data[7]}')
-            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {data[9]}')
+            self.diseaseVirulenceLabel = ttk.Label(self.diseaseDataWindow,text=f'Virulence: {data[9]}')
+            self.diseaseMutationChanceLabel = ttk.Label(self.diseaseDataWindow,text=f'Mutation chance: {data[7]}')
 
         
         self.diseaseIDlabel = ttk.Label(self.diseaseDataWindow,text=f'ID: {id}')
@@ -213,8 +209,8 @@ class UI(tk.Tk):
             self.diseaseInfectedTimeLabel['text'] = f'Infected time: {round(data[4], 2)}'
             self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {round(data[5], 2)}'
             self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {round(data[8], 2)}'
-            self.diseaseVirulenceLabel['text'] = f'Virulence: {round(data[7],2)}'
-            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {round(data[9],2)}'
+            self.diseaseVirulenceLabel['text'] = f'Virulence: {round(data[9],2)}'
+            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {round(data[7],2)}'
 
 
         else:
@@ -222,8 +218,8 @@ class UI(tk.Tk):
             self.diseaseInfectedTimeLabel['text'] = f'Infected time: {data[4]}'
             self.diseaseIncubationTimeLabel['text'] = f'Incubation time: {data[5]}'
             self.diseasePasymptomaticOnInfectionLabel['text'] = f'P asymptomatic on infection: {data[8]}'
-            self.diseaseVirulenceLabel['text'] = f'Virulence: {data[7]}'
-            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {data[9]}'
+            self.diseaseVirulenceLabel['text'] = f'Virulence: {data[9]}'
+            self.diseaseMutationChanceLabel['text'] = f'Mutation chance: {data[7]}'
 
         self.diseaseIDlabel['text'] = f'ID: {id}'
         self.diseaseNameLabel['text'] = f'Name: {data[0]}'
@@ -480,9 +476,9 @@ class UI(tk.Tk):
                                     "transmissionRadius": ["random", "1<value<4", "int"], 
                                     "infectedTime": ["random", "0.0<value<∞", "float"],
                                     "incubationTime": ["random", "0.0<value<∞", "float"],
+                                    "ageMostSusceptible" : ["random", "10<value<100", "int"],
                                     "mutationChance": ["random", "0.0<value<1.0", "float"],
                                     "numbBloodTypesSusceptible" : ["random",  "0<value<8", "int"], 
-                                    "ageMostSusceptible" : ["random", "10<value<100", "int"],
                                     "pAsymptomaticOnInfection": ["random", "0.0<value<1.0", "float"],
                                     "virulence" : [0.0, "0.0<value<1.0","float"]
                                 })

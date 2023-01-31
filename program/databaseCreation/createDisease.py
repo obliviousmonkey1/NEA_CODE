@@ -70,7 +70,7 @@ class DiseaseCreationHandler:
                         self.__infectedTime.append(float(value[0]))
                     elif key == 'incubationTime':
                         self.__incubationTime.append(float(value[0]))
-                    elif key == 'mutation_chance':
+                    elif key == 'mutationChance':
                         self.__mutationChance.append(float(value[0]))
                     elif key == 'numbBloodTypesSusceptible':
                         self.__numbBloodTypesSusceptible.append(int(value[0]))
@@ -102,8 +102,8 @@ class DiseaseCreationHandler:
                                             self.__transmissionTime[(populationID-1)],self.__contagion[(populationID-1)],
                                             self.__transmissionRadius[(populationID-1)], self.__infectedTime[(populationID-1)], 
                                             self.__incubationTime[(populationID-1)], self.__ageMostSusceptible[(populationID-1)],
-                                            self.__virulence[(populationID-1)], self.__pAsymptomaticOnInfection[(populationID-1)],
-                                            self.__mutationChance[(populationID-1)]
+                                            self.__mutationChance[(populationID-1)], self.__pAsymptomaticOnInfection[(populationID-1)],
+                                            self.__virulence[(populationID-1)]
                                             )
         self.seedBloodTypeRelationshipTable(populationID)
 

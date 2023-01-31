@@ -74,7 +74,8 @@ JSON:
 {   
     "general" :[{
         "generalMutationChance": ["0.2", "0.0<value<1.0", "float"],
-        "numberOfMaps": [3, "0<value<∞", "int"]
+        "numberOfMaps": [3, "0<value<∞", "int"],
+        "timeRequiredBetweenTravels": [1.0, "0.0<value<∞", "float"]
         }],
     "populations": [{
         "populationSize": [100, "0<value<∞", "int"],
@@ -86,6 +87,7 @@ JSON:
         "minNumberOfConnections": [1, "0<value<=numbCities", "int"],
         "cityName": ["city1", "city1", "str"],
         "infectionTimeBeforeQuarantine": [3.0,"0.0<value<∞","float"],
+        "travelQuarintineTime": [2.0,"0.0<value<∞","float"],
         "socialDistanceTriggerInfectionCount": [10, "1<value<∞", "int"],
         "identifyAndIsolateTriggerInfectionCount": [10, "1<value<∞", "int"]
         }],

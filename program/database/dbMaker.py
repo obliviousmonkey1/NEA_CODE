@@ -4,12 +4,6 @@ import os
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 
 
-"""
-person and pop have one to many
-pop to map has one to one
-in order to be able to go through old data the db should be named after what the user decides to name the simulation 
-"""
-
 createPersonTable = '''
 CREATE TABLE IF NOT EXISTS Person(
     id              INTEGER,
@@ -84,9 +78,9 @@ CREATE TABLE IF NOT EXISTS Disease(
     infectedTime             FLOAT,
     incubationTime           FLOAT,
     ageMostSusceptible       INTEGER,
-    virulence                INTEGER,
-    pAsymptomaticOnInfection FLOAT,
     mutationChance           FLOAT,
+    pAsymptomaticOnInfection FLOAT,
+    virulence                INTEGER,
     PRIMARY KEY(id)
 );
 '''
