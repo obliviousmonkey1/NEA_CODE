@@ -24,9 +24,12 @@ class Main:
         self._mainHandler = None
         dbM.createDB()
     
+
     def register(self, mH):
         self._mainHandler = mH
 
+
+    # Starts the database table seeding process 
     def seedDatabase(self):
         self.seedGeneralDB()
         self.seedBloodTypeTable()
@@ -35,6 +38,8 @@ class Main:
             self.__populationCreationHandler.seedPopulationTable(id)
         self.__mapCreationHandler.seedRelationshipTable()
 
+
+    # Creates and seeds the CSV file for each population 
     def createStatsCSV(self):
         mapNames = self.getMapHandlerNames()
         populationSize = self.getPopulationSizes()
@@ -68,10 +73,14 @@ class Main:
                     csv_writer.writerow(info)
 
 
+    # Populates the General table in the database with the values
     def seedGeneralDB(self):
         self.__dbQueryHandler.createGeneral(self.__generalMutationChance, self.__numberOfMaps, self.__timeRequiredBetweenTravels)
 
-  
+    
+    # Organises the general section of the json file into lists 
+    # if the value from the json is random then it randomly allocates a value 
+    # based on the key of the json value 
     def setUpGeneral(self, data):
         i = 0
        
@@ -95,8 +104,10 @@ class Main:
         return data 
 
 
+    # Starts the process of the JSON file data being organised 
+    # into its sections once that has been done it
+    # starts the seeding of the database 
     def setUpData(self):
-        # pretty sure don't have to keep assigning data 
         data = self._mainHandler.getReadConfig()
         data = self.setUpGeneral(data)
         self.__diseaseCreationHandler = cD.DiseaseCreationHandler(self.__dbQueryHandler, data)
@@ -108,38 +119,65 @@ class Main:
 
         self.seedDatabase()
         self.createStatsCSV()
-        #return True 
-    
+
+
+    # Starts the seeding of the Map database
     def startMapSeed(self, id, populationID, popSize):
         self.__mapCreationHandler.seedMapTable(id, populationID, popSize)
 
-    def getDiseaseID(self, populationID, personID):
-        return self.__diseaseCreationHandler.generateDiseaseID(populationID,personID,self.getMapHandlerName(populationID))
 
+    # Returns the disease ID for the current disease 
+    def getDiseaseID(self, populationID, pawnID):
+        return self.__diseaseCreationHandler.generateDiseaseID(populationID,pawnID,self.getMapHandlerName(populationID))
+
+
+    
+
+    # Populates the blood type table in the database with the values 
     def seedBloodTypeTable(self):
         id = 1
         for bloodType in ['O+','O-','A+','A-','B+','B-','AB+','AB-']:
             self.__dbQueryHandler.createBloodType(id, bloodType)
             id +=1
     
+
+    # returns a the value of the map width for the currently
+    # selected map 
     def getMapWidth(self) -> int:
         return self.__mapCreationHandler.getCityWidth()
 
+
+    # returns a the value of the map height for the currently
+    # selected map 
     def getMapHeight(self) -> int:
         return self.__mapCreationHandler.getCityHeight()
 
+
+    # returns a the value of the city name for the currently
+    # selected map 
     def getMapHandlerName(self, id) -> str:
         return self.__mapCreationHandler.getCityName(id)
     
+
+    # returns a the values of the city names of the maps
     def getMapHandlerNames(self) -> str:
         return self.__mapCreationHandler.getCityNames()
     
+
+    # returns a the value of the population size for the current
+    # population
     def getPopulationSizes(self) -> int:
         return self.__populationCreationHandler.getPopulationSize()
     
+
+    # returns a the value of the infected amounts for the currently
+    # selected population
     def getInfectedAmounts(self) -> int:
         return  self.__populationCreationHandler.getInfectedAmount()
 
+
+    # returns a the value of the probability of asymptomatic for the currently
+    # selected disease
     def getDiseasePasympto(self, id) -> float:
         return self.__diseaseCreationHandler.getPasymptomaticOnInfection(id)
 

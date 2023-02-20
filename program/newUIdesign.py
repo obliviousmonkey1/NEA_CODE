@@ -3,8 +3,6 @@ import json
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image 
-import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 
@@ -28,10 +26,10 @@ class UI(tk.Tk):
         self.initialize_user_interface()
 
 
+    # initializes the user interface 
     def initialize_user_interface(self):
         self.windowSizeChange('960','540')
         self.parent.title('Setup')
-        # self.parent.iconphoto(False, tk.PhotoImage(Image.open('/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/icon.png')))
         self.withdraw()
 
     
@@ -39,10 +37,12 @@ class UI(tk.Tk):
         self._controller = controller
 
 
+    # gets the current graph from the graphHandler
     def gCurrentData(self):
         return self._controller.gGraphData()
-        
-
+    
+    
+    # uses the graph from the graphHandler and puts it on the UI 
     def gCurrentGraph(self):
         data = self.gCurrentData()
         self.canvas = FigureCanvasTkAgg(data, master=self.parent)  # A tk.DrawingArea.
@@ -51,19 +51,10 @@ class UI(tk.Tk):
 
         self.gToolBarWindow()
 
-       
-    def gCity(self, cName):
-        # print('step sim',self.winfo_x())
-        # print('step sim',self.winfo_y())
-        # print('data',self.simulationDataWindow.winfo_x())
-        # print('data',self.simulationDataWindow.winfo_y())
-        # print('graph',self.graphSelctorWindow.winfo_x())
-        # print('graph',self.graphSelctorWindow.winfo_y())
-        # print('sim window',self.parent.winfo_x())
-        # print('sim window',self.parent.winfo_y())
-        # print('sim window',self.diseaseDataWindow.winfo_x())
-        # print('sim window',self.diseaseDataWindow.winfo_y())
 
+    # sets up the simulation UI for the newley selected graph 
+    # resets the data values populating the UI 
+    def gCity(self, cName):
         self.diseaseInfo = self._controller.gPopulationData(cName[-1],"dID")
         self.diseaseMenuIndex = 0
 
@@ -88,6 +79,8 @@ class UI(tk.Tk):
         self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
 
 
+    # adds buttons for each map to the UI which can be clicked
+    # to show data on sed map and a graph 
     def graphButtons(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file) 
@@ -110,10 +103,13 @@ class UI(tk.Tk):
         button.pack(anchor=tk.CENTER, side=tk.TOP)
 
 
+    # runs the simulation and once complete updates the graph 
     def rSim(self):
         self._controller.runSimulation()
         self.update()
 
+
+    # The UI loop for the simulation 
     def simulationWindow(self, value=0):
         if value == 1:
             self.canvas.get_tk_widget().destroy()
@@ -127,7 +123,7 @@ class UI(tk.Tk):
             self.currentDayIncubating.destroy()
             self.currentDayInfectious.destroy()
 
-        
+
         self.gCurrentGraph()
         if value == 0:
             self.graphButtons()
@@ -136,13 +132,9 @@ class UI(tk.Tk):
         
         self.title(f'Selected Graph:{self.currentGraphReference} Day:{self._controller.getCurrentDay()[0]}')
         self.dataUpdate()
-       
-    def populationInfo(self):
-        pass
 
-    def mapInfo(self):
-        pass
 
+    # sets up the UI widgets and initial data for disease information
     def diseaseInfoSetup(self):
         data = [None for _ in range(10)]
         id = None
@@ -191,6 +183,8 @@ class UI(tk.Tk):
         self.diseasePasymptomaticOnInfectionLabel.pack(anchor=tk.CENTER, side=tk.TOP)
         self.diseaseVirulenceLabel.pack(anchor=tk.CENTER, side=tk.TOP)
 
+    
+    # when a new disease is displayed refreshes the old data using this 
     def updateDInfo(self, change=0):
         data = [None for _ in range(10)]
         id = None
@@ -227,8 +221,10 @@ class UI(tk.Tk):
         self.diseaseTransmissionRadiusLabel['text'] = f'Transmission radius: {data[3]}'
         self.diseaseAgeMostSusceptibleLabel['text'] = f'Age most susceptible: {data[6]}'
 
+    
+    # updates and adds the data on the population to the UI 
     def dataUpdate(self):
-        self.currentDaySusceptibleStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Susceptible : {self._controller.gPopulationData(self.currentGraphReference[-1],"S")}')
+        self.currentDaySusceptibleStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Total susceptible : {self._controller.gPopulationData(self.currentGraphReference[-1],"S")}')
         self.currentDayInfectedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Total infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"I")}')
         self.currentDayRemovedStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Removed : {self._controller.gPopulationData(self.currentGraphReference[-1],"R")}')
         self.currentDayTravellingStatsLabel = ttk.Label(self.simulationDataWindow,text=f'Travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"T")}')
@@ -236,8 +232,8 @@ class UI(tk.Tk):
         self.currentDayQuarantineInfected  = ttk.Label(self.simulationDataWindow,text=f'Quarantine infected : {self._controller.gPopulationData(self.currentGraphReference[-1],"QI")}')
         self.currentDayQuarantineTravelling  = ttk.Label(self.simulationDataWindow,text=f'Quarantine travelling : {self._controller.gPopulationData(self.currentGraphReference[-1],"QT")}')
 
-        self.currentDayIncubating = ttk.Label(self.simulationDataWindow,text=f'Infected Incubating: {self._controller.gPopulationData(self.currentGraphReference[-1],"IB")}')
-        self.currentDayInfectious = ttk.Label(self.simulationDataWindow,text=f'Infected Infectious : {self._controller.gPopulationData(self.currentGraphReference[-1],"IF")}')
+        self.currentDayIncubating = ttk.Label(self.simulationDataWindow,text=f'Infected incubating: {self._controller.gPopulationData(self.currentGraphReference[-1],"IB")}')
+        self.currentDayInfectious = ttk.Label(self.simulationDataWindow,text=f'Infected infectious : {self._controller.gPopulationData(self.currentGraphReference[-1],"IF")}')
 
         self.currentDaySusceptibleStatsLabel.pack(anchor=tk.W, side=tk.TOP) 
         self.currentDayInfectedStatsLabel.pack(anchor=tk.W, side=tk.TOP)
@@ -248,10 +244,16 @@ class UI(tk.Tk):
         self.currentDayQuarantineInfected.pack(anchor=tk.W, side=tk.TOP) 
         self.currentDayQuarantineTravelling.pack(anchor=tk.W, side=tk.TOP)
 
+
+    # adds a tool bar to the graph to allow it to be moved about and zoomed
+    # in and out off 
     def gToolBarWindow(self):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.parent)
         self.toolbar.update()
 
+    
+    # while the database is being set up this gets the UI ready to display the 
+    # simulation UI and sets stuff up 
     def loading(self):
         self.clearWidgets()
         self.windowSizeChange('960','540')
@@ -299,6 +301,7 @@ class UI(tk.Tk):
 
         self.simulationWindow()
 
+
     # CONFIG SETUP
     def typeLoop(self):
         ty = 0
@@ -316,9 +319,14 @@ class UI(tk.Tk):
 
         self.updateSettings()
 
+
+    # adds the value given to by the key in the database
     def updateData(self,key,value) -> None:   
         self.data[self.type][self.currentIndex][key][0] = value
         
+    
+    # updates the json file with the changes made by the user 
+    # and displays a message on the UI saying changes have been applied 
     def updateSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'w') as file:
             json.dump(self.data, file)
@@ -327,7 +335,10 @@ class UI(tk.Tk):
         self.complete_label.grid(column=3, row=100, sticky=tk.S)
         self.complete_label.after(3000, lambda: self.complete_label.destroy() )
 
+
     # validation 
+    # validates the data given by the user making sure its 
+    # in the correct format for each entry 
     def validation(self):
         paddings = {'padx': 5, 'pady': 5}    
         try:
@@ -393,6 +404,10 @@ class UI(tk.Tk):
             self.errorLabel.grid(column=1, row=101, sticky=tk.W, **paddings)
             self.errorLabel.after(6000, lambda: self.errorLabel.destroy() )
  
+
+    # displays all the settings from the json file for 
+    # population, map and disease on the UI, allowing the 
+    # current values to be edited and commited 
     def displaySettings(self):
         paddings = {'padx': 5, 'pady': 5}
 
@@ -430,11 +445,16 @@ class UI(tk.Tk):
         commit_button = ttk.Button(self.parent, text='Commit', command=self.typeLoop)
         commit_button.grid(column=self.c+1, row=99, sticky=tk.S)
 
+
+    # checks if the value supplied is equal to random
     def randomCheck(self, value):
         if not value.lower() == 'random':
             return False
         return True
 
+
+    # loads the population, map and disease settings from the json 
+    # setting up the UI to fit it 
     def setUpTwo(self):
         self.openSettings()
         self.clearWidgets()
@@ -452,6 +472,8 @@ class UI(tk.Tk):
         simulation_button.grid(column=self.c//2, row=100, sticky=tk.S)
 
 
+    # sets up the json document with the correct number of entries for 
+    # each section ; map, disease and populations
     def setSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             data = json.load(file)
@@ -499,6 +521,8 @@ class UI(tk.Tk):
         self.windowSizeChange('1488','540')
         self.setUpTwo()
 
+    
+    # allows the user to move back to the previous page 
     def back(self):
         self.cleanUp()
         self.windowSizeChange('960','540')
@@ -509,35 +533,49 @@ class UI(tk.Tk):
         self.clearWidgets()
         self.setUpOne()
 
+    
+    # displays the general json settings 
     def setUpOne(self):
         self.openSettings()
-        # self.clear_widgets()
         self.displaySettings()
         nextButton = ttk.Button(self.parent, text='Next', command=self.setSettings)
         nextButton.grid(column=1, row=100, sticky=tk.S)
 
+
+    # clears all widgets currently on the UI
     def clearWidgets(self):
         for widget in self.parent.winfo_children():
             widget.destroy()
     
+
+    # changes the current pointer to make sure that it matches with the new 
+    # value selected in the drop down menu
     def option_changed(self, *args):
         self.optionMenuIndex = self.settings.index(self.option_var.get())
         self.currentIndex = self.settings.index(self.option_var.get())
         self.cleanUp()
         self.setUpTwo()
 
+
+    # clears all entries and labels  
     def cleanUp(self):
         self.e = []
         self.l = []
 
+
+    # takes in two values to change the size of the window
     def windowSizeChange(self,width,height):
         self.parent.geometry(f"{width}x{height}")
         self.parent.resizable(False,False)
 
+
+    # loads the json file 
     def openSettings(self):
         with open(os.path.expanduser(FILE_PATH_SETTINGS),'r') as file:
             self.data = json.load(file)
 
+    
+    # entry point into the UI
     def entry_point(self):
         self.setUpOne()
 

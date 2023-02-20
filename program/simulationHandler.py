@@ -19,19 +19,6 @@ import random
 """
 SIR_MODEL which runs all the maps simulations these are threaded and controlled in this file so that all of the maps are kept in sync 
 and stuff and the day is the same for all maps etc 
-
-needs to access databases to be able to populate map and stuff 
-so it will go through and put all the maps that are in the table into a list 
-it will then populate the population using the id 
-so get the pop from the pop id in the map 
-get the people from checking if their pop id is equal to that one 
-
-thread the maps 0
-
-load program, allow for editing of settings
-then we load the dbMaker
-then we load the createPopulation and createMap
-then we run the main simulationHandler
 """
  
 
@@ -40,20 +27,26 @@ class Main():
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
 
+    # returns all the maps in the map table in the database 
     def populateMapsFromDatabase(self):
        return self.__dbQueryHandler.getMaps()
 
 
+    # calls the simulation file and starts a cycle for the map provided
     def sim(self, map, threadID):
         sim = model.Simulation(map)
         sim.day(threadID)
         print(f'Thread {threadID}')
         
-        
+    
+    # returns the current day 
     def getDay(self) -> int:
         return self.__dbQueryHandler.getMapDay(1)
 
 
+    # gets the maps from the database 
+    # then splits the maps into seperate threads and calls the simulation code 
+    # to start the simulation cycle
     def run(self): 
         self.__maps = self.populateMapsFromDatabase()
         self.startTime = timeit.default_timer()

@@ -11,6 +11,10 @@ class MapCreationHandler:
         self.tag = 'maps'
         self.setUp(data)
 
+
+    # Organises the map section of the json file into lists 
+    # if the value from the json is random then it randomly allocates a value 
+    # based on the key of the json value 
     def setUp(self, data):
 
         self.__cityNames = []
@@ -76,7 +80,9 @@ class MapCreationHandler:
             i+=1
 
         return data
-        
+    
+
+    # Checks if the value in the json file is the word random
     def checkRandom(self, value):
         try:
             if not value.lower() == 'random':
@@ -85,9 +91,13 @@ class MapCreationHandler:
         except:
             return False
 
+
+    # Adds one to a value 
     def addOne(self, i):
         return i + 1 
 
+
+    # Gets the factors of the number given 
     def factors(self, f, n, i):
         if i > n:
             return []
@@ -98,31 +108,47 @@ class MapCreationHandler:
                 return self.factors(f, n, f(i))
 
 
+    # Generates the width and height of a map based on the population size
     def generateMapSize(self, populationSize):
         factors = self.factors(self.addOne, populationSize,1)
         width = factors[len(factors)//2]
         return width, populationSize//width
 
 
+    # Populates the Map table in the database with the values 
+    # of the current map being added 
     def seedMapTable(self, id: int, populationID: int, populationSize: int):
         self.width, self.height = self.generateMapSize(populationSize)
         self.__dbQueryHandler.createMap(id,self.__cityNames[populationID-1],self.width,self.height,0,self.__govermentActionReliabilty[(populationID-1)],self.__identifyAndIsolateTriggerInfectionCount[(populationID-1)],self.__infectionTimeBeforeQuarantine[(populationID-1)], self.__travelQuarintineTime[(populationID-1)],self.__socialDistanceTriggerInfectionCount[(populationID-1)],self.__travelProhibitedTriggerInfectionCount[populationID-1],self.__travelTime[(populationID-1)],0, populationID)
     
+
     def seedRelationshipTable(self):
         pass
     
+
     def connections(self):
         pass
 
+
+    # returns the values of all the city names 
     def getCityNames(self) -> list[str]:
         return self.__cityNames
 
+
+    # returns a the value of a city name for the currently
+    # selected map 
     def getCityName(self,id) -> str:
         return self.__cityNames[id-1]
     
+
+    # returns a the value of a city width for the currently
+    # selected map 
     def getCityWidth(self) -> int:
         return self.width
     
+
+    # returns a the value of a city height for the currently
+    # selected map 
     def getCityHeight(self) -> int:
         return self.height
 

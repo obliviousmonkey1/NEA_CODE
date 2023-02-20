@@ -1,9 +1,6 @@
 import sqlite3
 import os 
-"""
-This handles for everything 
-so have seperate functions for each database and stuff y
-"""
+
 
 class DBManager:
     def __init__(self, dbPath=os.path.expanduser('~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db')) -> None:
@@ -11,6 +8,7 @@ class DBManager:
     
 
     # Population and people 
+    # adds in new data to a new column population table
     def createPopulation(self, id: int, susceptible: int, infected: int, removed: int) -> None:
         cPopulation = '''
         INSERT INTO Population VALUES
@@ -21,6 +19,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # gets the value of the current suscpetible row for a certain id
     def getPopulationSusceptible(self, id: int) -> None:
         gPopulationSusceptible = '''
         SELECT Population.susceptible
@@ -32,6 +31,7 @@ class DBManager:
         return c.fetchone()   
 
 
+    # gets the value of the current infected row for a certain id
     def getPopulationInfected(self, id: int) -> None:
         gPopulationInfected = '''
         SELECT Population.infected
@@ -43,6 +43,7 @@ class DBManager:
         return c.fetchone()  
 
 
+    # gets the value of the current removed row for a certain id
     def getPopulationRemoved(self, id: int) -> None:
         gPopulationRemoved = '''
         SELECT Population.removed
@@ -54,6 +55,7 @@ class DBManager:
         return c.fetchone()  
 
 
+    # updates the value of the susceptible row for a certain id 
     def updatePopulationSusceptible(self, id: int, susceptible: int) -> None:
         uPopulationSusceptible = '''
         UPDATE Population
@@ -65,6 +67,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # updates the value of the infected row for a certain id 
     def updatePopulationInfected(self, id: int, infected: int) -> None:
         uPopulationInfected = '''
         UPDATE Population
@@ -76,6 +79,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # updates the value of the removed row for a certain id 
     def updatePopulationRemoved(self, id: int, removed: int) -> None:
         uPopulationRemoved = '''
         UPDATE Population
@@ -87,164 +91,179 @@ class DBManager:
         self.conn.commit()
 
 
-    def createPerson(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float, travelling:int,
+    # adds in new data to a new column pawn table
+    def createPawn(self, id: int, status: str, rTime: float, iTime: float, ibTime: float, travellingTime: float, travelling:int,
                     asymptomatoc: int, paritalImmunity:float,destination:int,bloodType:str,age:int,health:float, xPos: int, yPos: int,
                      diseaseID: int, populationID: int) -> None:
-        cPerson = '''
-        INSERT INTO Person VALUES
+        cPawn = '''
+        INSERT INTO Pawn VALUES
         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         '''
         c = self.conn.cursor()
-        c.execute(cPerson, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,populationID,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,0,0,diseaseID,populationID))
+        c.execute(cPawn, (id,status,rTime,iTime,ibTime,travellingTime,0.0,travelling,asymptomatoc,paritalImmunity,populationID,destination,bloodType,age,health,xPos,yPos,0.0,0,0,0,0,0,diseaseID,populationID))
         self.conn.commit()
 
 
+    # gets the values of all the population 
     def getPopulation(self, mapID):
         gPopulation = '''
-        SELECT Person.id, Person.status, Person.rTime, Person.iTime, Person.ibTime, Person.tTime, Person.ntTime, Person.travelling, Person.asymptomatic, Person.paritalImmunity, Person.sDestination, Person.destination, Person.bloodType, Person.age, Person.health, Person.xPos, Person.yPos, Person.qTime, Person.qInfected, Person.qTravelling, Person.arrivalCheck, Person.isInfectious, Person.isIncubating, Person.diseaseID
-        FROM Person, Map, Population
-        WHERE Map.ID = ? and Map.populationID = Population.id and Person.populationID = Population.id 
+        SELECT Pawn.id, Pawn.status, Pawn.rTime, Pawn.iTime, Pawn.ibTime, Pawn.tTime, Pawn.ntTime, Pawn.travelling, Pawn.asymptomatic, Pawn.paritalImmunity, Pawn.sDestination, Pawn.destination, Pawn.bloodType, Pawn.age, Pawn.health, Pawn.xPos, Pawn.yPos, Pawn.qTime, Pawn.qInfected, Pawn.qTravelling, Pawn.arrivalCheck, Pawn.isInfectious, Pawn.isIncubating, Pawn.diseaseID
+        FROM Pawn, Map, Population
+        WHERE Map.ID = ? and Map.populationID = Population.id and Pawn.populationID = Population.id 
         '''
         c = self.conn.cursor()
         c.execute(gPopulation, (mapID,))
         return c.fetchall()   
     
 
-    def updatePersonPopulationID(self, id: int, newID: int) -> None:
-        uPersonPopulationID = '''
-        UPDATE Person
+    # updates the value of the populationID row for a certain id 
+    def updatePawnPopulationID(self, id: int, newID: int) -> None:
+        uPawnPopulationID = '''
+        UPDATE Pawn
         SET populationID = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonPopulationID, (newID, id))
+        c.execute(uPawnPopulationID, (newID, id))
         self.conn.commit()
 
 
-    def updatePersonStatus(self, id: int, status: str) -> None:
-        uPersonStatus = '''
-        UPDATE Person
+    # updates the value of the status row for a certain id 
+    def updatePawnStatus(self, id: int, status: str) -> None:
+        uPawnStatus = '''
+        UPDATE Pawn
         SET status = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonStatus, (status, id))
+        c.execute(uPawnStatus, (status, id))
         self.conn.commit()
 
 
-    def updatePersonDestination(self, id: int, destination: str) -> None:
-        uPersonDestination = '''
-        UPDATE Person
+    # updates the value of the destination row for a certain id 
+    def updatePawnDestination(self, id: int, destination: str) -> None:
+        uPawnDestination = '''
+        UPDATE Pawn
         SET destination = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonDestination, (destination, id))
+        c.execute(uPawnDestination, (destination, id))
         self.conn.commit()
 
 
-    def updatePersonTravelling(self, id: int, travelling: int) -> None:
-        uPersonTravelling = '''
-        UPDATE Person
+    # updates the value of the travelling row for a certain id 
+    def updatePawnTravelling(self, id: int, travelling: int) -> None:
+        uPawnTravelling = '''
+        UPDATE Pawn
         SET travelling = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonTravelling, (travelling, id))
+        c.execute(uPawnTravelling, (travelling, id))
         self.conn.commit()
 
 
-    def updatePersonRtime(self, id: int, rTime: float) -> None:
-        uPersonRtime = '''
-        UPDATE Person
+    # updates the value of the radius time row for a certain id 
+    def updatePawnRtime(self, id: int, rTime: float) -> None:
+        uPawnRtime = '''
+        UPDATE Pawn
         SET rTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonRtime, (rTime, id))
+        c.execute(uPawnRtime, (rTime, id))
         self.conn.commit()
     
 
-    def updatePersonTtime(self, id: int, tTime: float) -> None:
-        uPersonTtime = '''
-        UPDATE Person
+    # updates the value of the travel time row for a certain id 
+    def updatePawnTtime(self, id: int, tTime: float) -> None:
+        uPawnTtime = '''
+        UPDATE Pawn
         SET tTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonTtime, (tTime, id))
+        c.execute(uPawnTtime, (tTime, id))
         self.conn.commit()
 
     
-    def updatePersonItime(self, id: int, iTime: float) -> None:
-        uPersonItime = '''
-        UPDATE Person
+    # updates the value of the infection time row for a certain id 
+    def updatePawnItime(self, id: int, iTime: float) -> None:
+        uPawnItime = '''
+        UPDATE Pawn
         SET iTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonItime, (iTime, id))
+        c.execute(uPawnItime, (iTime, id))
         self.conn.commit()
 
 
-    def updatePersonQtime(self, id: int, qTime: float) -> None:
-        uPersonQtime = '''
-        UPDATE Person
+    # updates the value of the quarantine time row for a certain id 
+    def updatePawnQtime(self, id: int, qTime: float) -> None:
+        uPawnQtime = '''
+        UPDATE Pawn
         SET qTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonQtime, (qTime, id))
+        c.execute(uPawnQtime, (qTime, id))
         self.conn.commit()
 
 
-    def updatePersonIBtime(self, id: int, ibTime: float) -> None:
-        uPersonIBtime = '''
-        UPDATE Person
+    # updates the value of the incubation time row for a certain id 
+    def updatePawnIBtime(self, id: int, ibTime: float) -> None:
+        uPawnIBtime = '''
+        UPDATE Pawn
         SET ibTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonIBtime, (ibTime, id))
+        c.execute(uPawnIBtime, (ibTime, id))
         self.conn.commit()
 
 
-    def updatePersonNTtime(self, id: int, ntTime: float) -> None:
-        uPersonNTtime = '''
-        UPDATE Person
+    # updates the value of the time since last travelled row for a certain id 
+    def updatePawnNTtime(self, id: int, ntTime: float) -> None:
+        uPawnNTtime = '''
+        UPDATE Pawn
         SET ntTime = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonNTtime, (ntTime, id))
+        c.execute(uPawnNTtime, (ntTime, id))
         self.conn.commit()
 
 
-    def updatePersonXPos(self, id: int, pos: int) -> None:
-        uPersonXPos = '''
-        UPDATE Person
+    # updates the value of the x position row for a certain id 
+    def updatePawnXPos(self, id: int, pos: int) -> None:
+        uPawnXPos = '''
+        UPDATE Pawn
         SET xPos = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonXPos, (pos, id))
+        c.execute(uPawnXPos, (pos, id))
         self.conn.commit()
 
 
-    def updatePersonYPos(self, id: int, pos: int) -> None:
-        uPersonYPos = '''
-        UPDATE Person
+    # updates the value of the y position row for a certain id 
+    def updatePawnYPos(self, id: int, pos: int) -> None:
+        uPawnYPos = '''
+        UPDATE Pawn
         SET yPos = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonYPos, (pos, id))
+        c.execute(uPawnYPos, (pos, id))
         self.conn.commit()
 
 
+    # updates the value of the boolean quarantined infected row for a certain id 
     def updateQinfected(self, id: int, qInfected: int) -> None:
         uQinfected = '''
-        UPDATE Person
+        UPDATE Pawn
         SET qInfected = ? 
         WHERE id = ?
         '''
@@ -253,9 +272,10 @@ class DBManager:
         self.conn.commit()
 
 
+    # updates the value of the boolean quarantined travelling row for a certain id 
     def updateQtravelling(self, id: int, qTravelling: int) -> None:
         uQtravelling = '''
-        UPDATE Person
+        UPDATE Pawn
         SET qTravelling = ? 
         WHERE id = ?
         '''
@@ -264,9 +284,10 @@ class DBManager:
         self.conn.commit()
 
 
+    # updates the value of arrival check row for a certain id 
     def updateArrivalCheck(self, id: int, arrivalCheck: int) -> None:
         uArrivalCheck = '''
-        UPDATE Person
+        UPDATE Pawn
         SET arrivalCheck = ? 
         WHERE id = ?
         '''
@@ -275,40 +296,44 @@ class DBManager:
         self.conn.commit()
 
 
+    # updates the value of the boolean is infectious row for a certain id 
     def updateIsInfectious(self, id: int, isInfectious: int) -> None:
-        uPersonIsInfectious = '''
-        UPDATE Person
+        uPawnIsInfectious = '''
+        UPDATE Pawn
         SET isInfectious = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonIsInfectious, (isInfectious, id))
+        c.execute(uPawnIsInfectious, (isInfectious, id))
         self.conn.commit()
 
 
+    # updates the value of the boolean is incubating row for a certain id 
     def updateIsIncubating(self, id: int, isIncubating: int) -> None:
-        uPersonIsIncubating = '''
-        UPDATE Person
+        uPawnIsIncubating = '''
+        UPDATE Pawn
         SET isIncubating = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonIsIncubating, (isIncubating, id))
+        c.execute(uPawnIsIncubating, (isIncubating, id))
         self.conn.commit()
 
 
+    # updates the value of the disease identifier row for a certain id 
     def updateDiseaseID(self, id: int, diseaseID: int) -> None:
-        uPersonDiseaseID = '''
-        UPDATE Person
+        uPawnDiseaseID = '''
+        UPDATE Pawn
         SET diseaseID = ? 
         WHERE id = ?
         '''
         c = self.conn.cursor()
-        c.execute(uPersonDiseaseID, (diseaseID, id))
+        c.execute(uPawnDiseaseID, (diseaseID, id))
         self.conn.commit()
 
 
     # Map
+    # adds in new data to a new column map table
     def createMap(self, id: int, name: str, width: int, height: int, day: int,govermentActionReliabilty:float,
                  identifyAndIsolateTriggerInfectionCount:int,infectionTimeBeforeQuarantine:float,travelQuarintineTime:float,socialDistanceTriggerInfectionCount:int,
                  travelProhibitedTriggerInfectionCount:int,travelTime:float, travelProhibited:int, populationID: int) -> None:
@@ -321,6 +346,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # gets the values of all the maps
     def getMaps(self):
         gMaps = '''
         SELECT *
@@ -331,6 +357,7 @@ class DBManager:
         return c.fetchall()
     
 
+    # gets the values of all map ids that aren't equal to the one passed as an argument
     def getMapIDs(self,id):
         gMapIDs = '''
         SELECT Map.id 
@@ -342,6 +369,7 @@ class DBManager:
         return c.fetchall()
 
 
+    # gets the values of all map ids 
     def getAllMapIDs(self):
         gAllMapIDs = '''
         SELECT Map.id 
@@ -352,6 +380,7 @@ class DBManager:
         return c.fetchall()
 
 
+    # gets the value of the current map width row for a certain id
     def getMapWidth(self, id: int) -> int:
         gMapWidth = '''
         SELECT width
@@ -363,6 +392,7 @@ class DBManager:
         return c.fetchone()       
 
 
+    # gets the value of the current map height row for a certain id
     def getMapHeight(self, id: int) -> int:
         gMapHeight = '''
         SELECT height
@@ -374,6 +404,7 @@ class DBManager:
         return c.fetchone()    
     
 
+    # gets the value of the current map day row for a certain id
     def getMapDay(self, id: int) -> int:
         gMapDay = '''
         SELECT day 
@@ -385,6 +416,7 @@ class DBManager:
         return c.fetchone()
     
 
+    # gets the value of the current travel time row for a certain id
     def getMapTravelTime(self, id: int) -> float:
         gMapTravelTime = '''
         SELECT travelTime 
@@ -396,6 +428,7 @@ class DBManager:
         return c.fetchone()
 
 
+    # gets the value of the current boolen travel prohibited row for a certain id
     def getMapCannnotTravelTo(self, id: int) -> float:
         gMapCannnotTravelTo = '''
         SELECT travelProhibited 
@@ -407,6 +440,7 @@ class DBManager:
         return c.fetchone()
         
 
+    # updates the value of the day row for a certain id 
     def updateMapDay(self, id: int, day: int) -> None:
         uMapDay = '''
         UPDATE Map
@@ -418,6 +452,7 @@ class DBManager:
         self.conn.commit()
     
     
+    # updates the value of the boolean travel prohibited row for a certain id 
     def updateMapCannotTravelTo(self, id: int, value: int) -> None:
         uMapCanTravelTo = '''
         UPDATE Map
@@ -430,6 +465,7 @@ class DBManager:
 
 
     # Disease
+    # adds in new data to a new column disease table
     def createDisease(self, id: str, name: str, transmissionTime: float, contagion: float, transmissionRadius: int,
                      infectedTime: float, incubationTime: float,ageMostSusceptible:int,virulence:float,pAsymptomaticOnInfection:float,
                      mutationChance:float) -> None:
@@ -442,6 +478,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # gets the value of the current name row for a certain id
     def getDiseaseName(self, id: str) -> str:
         gDiseaseName = '''
         SELECT name
@@ -453,6 +490,7 @@ class DBManager:
         return c.fetchone()    
 
 
+    # gets the value of the current transmission time row for a certain id
     def getDiseaseTransmissionTime(self, id: str) -> float:
         gDiseaseTransmissionTime = '''
         SELECT transmissionTime
@@ -464,6 +502,7 @@ class DBManager:
         return c.fetchone()    
 
 
+    # gets the value of the current contagion row for a certain id
     def getDiseaseContagion(self, id: str) -> float:
         gDiseaseContagion = '''
         SELECT contagion
@@ -475,6 +514,7 @@ class DBManager:
         return c.fetchone()    
 
 
+    # gets the value of the current transmission radius row for a certain id
     def getDiseaseTransmissionRadius(self, id: str) -> int:
         gDiseaseTransmissionRadius = '''
         SELECT transmissionRadius
@@ -486,6 +526,7 @@ class DBManager:
         return c.fetchone()    
 
 
+    # gets the value of the current infected time row for a certain id
     def getDiseaseInfectedTime(self, id: str) -> float:
         gInfectedTime = '''
         SELECT infectedTime
@@ -497,6 +538,7 @@ class DBManager:
         return c.fetchone()
     
 
+    # gets the value of the current incubation time row for a certain id
     def getDiseaseIncubationTime(self, id: str) -> float:
         gIncubationTime = '''
         SELECT incubationTime
@@ -508,6 +550,7 @@ class DBManager:
         return c.fetchone()
 
 
+    # gets the value of the current probabilty of asymptomatic on infection row for a certain id
     def getDiseasetPasymptomatic(self, id: str) -> float:
         gPasymptomaticOnInfection = '''
         SELECT pAsymptomaticOnInfection
@@ -519,6 +562,7 @@ class DBManager:
         return c.fetchone()
 
 
+    # gets the value of the current mutation chance row for a certain id
     def getDiseaseMutationChance(self, id: str) -> float:
         gDiseaseMutationChance = '''
         SELECT mutationChance
@@ -530,6 +574,7 @@ class DBManager:
         return c.fetchone()
 
 
+    # gets the value of the current disease mutation row for a certain id
     def getDiseaseMutation(self, id: str) -> float:
         gDiseaseMutationChance = '''
         SELECT *
@@ -542,6 +587,7 @@ class DBManager:
 
 
     # Blood Type
+    # adds in new data to a new column blood type table
     def createBloodType(self, id: int, bloodType: str) -> None:
         cBloodType = '''
         INSERT INTO BloodType VALUES
@@ -552,6 +598,7 @@ class DBManager:
         self.conn.commit()
     
 
+    # adds in new data to a new column disease blood type relational table
     def createDiseaseBloodTypeLink(self, diseaseID: str, bloodTypeID: int) -> None:
         cCreateDiseaseBloodTypeLinkTable = '''
         INSERT INTO DiseaseBloodTypeLink VALUES
@@ -563,6 +610,7 @@ class DBManager:
 
 
     # General 
+    # adds in new data to a new column general table
     def createGeneral(self, generalMutationChance: float, numberOfMaps: int, timeRequiredBetweenTravels: float) -> None:
         cGeneral = '''
         INSERT INTO General VALUES
@@ -573,6 +621,7 @@ class DBManager:
         self.conn.commit()
 
 
+    # gets the value of the current general mutation chance row for a certain id
     def getGeneralMutationChance(self, id: int):
         gGeneralMutationChance = '''
         SELECT General.generalMutationChance
@@ -584,6 +633,7 @@ class DBManager:
         return c.fetchone() 
 
 
+    # gets the value of the current number of maps row for a certain id
     def getNumberOfMaps(self, id: int):
         gNumberOfMaps = '''
         SELECT General.numberOfMaps
@@ -595,6 +645,7 @@ class DBManager:
         return c.fetchone()   
     
 
+    # gets the value of the current time required between travels row for a certain id
     def getTimeRequiredBetweenTravels(self, id: int):
         gTimeRequiredBetweenTravels = '''
         SELECT General.timeRequiredBetweenTravels
@@ -607,41 +658,43 @@ class DBManager:
 
 
     # Stats 
+    # gets the value of the current population travelling row for a certain id
     def getPopulationTravelling(self, id: int):
         gPopulationTravelling = '''
         SELECT *
-        FROM Person
-        WHERE Person.populationID = ? AND Person.travelling = 1
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.travelling = 1
         '''
         c = self.conn.cursor()
         c.execute(gPopulationTravelling, (id,))
         return c.fetchall()  
     
-    # quarintine 
-    # travel ban
-    # quarintining people 
+
+    # gets the values of the current population travelling row for a certain id 
     def getPopulationTravelling(self, id: int):
         gPopulationTravelling = '''
-        SELECT Person.destination
-        FROM Person
-        WHERE Person.populationID = ? AND Person.travelling = 1
+        SELECT Pawn.destination
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.travelling = 1
         '''
         c = self.conn.cursor()
         c.execute(gPopulationTravelling, (id,))
         return c.fetchall()  
 
 
+    # gets the values of the current disease ids in a map row for a certain id and if status is I
     def getAllDiseaseIDsInAmap(self, id: int):
         gPopulationTravelling = '''
-        SELECT Person.diseaseID
-        FROM Person
-        WHERE Person.populationID = ? AND Person.status = ?
+        SELECT Pawn.diseaseID
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.status = ?
         '''
         c = self.conn.cursor()
         c.execute(gPopulationTravelling, (id,'I'))
         return c.fetchall()  
 
 
+    # gets the value of all the disease rows for a certain id
     def getAllDiseaseInfoFromID(self, id: int):
         gAllDiseaseInfoFromID = '''
         SELECT *
@@ -653,44 +706,48 @@ class DBManager:
         return c.fetchone()  
     
     
+    # gets the values of the current quarintined infected row for a certain id
     def getPopulationQuarintineInfected(self, id: int):
         gPopulationQuarintineInfected = '''
-        SELECT Person.qInfected
-        FROM Person
-        WHERE Person.populationID = ?  AND Person.qInfected = ?
+        SELECT Pawn.qInfected
+        FROM Pawn
+        WHERE Pawn.populationID = ?  AND Pawn.qInfected = ?
         '''
         c = self.conn.cursor()
         c.execute(gPopulationQuarintineInfected, (id,1))
         return c.fetchall()  
 
 
+    # gets the values of the current population travelling row for a certain id
     def getPopulationQuarintineTravelling(self, id: int):
         gPopulationQuarintineTravelling = '''
-        SELECT Person.qTravelling
-        FROM Person
-        WHERE Person.populationID = ? AND Person.qTravelling = ?
+        SELECT Pawn.qTravelling
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.qTravelling = ?
         '''
         c = self.conn.cursor()
         c.execute(gPopulationQuarintineTravelling, (id,1))
         return c.fetchall()  
 
 
+    # gets the values of the current infected incubating row for a certain id and if a Pawn isnt travelling
     def getInfectedIncubating(self, id: int):
         gInfectedIncubating = '''
-        SELECT Person.isIncubating
-        FROM Person
-        WHERE Person.populationID = ? AND Person.isIncubating = ? AND Person.travelling = ?
+        SELECT Pawn.isIncubating
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.isIncubating = ? AND Pawn.travelling = ?
         '''
         c = self.conn.cursor()
         c.execute(gInfectedIncubating, (id,1,0))
         return c.fetchall()  
 
 
+    # gets the values of the current infectious row for a certain id and if the Pawn isn't travelling
     def getInfectedInfectious(self, id: int):
         gInfectedInfectious = '''
-        SELECT Person.isInfectious
-        FROM Person
-        WHERE Person.populationID = ? AND Person.isInfectious = ? AND Person.travelling = ?
+        SELECT Pawn.isInfectious
+        FROM Pawn
+        WHERE Pawn.populationID = ? AND Pawn.isInfectious = ? AND Pawn.travelling = ?
         '''
         c = self.conn.cursor()
         c.execute(gInfectedInfectious, (id,1,0))

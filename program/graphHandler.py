@@ -6,24 +6,16 @@ import os
 sys.path.append(os.path.expanduser(FILE_PATH))
 
 import pandas as pd
-import matplotlib.pyplot as plt
 import dbHandler as dbH
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.figure import Figure
 
-'''
-need to make a class which holds reference to the map ids 
-maybe have the data update every hour so graph updates per hour in real time while sim is running
-'''
 
 class GraphDataHandler:
     def __init__(self) -> None:
         self.__dbQueryHandler = dbH.DBManager(os.path.expanduser(FILE_PATH_DB))
 
+
+    # gets data from the database in order to populate entries in the GUI 
     def getMapData(self, id, type):
 
         if id != 's':
@@ -46,7 +38,6 @@ class GraphDataHandler:
             elif type == 'IF':
                 return len(self.__dbQueryHandler.getInfectedInfectious(id))
             else:
-                # print(self.__dbQueryHandler.getPopulationTravelling(id))
                 return len(self.__dbQueryHandler.getPopulationTravelling(id))
         else:
             if type == 'S':
@@ -69,9 +60,13 @@ class GraphDataHandler:
                 return removed
                 
 
+    # sets a new graph reference
     def setNewGraphRef(self,graphReference):
         self._graphReference = graphReference
 
+
+    # gets data from the current graphReferences csv file
+    # and uses matplotlib to use it to return a graph 
     def getData(self):
         data = pd.read_csv(os.path.expanduser(f'~/Documents/NEA/NEA_CODE/program/runTimeFiles/simData/{self._graphReference}data.csv'))
         x = data['day']

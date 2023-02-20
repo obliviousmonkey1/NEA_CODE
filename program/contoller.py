@@ -27,36 +27,49 @@ class Main:
     def setUpSimulationData(self):
         self.mainHandler.createAndPopulateDatabase()
 
+
     # db 
     def gCurrentDaySusceptibleData(self, id):
         return self.mainHandler.getCurrentDaySusceptibleData(id)
+
 
     # ui data 
     def gPopulationData(self, id, type) -> int:
         return self.mainHandler.gFreshPopulationData(id, type)
 
+
     # graph
     def gGraphData(self):
         return self.mainHandler.gNewGraphData()
 
+
     def sGraphRef(self, gR):
         self.mainHandler.sNewGraphRef(gR)
 
+
     # misc funciton calls 
+    # returns the current day in the simulation
     def getCurrentDay(self) -> int:
         return self.mainHandler.gCurrentDay()
 
+
+    # checks if the value passed is equal to the word random
     def checkRandom(self, value) -> bool:
         return miscFunctions.randomCheck(value)
-    
+
+
+    # returns the data from a json file
     def readConfig(self):
         return miscFunctions.readConfig()
-    
+
+
+    # writes data to a json file 
     def writeConfig(self, data):
         return miscFunctions.writeConfig(data)
 
+
 if __name__ == "__main__":
-    # cleans up previous files and overides the base recursion depth limit to a higher value
+    # cleans up previous files and overides the base recursion depth limit to a deeper depth
     sys.setrecursionlimit(15000)
     os.chdir("/Users/parzavel/Documents/NEA/NEA_CODE/program/runTimeFiles/simData")
     extension = 'csv'

@@ -6,7 +6,10 @@ class DiseaseCreationHandler:
         self.tag = 'disease'
         self.setUp(data)
 
-    # disease id should take into account the city that its in 
+
+    # Organises the disease section of the json file into lists 
+    # if the value from the json is random then it randomly allocates a value 
+    # based on the key of the json value 
     def setUp(self, data):
         self.__name = []
         self.__transmissionTime = []
@@ -84,6 +87,8 @@ class DiseaseCreationHandler:
            
         return data
 
+    
+    # Checks if the value in the json file is the word random
     def checkRandom(self, value):
         try:
             if not value.lower() == 'random':
@@ -92,12 +97,17 @@ class DiseaseCreationHandler:
         except:
             return False
 
-    def generateDiseaseID(self,populationID, personID,mapName):
-        self.__diseaseID = f"{0}.{personID}.{personID}.{mapName}.{self.__name[populationID-1]}"
+
+    # Creates an ID to use in the database for the disease table
+    def generateDiseaseID(self, populationID, pawnID, mapName):
+        self.__diseaseID = f"{0}.{pawnID}.{pawnID}.{mapName}.{self.__name[populationID-1]}"
         self.seedDiseaseTable(populationID)
         return  self.__diseaseID
 
-    def seedDiseaseTable(self,populationID):
+
+    # Populates the disease table in the database with the values 
+    # of the current disease being added 
+    def seedDiseaseTable(self, populationID):
         self.__dbQueryHandler.createDisease(self.__diseaseID, self.__name[(populationID-1)],
                                             self.__transmissionTime[(populationID-1)],self.__contagion[(populationID-1)],
                                             self.__transmissionRadius[(populationID-1)], self.__infectedTime[(populationID-1)], 
@@ -108,6 +118,9 @@ class DiseaseCreationHandler:
         self.seedBloodTypeRelationshipTable(populationID)
 
 
+    # Randomly creates x ammount (a value specified at run time) 
+    # of relationships between a bloodtypes and a disease 
+    # this is then added into the blood type link relational table
     def seedBloodTypeRelationshipTable(self, populationID):
         bloodTypes = ['O+','O-','A+','A-','B+','B-','AB+','AB-']
         bloodTypesUsed = []
@@ -120,5 +133,8 @@ class DiseaseCreationHandler:
             self.__dbQueryHandler.createDiseaseBloodTypeLink(self.__diseaseID,(bloodTypes.index(bloodType)+1))
             bloodTypesUsed.append(bloodType)
 
+
+    # returns a the value of propability of asymptomatic for the currently
+    # selected disease 
     def getPasymptomaticOnInfection(self, id) -> float:
         return self.__pAsymptomaticOnInfection[id-1]

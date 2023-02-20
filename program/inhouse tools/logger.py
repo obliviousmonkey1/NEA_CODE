@@ -30,7 +30,6 @@ class ContinousLog(S):
 
 
     # local dump single file 
-    # need to make it so os.listdir is in reference to a specific path 
     def logLDSF(self, reference:str="", additionalInfo=None, time:str=datetime.now().strftime("%y:%m:%H:%M:%S"), trackingID="add trackingID", path:str=os.path.expanduser("~/Documents/NEA/NEA_CODE/program/logs")):
         try:
             all_files = os.listdir()

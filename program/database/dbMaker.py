@@ -3,9 +3,10 @@ import os
 
 FILE_PATH = '~/Documents/NEA/NEA_CODE/program/runTimeFiles/database.db'
 
+# defines all the tables
 
-createPersonTable = '''
-CREATE TABLE IF NOT EXISTS Person(
+createPawnTable = '''
+CREATE TABLE IF NOT EXISTS Pawn(
     id              INTEGER,
     status          TEXT,
     rTime           FLOAT,
@@ -111,14 +112,12 @@ CREATE TABLE IF NOT EXISTS General(
 )
 '''
 
-
-# contain routines that people have one routine shared between many people 
-createWeeklyRoutinesTable = ''''''
+# adds all the tables to a database 
 
 def createDB():
     conn = sqlite3.connect(os.path.expanduser(FILE_PATH))
     c = conn.cursor()
-    c.execute(createPersonTable)
+    c.execute(createPawnTable)
     c.execute(createPopulationTable)
     c.execute(createMapTable)
     c.execute(createDiseaseTable)
